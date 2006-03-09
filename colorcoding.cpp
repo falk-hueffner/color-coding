@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
   while (feof(datei)==0)
   {
     fscanf(datei, "%s %s %f", k1,k2,&z3);
-    printf("%s\t%s\t%f\n", k1,k2,z3);
+    // printf("%s\t%s\t%f\n", k1,k2,z3);
 
     k1s=string(k1);
     k2s=string(k2);
@@ -152,10 +152,11 @@ int main(int argc, char* argv[])
   int* neighbours[node_list1.size()];
   float* weights[node_list1.size()];
 
+  cout<<endl<<"Anzahl der Knoten: "<<node_list1.size()<<endl;
   cout<<endl<<endl<<"Interne Zuordnung der Knoten zu Zahlen:"<<endl;
   for(pos=node_list1.begin(),i=0;pos!=node_list1.end();pos++,i++)
   {
-    cout<<pos->first<<"\t"<<pos->second<<"\t"<<endl;
+    //  cout<<pos->first<<"\t"<<pos->second<<"\t"<<endl;
     vec_size=nb_vec[i].size();
     number_neighbours[i]=vec_size;
 
@@ -174,12 +175,12 @@ int main(int argc, char* argv[])
   cout<<endl<<endl<<"Nachbarschaften:  "<<endl;
   for(i=0;i<number_nodes;i++)
   {
-    cout<<node_list2.find(i)->second<<" -> "<<"\t";
+    //  cout<<node_list2.find(i)->second<<" -> "<<"\t";
     for(j=0;j<number_neighbours[i];j++)
     {
-      cout<<node_list2.find(neighbours[i][j])->second<<"  "<<weights[i][j]<<"\t";
+      //  cout<<node_list2.find(neighbours[i][j])->second<<"  "<<weights[i][j]<<"\t";
     }
-    cout<<endl;
+    //  cout<<endl;
   }
 
  
@@ -188,6 +189,8 @@ int main(int argc, char* argv[])
   MAP_FLT_VIN results;
   MAP_FLT_VIN_ITER result_pos;
  
+  long zeit_start,zeit_ende;
+  time(&zeit_start);
   for(i=0;i<number_repeats;i++)
   {
     color_nodes(colors,number_nodes,number_colors);
@@ -195,8 +198,11 @@ int main(int argc, char* argv[])
     results.insert(res);
   }
 
-  cout<<endl<<"Gefundene Pfade: ";
-  for(result_pos=results.begin();result_pos!=results.end();result_pos++)
+  time(&zeit_ende);
+
+  cout<<endl<<"Gefundene Pfade (insgesamt "<<results.size()<<"):"<<endl;
+  result_pos=results.begin();
+  for(j=0;((result_pos!=results.end())&&(j<100));result_pos++,j++)
   {
     cout<<endl<<result_pos->first<<"\t  ";
     for(i=0;i<(result_pos->second).size();i++)
@@ -204,6 +210,7 @@ int main(int argc, char* argv[])
       cout<<node_list2.find((result_pos->second)[i])->second<<" ";
     }
   }
+  cout<<endl<<"Benötigte Zeit (in Sekunden): "<<(zeit_ende-zeit_start)<<endl;
   return 0;
 }
 

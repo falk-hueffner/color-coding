@@ -1,10 +1,22 @@
 #include "graph.h"
 using namespace std;
 
-colorset ins[]={1,1<<1,1<<2,1<<3,1<<4,1<<5,1<<6,1<<7,1<<8,1<<9,1<<10,1<<11,1<<12,1<<13,1<<14,1<<15};
-colorset del[]={~1,~(1<<1),~(1<<2),~(1<<3),~(1<<4),~(1<<5),~(1<<6),~(1<<7),~(1<<8),~(1<<9),~(1<<10),~(1<<11),~(1<<12),~(1<<13),~(1<<14),~(1<<15)};
+colorset ins[]={1,1<<1,1<<2,1<<3,1<<4,1<<5,1<<6,1<<7,1<<8,1<<9,1<<10,1<<11,1<<12,1<<13,1<<14,1<<15,
+		1<<16,1<<17,1<<18,1<<19,1<<20,1<<21,1<<22,1<<23,1<<24,1<<25,1<<26,1<<27,1<<28,1<<29,
+		1<<30,1<<31};
+colorset del[]={~1,~(1<<1),~(1<<2),~(1<<3),~(1<<4),~(1<<5),~(1<<6),~(1<<7),~(1<<8),~(1<<9),~(1<<10),
+		~(1<<11),~(1<<12),~(1<<13),~(1<<14),~(1<<15),~(1<<16),~(1<<17),~(1<<18),~(1<<19),
+		~(1<<20),~(1<<21),~(1<<22),~(1<<23),~(1<<24),~(1<<25),~(1<<26),~(1<<27),~(1<<28),
+		~(1<<29),~(1<<30),~(1<<31)};
 
-//--------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Read_Graph
+// -> reads a graph out of a file
+// 
+// Inputparameter: filename -> name of the file, which contains the graph
+// Returnparamter: none
+//-------------------------------------------------------------------------------
 
 void graph::read_graph(char* filename)
 {
@@ -31,7 +43,7 @@ void graph::read_graph(char* filename)
     return;
   }
 
-  cout<<endl<<endl<<"Eingelesene Graph-Datei:"<<endl;
+  cout<<endl<<endl<<"Read graph-file:"<<endl;
   i=0;
   while (feof(datei)==0)
   {
@@ -81,10 +93,17 @@ void graph::read_graph(char* filename)
     number_neighbours[i]=(neighbours_list[i]).size();
     j+=number_neighbours[i];
   }
-  cout<<"Number of nodes: "<<number_nodes<<endl<<"Number of edges: "<<j/2<<endl;
+  cout<<"Number of vertices: "<<number_nodes<<endl<<"Number of edges: "<<j/2<<endl;
 }
 
-//--------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Read_Start_Nodes
+// -> reads the startnodes out of a file
+// 
+// Inputparameter: filename -> name of the file, which contains the startnodes
+// Returnparamter: none
+//-------------------------------------------------------------------------------
 
 void graph::read_start_nodes(char* filename)
 {
@@ -104,7 +123,7 @@ void graph::read_start_nodes(char* filename)
     return;
   }
 
-  cout<<endl<<endl<<"Startknoten:  ";
+  cout<<endl<<"Startvertices:  ";
   while (feof(datei)==0)
   {
     fscanf(datei, "%s", n1);
@@ -117,11 +136,19 @@ void graph::read_start_nodes(char* filename)
       start_nodes.push_back(n1i);
     }
   }
+  cout<<endl;
   fclose(datei);
 
 }
 
-//--------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Color nodes
+// -> colors the vertices of a graph with different colors by random
+// 
+// Inputparameter: number_colors -> number of the different colors, which are used for coloring
+// Returnparamter: none
+//-------------------------------------------------------------------------------
 
 void graph::color_nodes(int number_colors)
 {
@@ -132,7 +159,16 @@ void graph::color_nodes(int number_colors)
   }
 }
 
-//--------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Search Path
+// -> searchs for the best path on the current coloring
+//    Data structure: Map
+// 
+// Inputparameter: path_length   -> length of the path to search for
+//                 weight_border -> abortcriteria for path-search
+// Returnparamter: Pair(weight of the best path, vertices of the best path)
+//-------------------------------------------------------------------------------
 
 Weight_Path_Pair graph::search_path(int path_length,float weight_border)
 {
@@ -150,7 +186,8 @@ Weight_Path_Pair graph::search_path(int path_length,float weight_border)
 
   for(i=0;i<start_nodes.size();i++)
   {
-    paths[0].insert(Matrix_Entry_Pair(Colorset_Vertex_Pair(ins[colors[start_nodes[i]]],start_nodes[i]),Vertex_Weight_Pair(start_nodes[i],0.0)));
+    paths[0].insert(Matrix_Entry_Pair(Colorset_Vertex_Pair(ins[colors[start_nodes[i]]],start_nodes[i]),
+				      Vertex_Weight_Pair(start_nodes[i],0.0)));
   }
 
   for(i=0;i<path_length-1;i++)
@@ -175,7 +212,8 @@ Weight_Path_Pair graph::search_path(int path_length,float weight_border)
 	else
 	{
 	  listpos2=paths[i+1].find(entry);
-	  if(((listpos2->second).second)>weight_sum) (listpos2->second)=Vertex_Weight_Pair(node,weight_sum);
+	  if(((listpos2->second).second)>weight_sum) 
+	    (listpos2->second)=Vertex_Weight_Pair(node,weight_sum);
 	}
       }
     }
@@ -214,7 +252,17 @@ Weight_Path_Pair graph::search_path(int path_length,float weight_border)
   return compl_res ;
 }
 
-//--------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Search Path Array
+// -> searchs for the best path on the current coloring.
+//    Data structures: Array, Stack
+// 
+// Inputparameter: path_length   -> length of the path to search for
+//                 number_colors -> number of the different colors
+//                 weight_border -> abortcriteria for path-search
+// Returnparamter: Pair(weight of the best path, vertices of the best path)
+//-------------------------------------------------------------------------------
 
 Weight_Path_Pair graph::search_path_array(int path_length,int number_colors,float weight_border)
 {
@@ -276,7 +324,8 @@ Weight_Path_Pair graph::search_path_array(int path_length,int number_colors,floa
     pathcolor=(nodes_to_do[act_stack].top()).first;
     node=(nodes_to_do[act_stack].top()).second;
     
-    result.insert(Weight_Pathvertex_Pair(array_weights[pathcolor][node],nodes_to_do[act_stack].top()));
+    result.insert(Weight_Pathvertex_Pair(array_weights[pathcolor][node],
+					 nodes_to_do[act_stack].top()));
     nodes_to_do[act_stack].pop();
   }
 
@@ -307,9 +356,23 @@ Weight_Path_Pair graph::search_path_array(int path_length,int number_colors,floa
   return compl_res ;
 }
 
-//--------------------------------------------------
 
-void graph::compute_results(int number_colors, int path_length, int number_iterations, int number_results)
+//-------------------------------------------------------------------------------
+// Compute Results
+// -> searchs for the best paths on different colorings.
+//    the results are stored in the member variable results 
+// 
+// Inputparameter: number_colors     -> number of the different colors
+//                 path_length       -> length of the path to search for
+//                 number_iterations -> number of different colorings
+//                 number_results    -> number of results, which are to be computed
+// Returnparamter: none
+//-------------------------------------------------------------------------------
+
+void graph::compute_results(int number_colors, 
+			    int path_length, 
+			    int number_iterations, 
+			    int number_results)
 {
   int i,j;
   
@@ -333,7 +396,15 @@ void graph::compute_results(int number_colors, int path_length, int number_itera
   }
 }
 
-//--------------------------------------------------
+
+//-------------------------------------------------------------------------------
+// Display Results
+// -> display the results of a search, which are stored in the member variable 
+//    results, on the screen 
+// 
+// Inputparameter: number_results    -> number of results, which are to be displayed
+// Returnparamter: none
+//-------------------------------------------------------------------------------
 
 void graph::display_results(int number_results)
 {

@@ -6,14 +6,21 @@ int main(int argc, char* argv[])
  
   if(argc!=6)
   {
-    cout<<"Anzahl der Paramter nicht korrekt!";
+    cout<<"Number of paramters incorrect!"<<endl;
+    cout<<"The following parameters are expected:"<<endl<<"1. file, which contains graph data"<<endl
+	<<"2. file, which contains the startvertices"<<endl
+	<<"3. lenght of the paths, which should be searched"<<endl
+	<<"4. number of the colors, which are used for coloring"<<endl
+	<<"5. number of iterations"<<endl;
     return 0;
   }
   int path_length=atoi(argv[3]);
   int number_colors=atoi(argv[4]);
   int number_iterations=atoi(argv[5]);
   
-  cout<<"Eingegebene Paramter:"<<endl<<"Graph: "<<argv[1]<<endl<<"Startknoten: "<<argv[2]<<endl<<"Pfadlänge: "<<argv[3]<<endl<<"Farbanzahl: "<<argv[4]<<endl<<"Iterationsanzahl: "<<argv[5]<<endl;
+  cout<<"Entered paramters:"<<endl<<"Graph: "<<argv[1]<<endl<<"Startvertices: "<<argv[2]<<endl
+      <<"Pathlength: "<<argv[3]<<endl<<"Number of colors: "<<argv[4]<<endl<<"Number of iterations: "
+      <<argv[5]<<endl;
   
   long sek;
   time(&sek);

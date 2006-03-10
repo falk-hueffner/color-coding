@@ -264,7 +264,10 @@ Weight_Path_Pair graph::search_path(int path_length,float weight_border)
 // Returnparamter: Pair(weight of the best path, vertices of the best path)
 //-------------------------------------------------------------------------------
 
-Weight_Path_Pair graph::search_path_array(int path_length,int number_colors,float weight_border)
+Weight_Path_Pair graph::search_path_array(int path_length,
+					  int number_colors,
+					  float weight_border,
+					  int iteration)
 {
   
   Weight_Pathvertex_Map result;
@@ -307,13 +310,23 @@ Weight_Path_Pair graph::search_path_array(int path_length,int number_colors,floa
         entry=Colorset_Vertex_Pair(new_pathcolor,act_node);
         weight_sum=n_weights_list[node][j]+array_weights[pathcolor][node];
 	if (weight_sum>weight_border) continue;
-
-	if(array_weights[new_pathcolor][act_node]>=weight_sum)
+	if(array_iterations[new_pathcolor][act_node]==iteration)
+	{
+	  if(array_weights[new_pathcolor][act_node]>=weight_sum)
+	  {
+	    array_weights[new_pathcolor][act_node]=weight_sum;
+	    array_last_nodes[new_pathcolor][act_node]=node;
+	    nodes_to_do[!act_stack].push(entry);
+	  }
+	}
+	else
 	{
 	  array_weights[new_pathcolor][act_node]=weight_sum;
 	  array_last_nodes[new_pathcolor][act_node]=node;
 	  nodes_to_do[!act_stack].push(entry);
+	  array_iterations[new_pathcolor][act_node]=iteration;
 	}
+
       }
     }
     act_stack=!act_stack;
@@ -377,21 +390,31 @@ void graph::compute_results(int number_colors,
   int i,j;
   
   Weight_Path_Pair res;
-  //MAP_FLT_VIN_ITER results_pos;
   
   weight weight_border=INT_MAX;
   results.clear();
 
-  // array_weights=new float[(int)pow(2,number_colors)][number_nodes];
-  
-  //array_weights.assign((int)pow(2,number_colors),VEC_FLT(number_nodes,INT_MAX));
-  //array_last_nodes.assign((int)pow(2,number_colors),VEC_INT(number_nodes,INT_MAX));
+  bool function_array=false; //Set on true for function search_path_array
+                            //Set on false for function search_path
+
+  if(function_array==true)
+  {
+    //------ This block is needed, when working with arrays -------
+    cout<<"Start initialising Arrays"<<endl;
+    array_weights.assign((int)pow(2,number_colors),Weights_Vec(number_nodes,INT_MAX));
+    cout<<"Array1 ready"<<endl;
+    array_last_nodes.assign((int)pow(2,number_colors),Vertices_Vec(number_nodes,INT_MAX));
+    cout<<"Array2 ready"<<endl;
+    array_iterations.assign((int)pow(2,number_colors),Vertices_Vec(number_nodes,INT_MAX));
+    cout<<"Array3 ready"<<endl;
+    //------ end of block -----------------------------------------
+  }
 
   for(i=0;i<number_iterations;i++)
   {
     color_nodes(number_colors);
-    res=search_path(path_length,weight_border);
-    //res=search_path_array(path_length,number_colors,weight_border);
+    if(function_array==false) res=search_path(path_length,weight_border);     //Maps
+    else res=search_path_array(path_length,number_colors,weight_border,i);    //Arrays and stacks
     results.insert(res);
   }
 }

@@ -63,6 +63,7 @@ class graph
   Vertices_Vec start_nodes;
   Vertices_Array array_last_nodes;
   Weights_Array array_weights;
+  Vertices_Array array_iterations;
   Weight_Path_Map results;
 
  public:
@@ -70,7 +71,7 @@ class graph
   void read_start_nodes(char* filename);
   void color_nodes(int number_colors);
   Weight_Path_Pair search_path(int path_length,float weight_border);
-  Weight_Path_Pair search_path_array(int path_length,int number_colors,float weight_border);
+  Weight_Path_Pair search_path_array(int path_length,int number_colors,float weight_border,int iteration);
   void compute_results(int number_colors, int path_length, int number_iterations, int number_results);
   void display_results(int number_results);
 };

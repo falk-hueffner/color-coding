@@ -1,18 +1,19 @@
 #include "graph.h"
 using namespace std;
 
-long ins[]={1,1<<1,1<<2,1<<3,1<<4,1<<5,1<<6,1<<7,1<<8,1<<9,1<<10,1<<11,1<<12,1<<13,1<<14,1<<15};
-long del[]={~1,~(1<<1),~(1<<2),~(1<<3),~(1<<4),~(1<<5),~(1<<6),~(1<<7),~(1<<8),~(1<<9),~(1<<10),~(1<<11),~(1<<12),~(1<<13),~(1<<14),~(1<<15)};
+colorset ins[]={1,1<<1,1<<2,1<<3,1<<4,1<<5,1<<6,1<<7,1<<8,1<<9,1<<10,1<<11,1<<12,1<<13,1<<14,1<<15};
+colorset del[]={~1,~(1<<1),~(1<<2),~(1<<3),~(1<<4),~(1<<5),~(1<<6),~(1<<7),~(1<<8),~(1<<9),~(1<<10),~(1<<11),~(1<<12),~(1<<13),~(1<<14),~(1<<15)};
 
 //--------------------------------------------------
 
 void graph::read_graph(char* filename)
 {
   FILE *datei;
-  int i,j,n1i,n2i;
+  int i,j;
+  vertex n1i,n2i;
   char n1[10],n2[10];
-  string n1s,n2s;
-  float w;
+  name n1s,n2s;
+  weight w;
 
   number_nodes=0;
   number_neighbours.clear();
@@ -42,10 +43,10 @@ void graph::read_graph(char* filename)
     
     if(node_list1.count(n1s)==0)
     {
-	node_list1.insert(PAIR_STR_INT(n1s,i));
-	node_list2.insert(PAIR_INT_STR(i,n1s));
-	neighbours_list.push_back(VEC_INT());
-	n_weights_list.push_back(VEC_FLT());
+	node_list1.insert(Name_Number_Pair(n1s,i));
+	node_list2.insert(Number_Name_Pair(i,n1s));
+	neighbours_list.push_back(Vertices_Vec());
+	n_weights_list.push_back(Weights_Vec());
 	n1i=i;
 	i++;
     } 
@@ -53,10 +54,10 @@ void graph::read_graph(char* filename)
 
     if(node_list1.count(n2s)==0)
     {
-	node_list1.insert(PAIR_STR_INT(n2s,i));
-	node_list2.insert(PAIR_INT_STR(i,n2s));
-	neighbours_list.push_back(VEC_INT());
-	n_weights_list.push_back(VEC_FLT());
+	node_list1.insert(Name_Number_Pair(n2s,i));
+	node_list2.insert(Number_Name_Pair(i,n2s));
+	neighbours_list.push_back(Vertices_Vec());
+	n_weights_list.push_back(Weights_Vec());
 	n2i=i;
 	i++;
     } 
@@ -73,8 +74,8 @@ void graph::read_graph(char* filename)
   
   j=0;
   number_nodes=node_list1.size();
-  number_neighbours=VEC_INT(number_nodes,0);
-  colors=VEC_INT(number_nodes,0);
+  number_neighbours=Numbers_Vec(number_nodes,0);
+  colors=Colors_Vec(number_nodes,0);
   for(i=0;i<node_list1.size();i++)
   {
     number_neighbours[i]=(neighbours_list[i]).size();
@@ -88,9 +89,9 @@ void graph::read_graph(char* filename)
 void graph::read_start_nodes(char* filename)
 {
   char n1[10];
-  int n1i;
-  string n1s;
-  VEC_STR start_vec;
+  vertex n1i;
+  name n1s;
+  Names_Vec start_vec;
   
   FILE* datei;
   
@@ -133,21 +134,23 @@ void graph::color_nodes(int number_colors)
 
 //--------------------------------------------------
 
-PAIR_FLT_VIN graph::search_path(int path_length,float weight_border)
+Weight_Path_Pair graph::search_path(int path_length,float weight_border)
 {
-  MAP_PLI_PIF paths[path_length];
-  MAP_PLI_PIF_ITER listpos,listpos2;
+  Matrix_Entry_Map paths[path_length];
+  Matrix_Entry_Map_Iter listpos,listpos2;
   
-  MAP_FLT_PLI result;
-  MAP_FLT_PLI_ITER respos;
+  Weight_Pathvertex_Map  result;
+  Weight_Pathvertex_Map_Iter respos;
   
-  PAIR_LNG_INT entry;
+  Colorset_Vertex_Pair entry;
   
-  int i,j,node,nn,actn;
-  float weight;
+  int i,j,nn;
+  vertex node,actn;
+  weight weight_sum;
+
   for(i=0;i<start_nodes.size();i++)
   {
-    paths[0].insert(PAIR_PLI_PIF(PAIR_LNG_INT(ins[colors[start_nodes[i]]],start_nodes[i]),PAIR_INT_FLT(start_nodes[i],0.0)));
+    paths[0].insert(Matrix_Entry_Pair(Colorset_Vertex_Pair(ins[colors[start_nodes[i]]],start_nodes[i]),Vertex_Weight_Pair(start_nodes[i],0.0)));
   }
 
   for(i=0;i<path_length-1;i++)
@@ -162,17 +165,17 @@ PAIR_FLT_VIN graph::search_path(int path_length,float weight_border)
       {
 	actn=neighbours_list[node][j];
 	if((ins[colors[actn]]&((listpos->first).first))!=0) continue;
-	entry=PAIR_LNG_INT(ins[colors[actn]]|((listpos->first).first),actn);
-	weight=n_weights_list[node][j]+((listpos->second).second);
-	if (weight>weight_border) continue;
+	entry=Colorset_Vertex_Pair(ins[colors[actn]]|((listpos->first).first),actn);
+	weight_sum=n_weights_list[node][j]+((listpos->second).second);
+	if (weight_sum>weight_border) continue;
 	if(paths[i+1].count(entry)==0)
 	{
-	  paths[i+1].insert(PAIR_PLI_PIF(entry,PAIR_INT_FLT(node,weight)));
+	  paths[i+1].insert(Matrix_Entry_Pair(entry,Vertex_Weight_Pair(node,weight_sum)));
 	}
 	else
 	{
 	  listpos2=paths[i+1].find(entry);
-	  if(((listpos2->second).second)>weight) (listpos2->second)=PAIR_INT_FLT(node,weight);
+	  if(((listpos2->second).second)>weight_sum) (listpos2->second)=Vertex_Weight_Pair(node,weight_sum);
 	}
       }
     }
@@ -180,32 +183,32 @@ PAIR_FLT_VIN graph::search_path(int path_length,float weight_border)
 
   for(listpos=paths[path_length-1].begin();listpos!=paths[path_length-1].end();listpos++)
   {
-    result.insert(PAIR_FLT_PLI((listpos->second).second,listpos->first));
+    result.insert(Weight_Pathvertex_Pair((listpos->second).second,listpos->first));
   }
 
-  VEC_INT res_path(path_length,0);
-  PAIR_FLT_VIN compl_res;
+  Vertices_Vec res_path(path_length,0);
+  Weight_Path_Pair compl_res;
 
   if(result.begin()!=result.end())
   {
-    long act_color=(result.begin()->second).first;
-    int act_node=(result.begin()->second).second;
-    int last_node=((paths[path_length-1].find(result.begin()->second))->second).first;
+    colorset act_color=(result.begin()->second).first;
+    vertex act_node=(result.begin()->second).second;
+    vertex last_node=((paths[path_length-1].find(result.begin()->second))->second).first;
 
     res_path[path_length-1]=act_node;
   
     for(i=path_length-2;i>=0;i--)
     {
-      listpos=paths[i].find(PAIR_LNG_INT(act_color &= del[colors[act_node]],last_node));
+      listpos=paths[i].find(Colorset_Vertex_Pair(act_color &= del[colors[act_node]],last_node));
       act_node=last_node;
       last_node=(listpos->second).first;
       res_path[i]=act_node;
     }
-    compl_res=PAIR_FLT_VIN(result.begin()->first,res_path);
+    compl_res=Weight_Path_Pair(result.begin()->first,res_path);
   }
   else
   {
-    compl_res=PAIR_FLT_VIN(INT_MAX,res_path);
+    compl_res=Weight_Path_Pair(INT_MAX,res_path);
   }
 
   return compl_res ;
@@ -213,18 +216,20 @@ PAIR_FLT_VIN graph::search_path(int path_length,float weight_border)
 
 //--------------------------------------------------
 
-PAIR_FLT_VIN graph::search_path_array(int path_length,int number_colors,float weight_border)
+Weight_Path_Pair graph::search_path_array(int path_length,int number_colors,float weight_border)
 {
   
-  MAP_FLT_PLI result;
-  MAP_FLT_PLI_ITER respos;
+  Weight_Pathvertex_Map result;
+  Weight_Pathvertex_Map_Iter respos;
   
-  PAIR_LNG_INT entry;
-  stack<PAIR_LNG_INT> nodes_to_do[2];
+  Colorset_Vertex_Pair entry;
+  stack<Colorset_Vertex_Pair> nodes_to_do[2];
 
-  int i,j,node,nn,act_node,color,new_color;
+  int i,j,nn;
+  colorset pathcolor,new_pathcolor;
+  vertex node,act_node;
   bool act_stack=false;
-  float weight;
+  weight weight_sum;
   
 //   array_weights.assign((int)pow(2,number_colors),VEC_FLT(number_nodes,INT_MAX));
 //   array_last_nodes.assign((int)pow(2,number_colors),VEC_INT(number_nodes,INT_MAX));
@@ -232,33 +237,33 @@ PAIR_FLT_VIN graph::search_path_array(int path_length,int number_colors,float we
 
   for(i=0;i<start_nodes.size();i++)
   {
-    color=ins[colors[start_nodes[i]]];
+    pathcolor=ins[colors[start_nodes[i]]];
     act_node=start_nodes[i];
-    array_weights[color][act_node]=0;
-    nodes_to_do[0].push(PAIR_LNG_INT(color,act_node));
+    array_weights[pathcolor][act_node]=0;
+    nodes_to_do[0].push(Colorset_Vertex_Pair(pathcolor,act_node));
   }
 
   for(i=0;i<path_length-1;i++)
   {
     while(!nodes_to_do[act_stack].empty())
     {
-      color=(nodes_to_do[act_stack].top()).first;
+      pathcolor=(nodes_to_do[act_stack].top()).first;
       node=(nodes_to_do[act_stack].top()).second;
       nodes_to_do[act_stack].pop();
       nn=number_neighbours[node];
       for(j=0;j<nn;j++)
       {
 	act_node=neighbours_list[node][j];
-	if((ins[colors[act_node]]&color)!=0) continue;
-	new_color=ins[colors[act_node]]|color;
-        entry=PAIR_LNG_INT(new_color,act_node);
-        weight=n_weights_list[node][j]+array_weights[color][node];
-	if (weight>weight_border) continue;
+	if((ins[colors[act_node]]&pathcolor)!=0) continue;
+	new_pathcolor=ins[colors[act_node]]|pathcolor;
+        entry=Colorset_Vertex_Pair(new_pathcolor,act_node);
+        weight_sum=n_weights_list[node][j]+array_weights[pathcolor][node];
+	if (weight_sum>weight_border) continue;
 
-	if(array_weights[new_color][act_node]>weight)
+	if(array_weights[new_pathcolor][act_node]>=weight_sum)
 	{
-	  array_weights[new_color][act_node]=weight;
-	  array_last_nodes[new_color][act_node]=node;
+	  array_weights[new_pathcolor][act_node]=weight_sum;
+	  array_last_nodes[new_pathcolor][act_node]=node;
 	  nodes_to_do[!act_stack].push(entry);
 	}
       }
@@ -268,21 +273,21 @@ PAIR_FLT_VIN graph::search_path_array(int path_length,int number_colors,float we
 
   while(!nodes_to_do[act_stack].empty())
   {
-    color=(nodes_to_do[act_stack].top()).first;
+    pathcolor=(nodes_to_do[act_stack].top()).first;
     node=(nodes_to_do[act_stack].top()).second;
     
-    result.insert(PAIR_FLT_PLI(array_weights[color][node],nodes_to_do[act_stack].top()));
+    result.insert(Weight_Pathvertex_Pair(array_weights[pathcolor][node],nodes_to_do[act_stack].top()));
     nodes_to_do[act_stack].pop();
   }
 
-  VEC_INT res_path(path_length,0);
-  PAIR_FLT_VIN compl_res;
+  Vertices_Vec res_path(path_length,0);
+  Weight_Path_Pair compl_res;
 
   if(result.begin()!=result.end())
   {
-    long act_color=(result.begin()->second).first;
-    int act_node=(result.begin()->second).second;
-    int last_node=array_last_nodes[act_color][act_node];
+    colorset act_color=(result.begin()->second).first;
+    act_node=(result.begin()->second).second;
+    vertex last_node=array_last_nodes[act_color][act_node];
 
     res_path[path_length-1]=act_node;
   
@@ -292,11 +297,11 @@ PAIR_FLT_VIN graph::search_path_array(int path_length,int number_colors,float we
       last_node=array_last_nodes[act_color &= del[colors[act_node]]][last_node];
       act_node=res_path[i];
     }
-    compl_res=PAIR_FLT_VIN(result.begin()->first,res_path);
+    compl_res=Weight_Path_Pair(result.begin()->first,res_path);
   }
   else
   {
-    compl_res=PAIR_FLT_VIN(INT_MAX,res_path);
+    compl_res=Weight_Path_Pair(INT_MAX,res_path);
   }
 
   return compl_res ;
@@ -308,10 +313,10 @@ void graph::compute_results(int number_colors, int path_length, int number_itera
 {
   int i,j;
   
-  PAIR_FLT_VIN res;
+  Weight_Path_Pair res;
   //MAP_FLT_VIN_ITER results_pos;
   
-  float weight_border=INT_MAX;
+  weight weight_border=INT_MAX;
   results.clear();
 
   // array_weights=new float[(int)pow(2,number_colors)][number_nodes];
@@ -332,7 +337,7 @@ void graph::compute_results(int number_colors, int path_length, int number_itera
 
 void graph::display_results(int number_results)
 {
-  MAP_FLT_VIN_ITER result_pos;
+  Weight_Path_Map_Iter result_pos;
   int i,j;
 
   cout<<endl<<"Best "<<number_results<<" of "<<results.size()<<" found paths:"<<endl;

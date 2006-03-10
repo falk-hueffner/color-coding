@@ -4,6 +4,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <stack>
 #include <string>
 #include <stdio.h>
 #include <time.h>
@@ -53,13 +54,19 @@ class graph
 
   VEC_INT start_nodes;
 
+  VEC_VEC_INT array_last_nodes;
+  VEC_VEC_FLT array_weights;
+  //int* array_last_nodes;
+  //float* array_weights;
+
   MAP_FLT_VIN results;
 
  public:
   void read_graph(char* filename);
   void read_start_nodes(char* filename);
   void color_nodes(int number_colors);
-  PAIR_FLT_VIN search_path(int path_length);
+  PAIR_FLT_VIN search_path(int path_length,float weight_border);
+  PAIR_FLT_VIN search_path_array(int path_length,int number_colors,float weight_border);
   void compute_results(int number_colors, int path_length, int number_iterations, int number_results);
   void display_results(int number_results);
 };

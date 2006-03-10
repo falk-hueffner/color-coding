@@ -133,7 +133,7 @@ void graph::color_nodes(int number_colors)
 
 //--------------------------------------------------
 
-PAIR_FLT_VIN graph::search_path(int path_length)
+PAIR_FLT_VIN graph::search_path(int path_length,float weight_border)
 {
   MAP_PLI_PIF paths[path_length];
   MAP_PLI_PIF_ITER listpos,listpos2;
@@ -141,7 +141,7 @@ PAIR_FLT_VIN graph::search_path(int path_length)
   MAP_FLT_PLI result;
   MAP_FLT_PLI_ITER respos;
   
-  PAIR_LNG_INT* entry;
+  PAIR_LNG_INT entry;
   
   int i,j,node,nn,actn;
   float weight;
@@ -162,20 +162,16 @@ PAIR_FLT_VIN graph::search_path(int path_length)
       {
 	actn=neighbours_list[node][j];
 	if((ins[colors[actn]]&((listpos->first).first))!=0) continue;
-	entry=new PAIR_LNG_INT(ins[colors[actn]]|((listpos->first).first),actn);
+	entry=PAIR_LNG_INT(ins[colors[actn]]|((listpos->first).first),actn);
 	weight=n_weights_list[node][j]+((listpos->second).second);
-	//if (weight>.5) continue;
-	if(paths[i+1].count(*entry)==0)
-	//if(paths[i+1].count(PAIR_LNG_INT(ins[colors[actn]]|((listpos->first).first),actn))==0)
+	if (weight>weight_border) continue;
+	if(paths[i+1].count(entry)==0)
 	{
-	  paths[i+1].insert(PAIR_PLI_PIF(*entry,PAIR_INT_FLT(node,weight)));
-	  //paths[i+1].insert(PAIR_PLI_PIF(PAIR_LNG_INT(ins[colors[actn]]|((listpos->first).first),actn),PAIR_INT_FLT(node,weight)));
-
+	  paths[i+1].insert(PAIR_PLI_PIF(entry,PAIR_INT_FLT(node,weight)));
 	}
 	else
 	{
-	  listpos2=paths[i+1].find(*entry);
-	  //listpos2=paths[i+1].find(PAIR_LNG_INT(ins[colors[actn]]|((listpos->first).first),actn));
+	  listpos2=paths[i+1].find(entry);
 	  if(((listpos2->second).second)>weight) (listpos2->second)=PAIR_INT_FLT(node,weight);
 	}
       }
@@ -187,10 +183,6 @@ PAIR_FLT_VIN graph::search_path(int path_length)
     result.insert(PAIR_FLT_PLI((listpos->second).second,listpos->first));
   }
 
-//    cout<<i<<endl;
-//    cout<<paths[0].size()<<"  "<<paths[1].size()<<"  "<<paths[2].size()<<"  "<<paths[3].size()<<"  "<<paths[4].size()<<"  "<<endl;
-//    cout<<result.begin()->first<<"   "<<((result.begin()->second).second)<<endl;
-  
   VEC_INT res_path(path_length,0);
   PAIR_FLT_VIN compl_res;
 
@@ -199,7 +191,6 @@ PAIR_FLT_VIN graph::search_path(int path_length)
     long act_color=(result.begin()->second).first;
     int act_node=(result.begin()->second).second;
     int last_node=((paths[path_length-1].find(result.begin()->second))->second).first;
-    //cout<<paths[path_length-1].count(result.begin()->second)<<"  ";
 
     res_path[path_length-1]=act_node;
   
@@ -222,17 +213,117 @@ PAIR_FLT_VIN graph::search_path(int path_length)
 
 //--------------------------------------------------
 
+PAIR_FLT_VIN graph::search_path_array(int path_length,int number_colors,float weight_border)
+{
+  
+  MAP_FLT_PLI result;
+  MAP_FLT_PLI_ITER respos;
+  
+  PAIR_LNG_INT entry;
+  stack<PAIR_LNG_INT> nodes_to_do[2];
+
+  int i,j,node,nn,act_node,color,new_color;
+  bool act_stack=false;
+  float weight;
+  
+//   array_weights.assign((int)pow(2,number_colors),VEC_FLT(number_nodes,INT_MAX));
+//   array_last_nodes.assign((int)pow(2,number_colors),VEC_INT(number_nodes,INT_MAX));
+  
+
+  for(i=0;i<start_nodes.size();i++)
+  {
+    color=ins[colors[start_nodes[i]]];
+    act_node=start_nodes[i];
+    array_weights[color][act_node]=0;
+    nodes_to_do[0].push(PAIR_LNG_INT(color,act_node));
+  }
+
+  for(i=0;i<path_length-1;i++)
+  {
+    while(!nodes_to_do[act_stack].empty())
+    {
+      color=(nodes_to_do[act_stack].top()).first;
+      node=(nodes_to_do[act_stack].top()).second;
+      nodes_to_do[act_stack].pop();
+      nn=number_neighbours[node];
+      for(j=0;j<nn;j++)
+      {
+	act_node=neighbours_list[node][j];
+	if((ins[colors[act_node]]&color)!=0) continue;
+	new_color=ins[colors[act_node]]|color;
+        entry=PAIR_LNG_INT(new_color,act_node);
+        weight=n_weights_list[node][j]+array_weights[color][node];
+	if (weight>weight_border) continue;
+
+	if(array_weights[new_color][act_node]>weight)
+	{
+	  array_weights[new_color][act_node]=weight;
+	  array_last_nodes[new_color][act_node]=node;
+	  nodes_to_do[!act_stack].push(entry);
+	}
+      }
+    }
+    act_stack=!act_stack;
+  }
+
+  while(!nodes_to_do[act_stack].empty())
+  {
+    color=(nodes_to_do[act_stack].top()).first;
+    node=(nodes_to_do[act_stack].top()).second;
+    
+    result.insert(PAIR_FLT_PLI(array_weights[color][node],nodes_to_do[act_stack].top()));
+    nodes_to_do[act_stack].pop();
+  }
+
+  VEC_INT res_path(path_length,0);
+  PAIR_FLT_VIN compl_res;
+
+  if(result.begin()!=result.end())
+  {
+    long act_color=(result.begin()->second).first;
+    int act_node=(result.begin()->second).second;
+    int last_node=array_last_nodes[act_color][act_node];
+
+    res_path[path_length-1]=act_node;
+  
+    for(i=path_length-2;i>=0;i--)
+    {
+      res_path[i]=last_node;
+      last_node=array_last_nodes[act_color &= del[colors[act_node]]][last_node];
+      act_node=res_path[i];
+    }
+    compl_res=PAIR_FLT_VIN(result.begin()->first,res_path);
+  }
+  else
+  {
+    compl_res=PAIR_FLT_VIN(INT_MAX,res_path);
+  }
+
+  return compl_res ;
+}
+
+//--------------------------------------------------
+
 void graph::compute_results(int number_colors, int path_length, int number_iterations, int number_results)
 {
-  int i;
+  int i,j;
   
   PAIR_FLT_VIN res;
-
+  //MAP_FLT_VIN_ITER results_pos;
+  
+  float weight_border=INT_MAX;
   results.clear();
+
+  // array_weights=new float[(int)pow(2,number_colors)][number_nodes];
+  
+  //array_weights.assign((int)pow(2,number_colors),VEC_FLT(number_nodes,INT_MAX));
+  //array_last_nodes.assign((int)pow(2,number_colors),VEC_INT(number_nodes,INT_MAX));
+
   for(i=0;i<number_iterations;i++)
   {
     color_nodes(number_colors);
-    res=search_path(path_length);
+    res=search_path(path_length,weight_border);
+    //res=search_path_array(path_length,number_colors,weight_border);
     results.insert(res);
   }
 }

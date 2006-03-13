@@ -358,7 +358,7 @@ Weight_Path_Pair graph::search_path_array(int path_length, int number_colors,
 
 void graph::compute_results(int number_colors, int path_length,
 			    int number_iterations, int number_results) {
-    int i, j;
+    int i;
 
     Weight_Path_Pair res;
 

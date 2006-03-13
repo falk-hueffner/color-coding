@@ -401,11 +401,11 @@ void graph::compute_results(int number_colors,
   {
     //------ This block is needed, when working with arrays -------
     cout<<"Start initialising Arrays"<<endl;
-    array_weights.assign((int)pow(2,number_colors),Weights_Vec(number_nodes,INT_MAX));
+    array_weights.assign(1<<number_colors,Weights_Vec(number_nodes,INT_MAX));
     cout<<"Array1 ready"<<endl;
-    array_last_nodes.assign((int)pow(2,number_colors),Vertices_Vec(number_nodes,INT_MAX));
+    array_last_nodes.assign(1<<number_colors,Vertices_Vec(number_nodes,INT_MAX));
     cout<<"Array2 ready"<<endl;
-    array_iterations.assign((int)pow(2,number_colors),Vertices_Vec(number_nodes,INT_MAX));
+    array_iterations.assign(1<<number_colors,Vertices_Vec(number_nodes,INT_MAX));
     cout<<"Array3 ready"<<endl;
     //------ end of block -----------------------------------------
   }

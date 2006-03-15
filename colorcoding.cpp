@@ -1,5 +1,6 @@
 #include "debug.h"
 #include "graph.h"
+#include "util.h"
 
 using namespace std;
 
@@ -25,25 +26,27 @@ int main(int argc, char *argv[]) {
 	  << "Number of colors: " << argv[4] << endl
 	  << "Number of iterations: " << argv[5] << endl;
 
+#if 0
     long sek;
-
     time(&sek);
     srand(sek);
+#endif
 
     graph protein_network;
 
     protein_network.read_graph(argv[1]);
     protein_network.read_start_nodes(argv[2]);
-    long zeit_start, zeit_ende;
 
-    time(&zeit_start);
+    double start = timestamp(), stop;
 
     protein_network.compute_results(number_colors, path_length, number_iterations, 100);
 
-    time(&zeit_ende);
+    stop = timestamp();
 
     protein_network.display_results(10);
 
-    debug << endl << "Benötigte Zeit (in Sekunden): " << (zeit_ende - zeit_start) << endl;
+    debug.turnOn();
+    
+    debug << endl << "Benötigte Zeit (in Sekunden): " << (stop - start) << endl;
     return 0;
 }

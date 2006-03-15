@@ -415,4 +415,5 @@ void graph::display_results(int number_results) {
 	    cout << node_list2.find((result_pos->second)[i])->second << " ";
 	}
     }
+    cout << flush;
 }

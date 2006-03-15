@@ -8,12 +8,18 @@ INCLUDES= -I.
 LDPATH	=
 LIBS	=
 
+OBJS	= \
+	colorcoding.o	\
+	debug.o		\
+	graph.o		\
+	util.o
+
 CXXOMPILE = $(CXX) $(CXXFLAGS) $(INCLUDES)
 CXXLINK	= $(CXX) $(CXXFLAGS) $(LDPATH) $(LIBS)
 
 all: depend colorcoding generate_graph
 
-colorcoding: colorcoding.o graph.o debug.o
+colorcoding: $(OBJS)
 	$(CXXLINK) $^ -o $@
 
 generate_graph: generate_graph.o

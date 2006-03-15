@@ -50,7 +50,7 @@ typedef pair<weight, Vertices_Vec> Weight_Path_Pair;
 typedef map<weight, Vertices_Vec> Weight_Path_Map;
 typedef Weight_Path_Map::iterator Weight_Path_Map_Iter;
 
-class graph {
+class Graph {
 private:
     int number_nodes;
 

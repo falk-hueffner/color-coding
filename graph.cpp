@@ -25,7 +25,7 @@ colorset del[] = {
 // Returnparamter: none
 //-------------------------------------------------------------------------------
 
-void graph::read_graph(char *filename) {
+void Graph::read_graph(char *filename) {
     FILE *datei;
     int i, j;
     vertex n1i, n2i;
@@ -105,7 +105,7 @@ void graph::read_graph(char *filename) {
 // Returnparamter: none
 //-------------------------------------------------------------------------------
 
-void graph::read_start_nodes(char *filename) {
+void Graph::read_start_nodes(char *filename) {
     char n1[10];
     vertex n1i;
     name n1s;
@@ -144,7 +144,7 @@ void graph::read_start_nodes(char *filename) {
 // Returnparamter: none
 //-------------------------------------------------------------------------------
 
-void graph::color_nodes(int number_colors)
+void Graph::color_nodes(int number_colors)
 {
     int i;
 
@@ -163,7 +163,7 @@ void graph::color_nodes(int number_colors)
 // Returnparamter: Pair(weight of the best path, vertices of the best path)
 //-------------------------------------------------------------------------------
 
-Weight_Path_Pair graph::search_path(int path_length, float weight_border)
+Weight_Path_Pair Graph::search_path(int path_length, float weight_border)
 {
     Matrix_Entry_Map paths[path_length];
     Matrix_Entry_Map_Iter listpos, listpos2;
@@ -250,7 +250,7 @@ Weight_Path_Pair graph::search_path(int path_length, float weight_border)
 // Returnparamter: Pair(weight of the best path, vertices of the best path)
 //-------------------------------------------------------------------------------
 
-Weight_Path_Pair graph::search_path_array(int path_length, int number_colors,
+Weight_Path_Pair Graph::search_path_array(int path_length, int number_colors,
 					  float weight_border, int iteration)
 {
     Weight_Pathvertex_Map result;
@@ -354,7 +354,7 @@ Weight_Path_Pair graph::search_path_array(int path_length, int number_colors,
 // Returnparamter: none
 //-------------------------------------------------------------------------------
 
-void graph::compute_results(int number_colors, int path_length,
+void Graph::compute_results(int number_colors, int path_length,
 			    int number_iterations, int number_results) {
     int i;
 
@@ -401,7 +401,7 @@ void graph::compute_results(int number_colors, int path_length,
 // Returnparamter: none
 //-------------------------------------------------------------------------------
 
-void graph::display_results(int number_results) {
+void Graph::display_results(int number_results) {
     Weight_Path_Map_Iter result_pos;
     int i, j;
 

@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     srand(sek);
 #endif
 
-    graph protein_network;
+    Graph protein_network;
 
     protein_network.read_graph(argv[1]);
     protein_network.read_start_nodes(argv[2]);

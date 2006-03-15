@@ -1,3 +1,4 @@
+#include "debug.h"
 #include "graph.h"
 
 using namespace std;
@@ -42,12 +43,11 @@ void graph::read_graph(char *filename) {
 
     datei = fopen(filename, "r");
     if (!datei) {
-	printf("Error while reading graph-file!");
-	getchar();
-	return;
+	cerr << "Error while reading graph-file!\n";
+	exit(1);
     }
 
-    cout << endl << endl << "Read graph-file:" << endl;
+    debug << endl << endl << "Read graph-file:" << endl;
     i = 0;
     while (feof(datei) == 0) {
 	fscanf(datei, "%s %s %f", n1, n2, &w);
@@ -93,8 +93,8 @@ void graph::read_graph(char *filename) {
 	number_neighbours[i] = (neighbours_list[i]).size();
 	j += number_neighbours[i];
     }
-    cout << "Number of vertices: " << number_nodes << endl << "Number of edges: "
-	 << j / 2 << endl;
+    debug << "Number of vertices: " << number_nodes << endl << "Number of edges: "
+	  << j / 2 << endl;
 }
 
 //-------------------------------------------------------------------------------
@@ -117,23 +117,21 @@ void graph::read_start_nodes(char *filename) {
 
     datei = fopen(filename, "r");
     if (!datei) {
-	printf("Error while reading start-node-file!");
-	getchar();
-	return;
+	cerr << "Error while reading start-node-file!\n";
+	exit(1);
     }
 
-    cout << endl << "Startvertices:  ";
+    //cout << endl << "Startvertices:  ";
     while (feof(datei) == 0) {
 	fscanf(datei, "%s", n1);
 
 	n1s = string(n1);
 	if (node_list1.count(n1s) == 1) {
-	    cout << n1s << "  ";
+	    //cout << n1s << "  ";
 	    n1i = node_list1.find(n1s)->second;
 	    start_nodes.push_back(n1i);
 	}
     }
-    cout << endl;
     fclose(datei);
 
 }
@@ -372,13 +370,13 @@ void graph::compute_results(int number_colors, int path_length,
 
     if (function_array == true) {
 	//------ This block is needed, when working with arrays -------
-	cout << "Start initialising Arrays" << endl;
+	debug << "Start initialising Arrays" << endl;
 	array_weights.assign(1 << number_colors, Weights_Vec(number_nodes, INT_MAX));
-	cout << "Array1 ready" << endl;
+	debug << "Array1 ready" << endl;
 	array_last_nodes.assign(1 << number_colors, Vertices_Vec(number_nodes, INT_MAX));
-	cout << "Array2 ready" << endl;
+	debug << "Array2 ready" << endl;
 	array_iterations.assign(1 << number_colors, Vertices_Vec(number_nodes, INT_MAX));
-	cout << "Array3 ready" << endl;
+	debug << "Array3 ready" << endl;
 	//------ end of block -----------------------------------------
     }
 
@@ -407,7 +405,7 @@ void graph::display_results(int number_results) {
     Weight_Path_Map_Iter result_pos;
     int i, j;
 
-    cout << endl << "Best " << number_results << " of " << results.size()
+    cout << "Best " << number_results << " of " << results.size()
 	 << " found paths:" << endl;
     result_pos = results.begin();
     for (j = 0; ((result_pos != results.end()) && (j < number_results));

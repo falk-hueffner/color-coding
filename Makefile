@@ -13,7 +13,7 @@ CXXLINK	= $(CXX) $(CXXFLAGS) $(LDPATH) $(LIBS)
 
 all: depend colorcoding generate_graph
 
-colorcoding: colorcoding.o graph.o
+colorcoding: colorcoding.o graph.o debug.o
 	$(CXXLINK) $^ -o $@
 
 generate_graph: generate_graph.o

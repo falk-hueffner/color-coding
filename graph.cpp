@@ -417,3 +417,50 @@ void Graph::display_results(int number_results) {
     }
     cout << flush;
 }
+
+//-------------------------------------------------------------------------------
+// Analyse Graph
+// -> analyses the graph 
+//    output of number of vertices, number of edges, distribution of vertex-degrees,
+//    distribution of edge-probabilities
+// 
+// Inputparameter: none    
+// Returnparamter: none
+//-------------------------------------------------------------------------------
+
+void Graph::analyse_graph() {
+  int number_edges=0,max_degree=0,prob,i,j;
+    Numbers_Vec degree_list(31, 0);
+    Numbers_Vec probability_list(20,0);
+    
+    for (i = 0; i < number_nodes; i++) {
+        number_edges += number_neighbours[i];
+	if (max_degree < number_neighbours[i]) max_degree = number_neighbours[i];
+	if (number_neighbours[i] < 31) degree_list[number_neighbours[i]]++;
+	for (j = 0; j < number_neighbours[i]; j++) {
+	    if (i < neighbours_list[i][j]) {
+	        prob=(int) (exp(-n_weights_list[i][j]) * 20);
+		probability_list[prob]++;
+	    }
+	}
+    }
+    number_edges /= 2;
+
+    cout << "Number of vertices: " << node_list1.size() << endl;
+    cout << "Number of edges: " << number_edges << endl;
+
+    cout << endl << "Degree   Number of vertices" << endl;
+    for (i = 1; i < 31; i++) {
+        cout << i << "\t\t" << degree_list[i] << endl;
+    }
+
+    cout << endl << "Average vertex-degree: " << (float) (number_edges * 2) / number_nodes << endl;
+    cout << "Maximal vertex-degree: " << max_degree << endl;
+
+    cout << endl << "Distribution of the edge-probabilities" << endl;
+    cout << "Probability  Number of edges" << endl;
+    for (i = 0; i < 20; i++) {
+        cout << i * 0.05 << " .. " << (i + 1) * 0.05 << "\t" <<  probability_list[i] << endl;
+    }
+}
+

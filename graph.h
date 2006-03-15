@@ -76,6 +76,7 @@ public:
     void compute_results(int number_colors, int path_length,
 			 int number_iterations, int number_results);
     void display_results(int number_results);
+    void analyse_graph();
 };
 
 #endif				// _GRAPH_

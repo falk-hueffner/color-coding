@@ -39,6 +39,7 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
     Mempool* old_pool = new Mempool();
     PTree* old_colorsets = new PTree[g.num_vertices()](old_pool, leaf_size);
     PTree::Node* pt_nodes[g.num_vertices()];
+    weight weight_threshold = paths.worst_weight();
 
     for (std::size_t i = 0; i < start_nodes.size(); ++i) {
 	vertex s = start_nodes[i];
@@ -51,6 +52,17 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 	Mempool* new_pool = new Mempool();
 	PTree* new_colorsets = new PTree[g.num_vertices()](new_pool, leaf_size);
 
+#if 0
+	std::size_t life = 0, dead = 0;
+	for (vertex v = 0; v < g.num_vertices(); ++v) {
+	    if (old_colorsets[v].root)
+		++life;
+	    else
+		++dead;
+	}
+	std::cerr << "l = " << l << " life = " << life << " dead = " << dead << endl;
+#endif
+	
 	for (vertex v = 0; v < g.num_vertices(); ++v) {
 	    for (std::size_t i = 0; i < g.deg(v); ++i) {
 		vertex w = g.neighbor(v, i);
@@ -65,13 +77,16 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 			continue;
 		    if (pt_node->is_leaf) {
 			PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
-			PartialPath* new_pp = find_pp(new_colorsets[w],
-						      pt_node->key | w_color);
-			if (old_pp->w + edge_weight < new_pp->w) {
-			    new_pp->w = old_pp->w + edge_weight;
-			    memcpy(new_pp->vertices, old_pp->vertices, l * sizeof (vertex));
-			    new_pp->vertices[l] = v;
-			}			    
+			weight new_weight = old_pp->w + edge_weight;
+			if (new_weight < weight_threshold) {
+			    PartialPath* new_pp = find_pp(new_colorsets[w],
+							  pt_node->key | w_color);
+			    if (new_weight < new_pp->w) {
+				new_pp->w = new_weight;
+				memcpy(new_pp->vertices, old_pp->vertices, l * sizeof (vertex));
+				new_pp->vertices[l] = v;
+			    }
+			}
 		    } else {
 			pt_nodes[num_pt_nodes++] = pt_node->left;
 			pt_nodes[num_pt_nodes++] = pt_node->right;
@@ -97,6 +112,7 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 		    Path p(pp->vertices, pp->vertices + path_length - 1);
 		    p.push_back(v);
 		    paths.add(p, pp->w);
+		    weight_threshold = paths.worst_weight();
 		}
 	    } else {
 		pt_nodes[num_pt_nodes++] = pt_node->left;

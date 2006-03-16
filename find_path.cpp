@@ -64,13 +64,14 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 #endif
 	
 	for (vertex v = 0; v < g.num_vertices(); ++v) {
+	    if (!old_colorsets[v].root)
+		continue;
 	    for (std::size_t i = 0; i < g.deg(v); ++i) {
 		vertex w = g.neighbor(v, i);
 		weight edge_weight = g.edge_weight(v, i);
 		colorset w_color = g.color_set(w);
 		std::size_t num_pt_nodes = 0;
-		if (old_colorsets[v].root)
-		    pt_nodes[num_pt_nodes++] = old_colorsets[v].root;
+		pt_nodes[num_pt_nodes++] = old_colorsets[v].root;
 		while (num_pt_nodes) {
 		    PTree::Node* pt_node = pt_nodes[--num_pt_nodes];
 		    if (pt_node->key & w_color)

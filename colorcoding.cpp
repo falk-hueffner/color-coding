@@ -35,8 +35,8 @@ int main(int argc, char *argv[]) {
 
     Graph protein_network;
 
-    protein_network.read_graph(argv[1]);
-    protein_network.read_start_nodes(argv[2]);
+    protein_network.read_graph(fopen(argv[1], "r"));
+    protein_network.read_start_nodes(fopen(argv[2], "r"));
 
     double start = timestamp(), stop;
 

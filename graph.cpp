@@ -25,8 +25,7 @@ colorset del[] = {
 // Returnparamter: none
 //-------------------------------------------------------------------------------
 
-void Graph::read_graph(char *filename) {
-    FILE *datei;
+void Graph::read_graph(FILE* stream) {
     int i, j;
     vertex n1i, n2i;
     char n1[10], n2[10];
@@ -41,16 +40,10 @@ void Graph::read_graph(char *filename) {
     neighbours_list.clear();
     n_weights_list.clear();
 
-    datei = fopen(filename, "r");
-    if (!datei) {
-	cerr << "Error while reading graph-file!\n";
-	exit(1);
-    }
-
     debug << endl << endl << "Read graph-file:" << endl;
     i = 0;
-    while (feof(datei) == 0) {
-	fscanf(datei, "%s %s %f", n1, n2, &w);
+    while (feof(stream) == 0) {
+	fscanf(stream, "%s %s %f", n1, n2, &w);
 	//printf("%s\t%s\t%f\n", n1,n2,w);
 
 	n1s = string(n1);
@@ -83,8 +76,6 @@ void Graph::read_graph(char *filename) {
 
     }
 
-    fclose(datei);
-
     j = 0;
     number_nodes = node_list1.size();
     number_neighbours = Numbers_Vec(number_nodes, 0);
@@ -105,25 +96,17 @@ void Graph::read_graph(char *filename) {
 // Returnparamter: none
 //-------------------------------------------------------------------------------
 
-void Graph::read_start_nodes(char *filename) {
+void Graph::read_start_nodes(FILE* stream) {
     char n1[10];
     vertex n1i;
     name n1s;
     Names_Vec start_vec;
 
-    FILE *datei;
-
     start_nodes.clear();
 
-    datei = fopen(filename, "r");
-    if (!datei) {
-	cerr << "Error while reading start-node-file!\n";
-	exit(1);
-    }
-
     //cout << endl << "Startvertices:  ";
-    while (feof(datei) == 0) {
-	fscanf(datei, "%s", n1);
+    while (feof(stream) == 0) {
+	fscanf(stream, "%s", n1);
 
 	n1s = string(n1);
 	if (node_list1.count(n1s) == 1) {
@@ -132,7 +115,7 @@ void Graph::read_start_nodes(char *filename) {
 	    start_nodes.push_back(n1i);
 	}
     }
-    fclose(datei);
+    fclose(stream);
 
 }
 

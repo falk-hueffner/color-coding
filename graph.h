@@ -96,8 +96,8 @@ public:
     }
     const Vertices_Vec& startnodes() const { return start_nodes; }
 
-    void read_graph(char *filename);
-    void read_start_nodes(char *filename);
+    void read_graph(FILE* stream);
+    void read_start_nodes(FILE* stream);
     void color_nodes(int number_colors);
     Weight_Path_Pair search_path(int path_length, float weight_border);
     Weight_Path_Pair search_path_array(int path_length, int number_colors,

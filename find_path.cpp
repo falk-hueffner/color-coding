@@ -61,17 +61,17 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 		    pt_nodes[num_pt_nodes++] = old_colorsets[v].root;
 		while (num_pt_nodes) {
 		    PTree::Node* pt_node = pt_nodes[--num_pt_nodes];
+		    if (pt_node->key & w_color)
+			continue;
 		    if (pt_node->is_leaf) {
-			if (!(pt_node->key & w_color)) {
-			    PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
-			    PartialPath* new_pp = find_pp(new_colorsets[w],
-							  pt_node->key | w_color);
-			    if (old_pp->w + edge_weight < new_pp->w) {
-				new_pp->w = old_pp->w + edge_weight;
-				memcpy(new_pp->vertices, old_pp->vertices, l * sizeof (vertex));
-				new_pp->vertices[l] = v;
-			    }
-			}
+			PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
+			PartialPath* new_pp = find_pp(new_colorsets[w],
+						      pt_node->key | w_color);
+			if (old_pp->w + edge_weight < new_pp->w) {
+			    new_pp->w = old_pp->w + edge_weight;
+			    memcpy(new_pp->vertices, old_pp->vertices, l * sizeof (vertex));
+			    new_pp->vertices[l] = v;
+			}			    
 		    } else {
 			pt_nodes[num_pt_nodes++] = pt_node->left;
 			pt_nodes[num_pt_nodes++] = pt_node->right;

@@ -412,25 +412,40 @@ void Graph::display_results(int number_results) {
 //-------------------------------------------------------------------------------
 
 void Graph::analyse_graph() {
-  int number_edges=0,max_degree=0,prob,i,j;
+    int number_edges=0,max_degree=0,prob,i,i2,i3,j;
     Numbers_Vec degree_list(31, 0);
     Numbers_Vec probability_list(20,0);
+    vertex vertex2,vertex3;
+    int pottriads=0,triadscount=0;
+    double clustercoeff;
     
     for (i = 0; i < number_nodes; i++) {
         number_edges += number_neighbours[i];
 	if (max_degree < number_neighbours[i]) max_degree = number_neighbours[i];
 	if (number_neighbours[i] < 31) degree_list[number_neighbours[i]]++;
+	pottriads += number_neighbours[i] * (number_neighbours[i] - 1) / 2;
+
 	for (j = 0; j < number_neighbours[i]; j++) {
 	    if (i < neighbours_list[i][j]) {
 	        prob=(int) (exp(-n_weights_list[i][j]) * 20);
 		probability_list[prob]++;
 	    }
+	    vertex2 = neighbours_list[i][j];
+	    for (i2 = 0; i2 < number_neighbours[vertex2]; i2++) {
+	        vertex3 = neighbours_list[vertex2][i2];
+		for (i3 = 0; i3 < number_neighbours[vertex3]; i3++) {
+		    if (neighbours_list[vertex3][i3]==i) triadscount++;
+		}
+	    }
+	    
 	}
     }
+    clustercoeff = ((double) triadscount / (2 * ((double) pottriads)));
     number_edges /= 2;
 
     cout << "Number of vertices: " << node_list1.size() << endl;
     cout << "Number of edges: " << number_edges << endl;
+    cout << endl << "Cluster coefficient: " << clustercoeff << endl;
 
     cout << endl << "Degree   Number of vertices" << endl;
     for (i = 1; i < 31; i++) {

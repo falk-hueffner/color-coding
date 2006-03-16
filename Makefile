@@ -11,7 +11,9 @@ LIBS	=
 OBJS	= \
 	colorcoding.o	\
 	debug.o		\
+	find_path.o	\
 	graph.o		\
+	ptree.o		\
 	util.o
 
 CXXOMPILE = $(CXX) $(CXXFLAGS) $(INCLUDES)

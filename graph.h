@@ -10,15 +10,15 @@
 #include <stdint.h>
 #include <time.h>
 #include <math.h>
+#include <cassert>
+
+#include "types.h"
 
 using namespace std;
 
-typedef uint32_t colorset;
-typedef uint32_t vertex;
-typedef float weight;
 typedef string name;
 
-typedef vector<int> Vertices_Vec;
+typedef vector<vertex> Vertices_Vec;
 typedef vector<int> Colors_Vec;
 typedef vector<int> Numbers_Vec;
 typedef vector<float> Weights_Vec;
@@ -67,6 +67,35 @@ private:
     Weight_Path_Map results;
 
 public:
+    std::size_t num_vertices() const { return number_nodes; }
+    std::size_t deg(vertex v) const {
+	assert(v < num_vertices());
+	return number_neighbours[v];
+    }
+    std::size_t color(vertex v) const {
+	assert(v < num_vertices());
+	return colors[v];
+    }
+    colorset color_set(vertex v) const {
+	assert(v < num_vertices());
+	return static_cast<colorset>(1) << colors[v];
+    }
+    std::string node_name(vertex v) const {
+	assert(v < num_vertices());
+	return node_list2.find(v)->second;
+    }
+    vertex neighbor(vertex v, std::size_t i) const {
+	assert(v < num_vertices());
+	assert(i < deg(v));	
+	return neighbours_list[v][i];
+    }
+    weight edge_weight(vertex v, std::size_t i) const {
+	assert(v < num_vertices());
+	assert(i < deg(v));	
+	return n_weights_list[v][i];
+    }
+    const Vertices_Vec& startnodes() const { return start_nodes; }
+
     void read_graph(char *filename);
     void read_start_nodes(char *filename);
     void color_nodes(int number_colors);

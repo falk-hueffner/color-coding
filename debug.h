@@ -18,7 +18,8 @@ public:
 	return *this;
     }
 
-    void turnOn() { on = true; }
+    void turn_on() { on = true; }
+    void turn_off() { on = false; }
 
 private:
     std::ostream& out;

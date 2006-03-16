@@ -364,7 +364,7 @@ void Graph::compute_results(int number_colors, int path_length,
 
     results.clear();
 
-    bool function_array = false;	//Set on true for function search_path_array
+    bool function_array = true;	//Set on true for function search_path_array
 
     //Set on false for function search_path
 

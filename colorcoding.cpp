@@ -1,6 +1,7 @@
 #include "debug.h"
 #include "graph.h"
 #include "util.h"
+#include "find_path.h"
 
 using namespace std;
 
@@ -39,14 +40,25 @@ int main(int argc, char *argv[]) {
 
     double start = timestamp(), stop;
 
+#if 1
+    PathSet paths = lightest_path(protein_network, protein_network.startnodes(),
+				  path_length, number_colors, number_iterations);
+    for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {
+	std::cout << i->w;
+	for (std::size_t j = 0; j < i->p.size(); ++j)
+	    std::cout << ' ' << protein_network.node_name(i->p[j]);
+	std::cout << std::endl;
+    }
+#else
     protein_network.compute_results(number_colors, path_length, number_iterations, 100);
 
     stop = timestamp();
 
     protein_network.display_results(10);
 
-    debug.turnOn();
+    debug.turn_on();
     
     debug << endl << "Benötigte Zeit (in Sekunden): " << (stop - start) << endl;
+#endif
     return 0;
 }

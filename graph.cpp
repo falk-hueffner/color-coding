@@ -31,7 +31,7 @@ void Graph::read_graph(char *filename) {
     vertex n1i, n2i;
     char n1[10], n2[10];
     name n1s, n2s;
-    weight w;
+    float w;
 
     number_nodes = 0;
     number_neighbours.clear();

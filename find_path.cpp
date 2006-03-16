@@ -4,6 +4,7 @@
 #include "debug.h"
 #include "find_path.h"
 #include "ptree.h"
+#include "util.h"
 
 struct PartialPath {
     weight w;
@@ -127,11 +128,17 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 
 PathSet lightest_path(/*const*/ Graph& g, const VertexSet& start_nodes,
 		      std::size_t path_length, std::size_t num_colors,
-		      std::size_t iterations) {
-    PathSet paths;
-    info.turn_on();
-    for (std::size_t i = 0; i < iterations; ++i) {
-	debug << "Trial " << i << "/" << iterations << std::endl;
+		      std::size_t num_trials, std::size_t num_paths) {
+    PathSet paths(num_paths);
+    double last_printed = 0;
+    for (std::size_t i = 0; i < num_trials; ++i) {
+	if (timestamp() - last_printed > 1) {
+	    info << "Trial " << i << "/" << num_trials << ' '
+		 << paths.size( ) << " paths; best " << paths.best_weight()
+		 << " worst " << paths.worst_weight()
+		 << std::endl;
+	    last_printed = timestamp();
+	}
 	g.color_nodes(num_colors);
 	dynprog_trial(g, start_nodes, path_length, paths);
     }

@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "debug.h"
 #include "graph.h"
 #include "util.h"
@@ -5,49 +7,101 @@
 
 using namespace std;
 
+static void usage(FILE *stream) {
+    fputs("colorcode: Find most probable path in a graph\n"
+	  "  stdin  	Input graph\n"
+	  "  -i FILE	Read start vertices from FILE\n"
+	  "  -v	Print progress to stderr\n"
+	  "  -l K	Find paths of length K (default: 8)\n"
+	  "  -c C	Use C colors (default: K)\n"
+	  "  -n P	Find the best P paths (default: 10)\n"
+	  "  -t T	T trials\n"
+	  "  -p S	S\% success probability (default: 99.9)\n"
+	  "  -r [R]	Random seed R (or random if not given) (default: 0)\n"
+	  "  -s	Print only statistics\n"
+	  "  -h	Display this list of options\n"
+	  , stream);
+}
+
 int main(int argc, char *argv[]) {
-    if (argc != 6) {
-	cerr << "Number of paramters incorrect!" << endl
-	     << "The following parameters are expected:" << endl
-	     << "1. file, which contains graph data" << endl
-	     << "2. file, which contains the startvertices" << endl
-	     << "3. lenght of the paths, which should be searched" << endl
-	     << "4. number of the colors, which are used for coloring" << endl
-	     << "5. number of iterations" << endl;
-	return 1;
+    const char *start_vertices_file = NULL;
+    std::size_t path_length = 8;
+    std::size_t num_colors = 0;
+    std::size_t num_paths = 10;
+    std::size_t num_trials = 0;
+    double success_prob = 99.9;
+    bool stats_only = false;
+    
+    int c;
+    while ((c = getopt(argc, argv, "i:vl:c:n:t:p:r::sh")) != -1) {
+	switch (c) {
+	case 'i': start_vertices_file = optarg; break;
+	case 'v': info.turn_on(); break;
+	case 'l': path_length = atoi(optarg); break;
+	case 'c': num_colors = atoi(optarg); break;
+	case 'n': num_paths = atoi(optarg); break;
+	case 't': num_trials = atoi(optarg); break;
+	case 'p': success_prob = atof(optarg); break;
+	case 'r':
+	    if (optarg)
+		srand(atoi(optarg));
+	    else
+		srand(time(NULL));
+	    num_paths = atoi(optarg); break;
+	case 's': stats_only = true; break;
+	case 'h': usage(stdout); exit(0); break;
+	default:  usage(stderr); exit(1); break;
+	}
     }
-    int path_length = atoi(argv[3]);
-    int number_colors = atoi(argv[4]);
-    int number_iterations = atoi(argv[5]);
+    if (optind < argc) {
+	usage(stderr);
+	exit(1);
+    }
 
-    debug << "Entered paramters:" << endl
-	  << "Graph: " << argv[1] << endl
-	  << "Startvertices: " << argv[2] << endl
-	  << "Pathlength: " << argv[3] << endl
-	  << "Number of colors: " << argv[4] << endl
-	  << "Number of iterations: " << argv[5] << endl;
+    if (path_length >= 31) {
+	fprintf(stderr, "error: path length must be < 31\n");
+	exit(1);
+    }
+    if (num_colors == 0)
+	num_colors = path_length;
+    if (num_colors < path_length) {
+	fprintf(stderr, "error: need at least as many colors as the path length\n");
+	exit(1);
+    }
 
-#if 0
-    long sek;
-    time(&sek);
-    srand(sek);
-#endif
+    Graph g;
+    g.read_graph(stdin);
 
-    Graph protein_network;
+    if (num_trials == 0) {
+	double epsilon = 1 - success_prob / 100;
+	// FIXME: assumes path_length == num_colors
+	std::size_t n = g.num_vertices();
+	num_trials = std::size_t(exp(double(path_length)) * log(n / epsilon) + 1);
+    }
 
-    protein_network.read_graph(fopen(argv[1], "r"));
-    protein_network.read_start_nodes(fopen(argv[2], "r"));
-
-    double start = timestamp(), stop;
+    if (start_vertices_file) {
+	FILE* file = fopen(start_vertices_file, "r");
+	g.read_start_nodes(file);
+	fclose(file);
+    } else {
+	for (std::size_t i = 0; i < g.num_vertices(); ++i)
+	    g.start_nodes.push_back(i);
+    }
 
 #if 1
-    PathSet paths = lightest_path(protein_network, protein_network.startnodes(),
-				  path_length, number_colors, number_iterations);
-    for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {
-	std::cout << i->w;
-	for (std::size_t j = 0; j < i->p.size(); ++j)
-	    std::cout << ' ' << protein_network.node_name(i->p[j]);
-	std::cout << std::endl;
+    double start = timestamp();
+    PathSet paths = lightest_path(g, g.startnodes(), path_length, num_colors, num_trials,
+				  num_paths);
+    double stop = timestamp();
+    if (stats_only) {
+	printf("%10.2f %10.2f\n", paths.best_weight(), stop - start);
+    } else {
+	for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {
+	    std::cout << i->w;
+	    for (std::size_t j = 0; j < i->p.size(); ++j)
+		std::cout << ' ' << g.node_name(i->p[j]);
+	    std::cout << std::endl;
+	}
     }
 #else
     protein_network.compute_results(number_colors, path_length, number_iterations, 100);

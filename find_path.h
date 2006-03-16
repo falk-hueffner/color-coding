@@ -23,6 +23,12 @@ public:
 	else
 	    return paths.rbegin()->w;
     }
+    weight best_weight() {
+	if (paths.empty())
+	    return -1e10;
+	else
+	    return paths.begin()->w;
+    }
 
     std::size_t size() { return paths.size(); }
     
@@ -52,6 +58,6 @@ private:
 
 PathSet lightest_path(/*const*/ Graph& g, const VertexSet& start_nodes,
 		      std::size_t path_length, std::size_t num_colors,
-		      std::size_t iterations);
+		      std::size_t num_trials, std::size_t num_paths);
 
 #endif	// FIND_PATH_H

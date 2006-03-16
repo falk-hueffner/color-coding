@@ -60,13 +60,13 @@ private:
     Colors_Vec colors;
     Vertices_Array neighbours_list;
     Weights_Array n_weights_list;
-    Vertices_Vec start_nodes;
     Vertices_Array array_last_nodes;
     Weights_Array array_weights;
     Vertices_Array array_iterations;
     Weight_Path_Map results;
 
 public:
+    Vertices_Vec start_nodes;
     std::size_t num_vertices() const { return number_nodes; }
     std::size_t deg(vertex v) const {
 	assert(v < num_vertices());

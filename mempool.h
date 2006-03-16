@@ -25,7 +25,7 @@ public:
     }
 
 private:
-    static const std::size_t CHUNK_SIZE = 1024 * 64;
+    static const std::size_t CHUNK_SIZE = 1024 * 8;
     unsigned char *top, *end;
     std::vector<unsigned char*> chunks;
 };

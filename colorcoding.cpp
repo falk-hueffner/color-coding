@@ -23,6 +23,10 @@ static void usage(FILE *stream) {
 	  , stream);
 }
 
+static double lfact(int n) {
+    return lgamma(n + 1.0);
+}
+
 int main(int argc, char *argv[]) {
     const char *start_vertices_file = NULL;
     std::size_t path_length = 8;
@@ -74,9 +78,12 @@ int main(int argc, char *argv[]) {
 
     if (num_trials == 0) {
 	double epsilon = 1 - success_prob / 100;
-	// FIXME: assumes path_length == num_colors
-	std::size_t n = g.num_vertices();
-	num_trials = std::size_t(exp(double(path_length)) * log(n / epsilon) + 1);
+	int n = g.num_vertices();
+	int k = path_length;
+	int x = num_colors - path_length;
+	double colorful_prob;
+	colorful_prob = exp(lfact(k + x) - lfact(x) - k * log(double(k + x)));
+	num_trials = int(log(epsilon) / log1p(-colorful_prob) + 1);
     }
 
     if (start_vertices_file) {
@@ -94,7 +101,7 @@ int main(int argc, char *argv[]) {
 				  num_paths);
     double stop = timestamp();
     if (stats_only) {
-	printf("%10.2f %10.2f\n", paths.best_weight(), stop - start);
+	printf("%15.2f %12.8f %12.8f\n", stop - start, paths.best_weight(), paths.worst_weight());
     } else {
 	for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {
 	    std::cout << i->w;

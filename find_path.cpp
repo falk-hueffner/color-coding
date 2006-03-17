@@ -152,9 +152,14 @@ PathSet lightest_path(/*const*/ Graph& g, const VertexSet& start_nodes,
 		min_edge_weight = edge_weight;
 	}
     }
-    std::cerr << "min_edge_weight = " << min_edge_weight << endl;
-    
+
     PathSet paths(num_paths);
+
+    if (num_colors > path_length) {
+	g.color_nodes(path_length);
+	dynprog_trial(g, start_nodes, path_length, paths, min_edge_weight);
+    }
+    
     double last_printed = 0;
     for (std::size_t i = 0; i < num_trials; ++i) {
 	if (timestamp() - last_printed > 1) {

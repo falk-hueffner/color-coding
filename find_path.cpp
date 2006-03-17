@@ -123,7 +123,6 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 		    Path p(pp->vertices, pp->vertices + path_length - 1);
 		    p.push_back(v);
 		    paths.add(p, pp->w);
-		    weight_threshold = paths.worst_weight();
 		}
 	    } else {
 		pt_nodes[num_pt_nodes++] = pt_node->left;

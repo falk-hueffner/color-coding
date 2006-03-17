@@ -56,15 +56,15 @@ int main(int argc, char *argv[]) {
 	case 'p': success_prob = atof(optarg); break;
 	case 'r':
 	    if (optarg) {
+		srand(atoi(optarg));
+	    } else {
 #ifdef __unix__
 		struct timeval tv;
 		gettimeofday(&tv, NULL);
 		srand((unsigned(tv.tv_sec) * unsigned(getpid())) ^ unsigned(tv.tv_usec));
 #else
-		srand(atoi(optarg));
-#endif
-	    } else {
 		srand(time(NULL));
+#endif
 	    }
 	    break;
 	case 's': stats_only = true; break;

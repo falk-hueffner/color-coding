@@ -14,7 +14,7 @@ static void usage(FILE *stream) {
 	  "  -v	Print progress to stderr\n"
 	  "  -l K	Find paths of length K (default: 8)\n"
 	  "  -c C	Use C colors (default: K)\n"
-	  "  -n P	Find the best P paths (default: 10)\n"
+	  "  -n P	Find the best P paths (default: 100)\n"
 	  "  -t T	T trials\n"
 	  "  -p S	S\% success probability (default: 99.9)\n"
 	  "  -r [R]	Random seed R (or random if not given) (default: 0)\n"
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
     const char *start_vertices_file = NULL;
     std::size_t path_length = 8;
     std::size_t num_colors = 0;
-    std::size_t num_paths = 10;
+    std::size_t num_paths = 100;
     std::size_t num_trials = 0;
     double success_prob = 99.9;
     bool stats_only = false;
@@ -72,6 +72,10 @@ int main(int argc, char *argv[]) {
 	num_colors = path_length;
     if (num_colors < path_length) {
 	fprintf(stderr, "error: need at least as many colors as the path length\n");
+	exit(1);
+    }
+    if (num_colors >= 31) {
+	fprintf(stderr, "error: number of colors must be < 31\n");
 	exit(1);
     }
 

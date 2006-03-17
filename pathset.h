@@ -32,6 +32,7 @@ public:
 private:
     std::size_t max_size;
     std::set<Entry> entries;
+    std::set<Path> paths;
 };
 
 #endif // PATHSET_H

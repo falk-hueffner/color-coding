@@ -16,17 +16,17 @@ std::size_t peak_mem_usage;
 
 static void usage(FILE *stream) {
     fputs("colorcode: Find most probable path in a graph\n"
-	  "  stdin  	Input graph\n"
-	  "  -i FILE	Read start vertices from FILE\n"
-	  "  -v	Print progress to stderr\n"
-	  "  -l K	Find paths of length K (default: 8)\n"
-	  "  -c C	Use C colors (default: K)\n"
-	  "  -n P	Find the best P paths (default: 100)\n"
-	  "  -t T	T trials\n"
-	  "  -p S	S\% success probability (default: 99.9)\n"
-	  "  -r [R]	Random seed R (or random if not given) (default: 1)\n"
-	  "  -s	Print only statistics\n"
-	  "  -h	Display this list of options\n"
+	  "  stdin      Input graph\n"
+	  "  -i FILE    Read start vertices from FILE\n"
+	  "  -v         Print progress to stderr\n"
+	  "  -l K       Find paths of length K (default: 8)\n"
+	  "  -c C       Use C colors (default: K)\n"
+	  "  -n P       Find the best P paths (default: 100)\n"
+	  "  -t T       T trials\n"
+	  "  -p S       S\% success probability (default: 99.9)\n"
+	  "  -r [R]     Random seed R (or random if not given) (default: 1)\n"
+	  "  -s         Print only statistics\n"
+	  "  -h         Display this list of options\n"
 	  , stream);
 }
 

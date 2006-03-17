@@ -4,7 +4,7 @@ CXXFLAGS= -O3 $(shell CC=$(CC) gcc-arch) -g -W -Wall -Wno-sign-compare -pipe
 # disable internal consistency checking for some speedup
 #CXXFLAGS  += -DNDEBUG
 
-INCLUDES= -I.
+INCLUDES=
 LDPATH	=
 LIBS	=
 

@@ -37,14 +37,14 @@ static void debug_colorset(colorset c) {
 }
 
 void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
-		   std::size_t path_length, PathSet& paths) {
+		   std::size_t path_length, PathSet& paths,
+		   weight min_edge_weight) {
     std::size_t leaf_size = sizeof (PartialPath);
     Mempool* old_pool = new Mempool();
     PTree* old_colorsets = new PTree[g.num_vertices()];
     for (std::size_t i = 0; i < g.num_vertices(); ++i)
 	new (old_colorsets + i) PTree(old_pool, leaf_size);
     PTree::Node* pt_nodes[g.num_vertices()];
-    weight weight_threshold = paths.worst_weight();
 
     for (std::size_t i = 0; i < start_nodes.size(); ++i) {
 	vertex s = start_nodes[i];
@@ -53,6 +53,8 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
     }
 
     for (std::size_t l = 0; l < path_length - 1; ++l) {
+	weight weight_threshold =
+	    paths.worst_weight() - ((path_length - 1) - l - 1) * min_edge_weight;
 	leaf_size += sizeof (vertex);
 	Mempool* new_pool = new Mempool();
 	PTree* new_colorsets = new PTree[g.num_vertices()];
@@ -105,6 +107,11 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 	std::size_t mem_usage = old_pool->mem_usage() + new_pool->mem_usage();
 	if (mem_usage > peak_mem_usage)
 	    peak_mem_usage = mem_usage;
+#if 0
+	std::size_t old_mem = old_pool->mem_usage(), new_mem = new_pool->mem_usage();
+	std::cerr << "l=" << l << ": " << old_mem << " + l=" << l+1 << ": " << new_mem
+		  << " = " << (old_mem + new_mem) / 1024 / 1024 << "M\n";
+#endif
 	delete[] old_colorsets;
 	delete old_pool;
 	old_colorsets = new_colorsets;
@@ -137,6 +144,16 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 PathSet lightest_path(/*const*/ Graph& g, const VertexSet& start_nodes,
 		      std::size_t path_length, std::size_t num_colors,
 		      std::size_t num_trials, std::size_t num_paths) {
+    weight min_edge_weight = 1e10;
+    for (vertex v = 0; v < g.num_vertices(); ++v) {
+	for (std::size_t i = 0; i < g.deg(v); ++i) {
+	    weight edge_weight = g.edge_weight(v, i);
+	    if (edge_weight < min_edge_weight)
+		min_edge_weight = edge_weight;
+	}
+    }
+    std::cerr << "min_edge_weight = " << min_edge_weight << endl;
+    
     PathSet paths(num_paths);
     double last_printed = 0;
     for (std::size_t i = 0; i < num_trials; ++i) {
@@ -148,7 +165,7 @@ PathSet lightest_path(/*const*/ Graph& g, const VertexSet& start_nodes,
 	    last_printed = timestamp();
 	}
 	g.color_nodes(num_colors);
-	dynprog_trial(g, start_nodes, path_length, paths);
+	dynprog_trial(g, start_nodes, path_length, paths, min_edge_weight);
     }
     return paths;
 }

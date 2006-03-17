@@ -23,8 +23,9 @@ static void usage(FILE *stream) {
 	  , stream);
 }
 
-static double lfact(int n) {
-    return lgamma(n + 1.0);
+// returns ln(n!)
+static double lfact(std::size_t n) {
+    return lgamma(n + 1);
 }
 
 int main(int argc, char *argv[]) {
@@ -78,12 +79,10 @@ int main(int argc, char *argv[]) {
 
     if (num_trials == 0) {
 	double epsilon = 1 - success_prob / 100;
-	int n = g.num_vertices();
-	int k = path_length;
-	int x = num_colors - path_length;
-	double colorful_prob;
-	colorful_prob = exp(lfact(k + x) - lfact(x) - k * log(double(k + x)));
-	num_trials = int(log(epsilon) / log1p(-colorful_prob) + 1);
+	std::size_t k = path_length;
+	std::size_t x = num_colors - path_length;
+	double colorful_prob = exp(lfact(k + x) - lfact(x) - k * log(double(k + x)));
+	num_trials = std::size_t(ceil(log(epsilon) / log1p(-colorful_prob)));
     }
 
     if (start_vertices_file) {

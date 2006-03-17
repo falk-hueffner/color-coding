@@ -153,7 +153,6 @@ PathSet lightest_path(/*const*/ Graph& g, const VertexSet& start_nodes,
 		min_edge_weight = edge_weight;
 	}
     }
-    fprintf(stderr, "max_common = %zd\n", max_common);
 
     PathSet paths(num_paths, max_common);
 

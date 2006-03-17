@@ -103,7 +103,6 @@ int main(int argc, char *argv[]) {
 	std::size_t x = num_colors - path_length;
 	double colorful_prob = exp(lfact(k + x) - lfact(x) - k * log(double(k + x)));
 	num_trials = std::size_t(ceil(log1p(-success_prob / 100) / log1p(-colorful_prob)));
-	fprintf(stderr, "num_trials = %zd\n", num_trials);
     }
 
     if (start_vertices_file) {

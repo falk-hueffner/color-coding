@@ -1,4 +1,11 @@
 #include <math.h>
+#include <time.h>
+
+#ifdef __unix__
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#endif
 
 #include "debug.h"
 #include "graph.h"
@@ -17,7 +24,7 @@ static void usage(FILE *stream) {
 	  "  -n P	Find the best P paths (default: 100)\n"
 	  "  -t T	T trials\n"
 	  "  -p S	S\% success probability (default: 99.9)\n"
-	  "  -r [R]	Random seed R (or random if not given) (default: 0)\n"
+	  "  -r [R]	Random seed R (or random if not given) (default: 1)\n"
 	  "  -s	Print only statistics\n"
 	  "  -h	Display this list of options\n"
 	  , stream);
@@ -36,7 +43,6 @@ int main(int argc, char *argv[]) {
     std::size_t num_trials = 0;
     double success_prob = 99.9;
     bool stats_only = false;
-    srand(0);
 
     int c;
     while ((c = getopt(argc, argv, "i:vl:c:n:t:p:r::sh")) != -1) {
@@ -49,10 +55,17 @@ int main(int argc, char *argv[]) {
 	case 't': num_trials = atoi(optarg); break;
 	case 'p': success_prob = atof(optarg); break;
 	case 'r':
-	    if (optarg)
+	    if (optarg) {
+#ifdef __unix__
+		struct timeval tv;
+		gettimeofday(&tv, NULL);
+		srand((unsigned(tv.tv_sec) * unsigned(getpid())) ^ unsigned(tv.tv_usec));
+#else
 		srand(atoi(optarg));
-	    else
+#endif
+	    } else {
 		srand(time(NULL));
+	    }
 	    break;
 	case 's': stats_only = true; break;
 	case 'h': usage(stdout); exit(0); break;

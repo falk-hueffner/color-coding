@@ -412,7 +412,7 @@ void Graph::display_results(int number_results) {
 //-------------------------------------------------------------------------------
 
 void Graph::analyse_graph() {
-    int number_edges=0, max_degree=0, max_comp_size=0, size, size_sum = 0, num_comp = 0;
+    int number_edges=0, max_degree=0, max_comp_size=0, size, num_comp = 0;
     int prob, i, i2, i3, j;
     Numbers_Vec degree_list(31, 0);
     Numbers_Vec probability_list(20, 0);
@@ -432,7 +432,6 @@ void Graph::analyse_graph() {
 	    size=get_comp_size(i, processed_vertices);
 	    if (size < 31) comp_size_list[size]++;
 	    if (max_comp_size < size) max_comp_size = size;
-	    size_sum += size;
 	}
 	
 	pottriads += number_neighbours[i] * (number_neighbours[i] - 1) / 2;
@@ -473,7 +472,7 @@ void Graph::analyse_graph() {
 
     cout << endl << "Number of components: " << num_comp << endl;
     cout << "Average component size: " << (float) number_nodes / num_comp << endl;
-    cout << "Maximal component size: " << max_comp_size << endl << size_sum << endl;
+    cout << "Maximal component size: " << max_comp_size << endl;
    
     cout << endl << "Distribution of the edge-probabilities" << endl;
     cout << "Probability  Number of edges" << endl;

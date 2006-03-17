@@ -38,7 +38,9 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 		   std::size_t path_length, PathSet& paths) {
     std::size_t leaf_size = sizeof (PartialPath);
     Mempool* old_pool = new Mempool();
-    PTree* old_colorsets = new PTree[g.num_vertices()](old_pool, leaf_size);
+    PTree* old_colorsets = new PTree[g.num_vertices()];
+    for (std::size_t i = 0; i < g.num_vertices(); ++i)
+	new (old_colorsets + i) PTree(old_pool, leaf_size);
     PTree::Node* pt_nodes[g.num_vertices()];
     weight weight_threshold = paths.worst_weight();
 
@@ -51,7 +53,9 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
     for (std::size_t l = 0; l < path_length - 1; ++l) {
 	leaf_size += sizeof (vertex);
 	Mempool* new_pool = new Mempool();
-	PTree* new_colorsets = new PTree[g.num_vertices()](new_pool, leaf_size);
+	PTree* new_colorsets = new PTree[g.num_vertices()];
+	for (std::size_t i = 0; i < g.num_vertices(); ++i)
+	    new (new_colorsets + i) PTree(new_pool, leaf_size);
 
 #if 0
 	std::size_t life = 0, dead = 0;

@@ -12,6 +12,7 @@ class PTree {
 public:
     typedef uint32_t key_t;
 
+    PTree() { }
     PTree(Mempool* n_mempool, std::size_t n_leaf_size = 0)
 	: mempool(n_mempool), root(NULL), leaf_size(n_leaf_size) {
 	// ensure alignment

@@ -6,6 +6,8 @@
 #include "ptree.h"
 #include "util.h"
 
+extern std::size_t peak_mem_usage;
+
 struct PartialPath {
     weight w;
     vertex vertices[];
@@ -100,6 +102,9 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 		}
 	    }
 	}
+	std::size_t mem_usage = old_pool->mem_usage() + new_pool->mem_usage();
+	if (mem_usage > peak_mem_usage)
+	    peak_mem_usage = mem_usage;
 	delete[] old_colorsets;
 	delete old_pool;
 	old_colorsets = new_colorsets;

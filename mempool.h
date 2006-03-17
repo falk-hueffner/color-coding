@@ -12,6 +12,7 @@ public:
 	for (std::size_t i = 0; i < chunks.size(); i++)
 	    delete[] chunks[i];
     }
+
     void* alloc(std::size_t n) {
 	assert(n <= CHUNK_SIZE);
 	if (top + n > end) {
@@ -22,6 +23,10 @@ public:
 	void* r = top;
 	top += n;
 	return r;
+    }
+
+    std::size_t mem_usage() {
+	return CHUNK_SIZE * chunks.size() - (end - top);
     }
 
 private:

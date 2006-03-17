@@ -5,7 +5,7 @@
 #include "util.h"
 #include "find_path.h"
 
-using namespace std;
+std::size_t peak_mem_usage;
 
 static void usage(FILE *stream) {
     fputs("colorcode: Find most probable path in a graph\n"
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 				  num_paths);
     double stop = timestamp();
     if (stats_only) {
-	printf("%15.2f %12.8f %12.8f\n", stop - start, paths.best_weight(), paths.worst_weight());
+	printf("%15.2f %6d %12.8f %12.8f\n", stop - start, peak_mem_usage / 1024 / 1024, paths.best_weight(), paths.worst_weight());
     } else {
 	for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {
 	    std::cout << i->path_weight();

@@ -4,24 +4,24 @@
 
 void PathSet::add(const Path& p, weight w) {
     if (size() < max_size || w < worst_weight()) {
-	paths.insert(Entry(p, w));
+	entries.insert(Entry(p, w));
     }
     if (size() > max_size)
-	paths.erase(*paths.rbegin());
+	entries.erase(*entries.rbegin());
 }
 
 weight PathSet::worst_weight() {
-    if (paths.empty())
+    if (entries.empty())
 	return 1e10;
     else
-	return paths.rbegin()->w;
+	return entries.rbegin()->path_weight();
 }
 
 weight PathSet::best_weight() {
-    if (paths.empty())
+    if (entries.empty())
 	return -1e10;
     else
-	return paths.begin()->w;
+	return entries.begin()->path_weight();
 }
 
 PathSet::Entry::Entry(const Path& n_p, weight n_w) : p(n_p), w(n_w) {

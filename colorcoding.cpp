@@ -103,9 +103,9 @@ int main(int argc, char *argv[]) {
 	printf("%15.2f %12.8f %12.8f\n", stop - start, paths.best_weight(), paths.worst_weight());
     } else {
 	for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {
-	    std::cout << i->w;
-	    for (std::size_t j = 0; j < i->p.size(); ++j)
-		std::cout << ' ' << g.node_name(i->p[j]);
+	    std::cout << i->path_weight();
+	    for (std::size_t j = 0; j < i->path().size(); ++j)
+		std::cout << ' ' << g.node_name(i->path()[j]);
 	    std::cout << std::endl;
 	}
     }

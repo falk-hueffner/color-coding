@@ -36,7 +36,8 @@ int main(int argc, char *argv[]) {
     std::size_t num_trials = 0;
     double success_prob = 99.9;
     bool stats_only = false;
-    
+    srand(0);
+
     int c;
     while ((c = getopt(argc, argv, "i:vl:c:n:t:p:r::sh")) != -1) {
 	switch (c) {
@@ -52,7 +53,7 @@ int main(int argc, char *argv[]) {
 		srand(atoi(optarg));
 	    else
 		srand(time(NULL));
-	    num_paths = atoi(optarg); break;
+	    break;
 	case 's': stats_only = true; break;
 	case 'h': usage(stdout); exit(0); break;
 	default:  usage(stderr); exit(1); break;
@@ -100,7 +101,8 @@ int main(int argc, char *argv[]) {
 				  num_paths);
     double stop = timestamp();
     if (stats_only) {
-	printf("%15.2f %6d %12.8f %12.8f\n", stop - start, peak_mem_usage / 1024 / 1024, paths.best_weight(), paths.worst_weight());
+	printf("%15.2f %6d %12.8f %12.8f\n", stop - start,
+	       peak_mem_usage / 1024 / 1024, paths.best_weight(), paths.worst_weight());
     } else {
 	for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {
 	    std::cout << i->path_weight();

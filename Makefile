@@ -1,4 +1,4 @@
-CXX	= g++
+CXX	= g++-3.4
 # gcc-arch can be obtained from http://people.debian.org/~falk/gcc-arch
 CXXFLAGS= -O3 $(shell CC=$(CC) gcc-arch) -g -W -Wall -Wno-sign-compare -pipe
 # disable internal consistency checking for some speedup
@@ -13,6 +13,7 @@ OBJS	= \
 	debug.o		\
 	find_path.o	\
 	graph.o		\
+	pathset.o	\
 	ptree.o		\
 	util.o
 

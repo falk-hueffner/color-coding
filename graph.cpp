@@ -412,19 +412,30 @@ void Graph::display_results(int number_results) {
 //-------------------------------------------------------------------------------
 
 void Graph::analyse_graph() {
-    int number_edges=0,max_degree=0,prob,i,i2,i3,j;
+    int number_edges=0, max_degree=0, max_comp_size=0, size, size_sum = 0, num_comp = 0;
+    int prob, i, i2, i3, j;
     Numbers_Vec degree_list(31, 0);
-    Numbers_Vec probability_list(20,0);
+    Numbers_Vec probability_list(20, 0);
+    Numbers_Vec comp_size_list(31, 0);
     vertex vertex2,vertex3;
     int pottriads=0,triadscount=0;
     double clustercoeff;
+    set<vertex> processed_vertices;
     
     for (i = 0; i < number_nodes; i++) {
         number_edges += number_neighbours[i];
 	if (max_degree < number_neighbours[i]) max_degree = number_neighbours[i];
 	if (number_neighbours[i] < 31) degree_list[number_neighbours[i]]++;
-	pottriads += number_neighbours[i] * (number_neighbours[i] - 1) / 2;
 
+	if (processed_vertices.find(i) == processed_vertices.end()) {
+	    num_comp++;
+	    size=get_comp_size(i, processed_vertices);
+	    if (size < 31) comp_size_list[size]++;
+	    if (max_comp_size < size) max_comp_size = size;
+	    size_sum += size;
+	}
+	
+	pottriads += number_neighbours[i] * (number_neighbours[i] - 1) / 2;
 	for (j = 0; j < number_neighbours[i]; j++) {
 	    if (i < neighbours_list[i][j]) {
 	        prob=(int) (exp(-n_weights_list[i][j]) * 20);
@@ -455,6 +466,15 @@ void Graph::analyse_graph() {
     cout << endl << "Average vertex-degree: " << (float) (number_edges * 2) / number_nodes << endl;
     cout << "Maximal vertex-degree: " << max_degree << endl;
 
+    cout << endl << "Size   Number of componente" << endl;
+    for (i = 1; i < 31; i++) {
+        cout << i << "\t\t" << comp_size_list[i] << endl;
+    }
+
+    cout << endl << "Number of components: " << num_comp << endl;
+    cout << "Average component size: " << (float) number_nodes / num_comp << endl;
+    cout << "Maximal component size: " << max_comp_size << endl << size_sum << endl;
+   
     cout << endl << "Distribution of the edge-probabilities" << endl;
     cout << "Probability  Number of edges" << endl;
     for (i = 0; i < 20; i++) {
@@ -462,3 +482,14 @@ void Graph::analyse_graph() {
     }
 }
 
+int Graph::get_comp_size(vertex v, set<vertex> &v_set) {
+    if (v_set.find(v) != v_set.end()) return 0;
+    int i,size = 1;
+    v_set.insert(v);
+
+    for (i = 0; i < number_neighbours[v]; i++) {
+	size += get_comp_size(neighbours_list[v][i], v_set);
+    }
+
+    return size;
+}

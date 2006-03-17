@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <stack>
+#include <set>
 #include <string>
 #include <stdio.h>
 #include <stdint.h>
@@ -106,6 +107,7 @@ public:
 			 int number_iterations, int number_results);
     void display_results(int number_results);
     void analyse_graph();
+    int get_comp_size(vertex v, set<vertex> &v_set);
 };
 
 #endif				// _GRAPH_

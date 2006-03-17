@@ -143,7 +143,8 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 
 PathSet lightest_path(/*const*/ Graph& g, const VertexSet& start_nodes,
 		      std::size_t path_length, std::size_t num_colors,
-		      std::size_t num_trials, std::size_t num_paths) {
+		      std::size_t num_trials, std::size_t num_paths,
+		      std::size_t max_common) {
     weight min_edge_weight = 1e10;
     for (vertex v = 0; v < g.num_vertices(); ++v) {
 	for (std::size_t i = 0; i < g.deg(v); ++i) {
@@ -152,8 +153,9 @@ PathSet lightest_path(/*const*/ Graph& g, const VertexSet& start_nodes,
 		min_edge_weight = edge_weight;
 	}
     }
+    fprintf(stderr, "max_common = %zd\n", max_common);
 
-    PathSet paths(num_paths);
+    PathSet paths(num_paths, max_common);
 
     if (num_colors > path_length) {
 	g.color_nodes(path_length);

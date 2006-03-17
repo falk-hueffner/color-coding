@@ -22,8 +22,9 @@ static void usage(FILE *stream) {
 	  "  -l K       Find paths of length K (default: 8)\n"
 	  "  -c C       Use C colors (default: K)\n"
 	  "  -n P       Find the best P paths (default: 100)\n"
+	  "  -f F       Filter paths with more than F% in common (default: 70)\n"
 	  "  -t T       T trials\n"
-	  "  -p S       S\% success probability (default: 99.9)\n"
+	  "  -p S       S% success probability (default: 99.9)\n"
 	  "  -r [R]     Random seed R (or random if not given) (default: 1)\n"
 	  "  -s         Print only statistics\n"
 	  "  -h         Display this list of options\n"
@@ -40,18 +41,20 @@ int main(int argc, char *argv[]) {
     std::size_t path_length = 8;
     std::size_t num_colors = 0;
     std::size_t num_paths = 100;
+    double filter = 70;
     std::size_t num_trials = 0;
     double success_prob = 99.9;
     bool stats_only = false;
 
     int c;
-    while ((c = getopt(argc, argv, "i:vl:c:n:t:p:r::sh")) != -1) {
+    while ((c = getopt(argc, argv, "i:vl:c:n:f:t:p:r::sh")) != -1) {
 	switch (c) {
 	case 'i': start_vertices_file = optarg; break;
 	case 'v': info.turn_on(); break;
 	case 'l': path_length = atoi(optarg); break;
 	case 'c': num_colors = atoi(optarg); break;
 	case 'n': num_paths = atoi(optarg); break;
+	case 'f': filter = atof(optarg); break;
 	case 't': num_trials = atoi(optarg); break;
 	case 'p': success_prob = atof(optarg); break;
 	case 'r':
@@ -112,10 +115,12 @@ int main(int argc, char *argv[]) {
 	    g.start_nodes.push_back(i);
     }
 
+    std::size_t max_common = int(path_length * (filter / 100));
+
 #if 1
     double start = timestamp();
     PathSet paths = lightest_path(g, g.startnodes(), path_length, num_colors, num_trials,
-				  num_paths);
+				  num_paths, max_common);
     double stop = timestamp();
     if (stats_only) {
 	printf("%15.2f %6d %12.8f %12.8f\n", stop - start,

@@ -2,6 +2,7 @@
 #define PATHSET_H
 
 #include <set>
+#include <vector>
 
 #include "types.h"
 
@@ -13,19 +14,19 @@ public:
 
     std::size_t size() const { return std::min(entries.size(), max_size); }
     bool is_full() const { return entries.size() >= max_size; }
-    void add(const Path& p, weight w);
+    void add(const std::vector<vertex>& p, weight w);
     weight best_weight() const;
     weight worst_weight() const;
     
     class Entry {
 	friend class PathSet;
     public:
-	Entry(const Path& n_p, weight n_w);
+	Entry(const std::vector<vertex>& n_p, weight n_w);
 	bool operator<(const Entry& other) const;
-	const Path& path() const { return p; }
+	const std::vector<vertex>& path() const { return p; }
 	weight path_weight() const { return w; }
     private:
-	Path p;
+	std::vector<vertex> p;
 	weight w;
 	std::set<vertex> path_set;
     };

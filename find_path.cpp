@@ -17,8 +17,8 @@ static PartialPath* find_pp(PTree& t, colorset c) {
     return static_cast<PartialPath*>(t.find_or_insert(c));
 }
 
-void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
-		   const std::vector<bool>& is_end_vertex,		      
+void dynprog_trial(const Graph& g, const std::vector<vertex>& start_vertices,
+		   const std::vector<bool>& is_end_vertex,
 		   std::size_t path_length, PathSet& paths,
 		   weight min_edge_weight) {
     std::size_t leaf_size = sizeof (PartialPath);
@@ -28,8 +28,8 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 	new (old_colorsets + i) PTree(old_pool, leaf_size);
     PTree::Node* pt_nodes[g.num_vertices()];
 
-    for (std::size_t i = 0; i < start_nodes.size(); ++i) {
-	vertex s = start_nodes[i];
+    for (std::size_t i = 0; i < start_vertices.size(); ++i) {
+	vertex s = start_vertices[i];
 	PartialPath *pp = find_pp(old_colorsets[s], g.color_set(s));
 	pp->w = 0;
     }
@@ -111,7 +111,7 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
 	    if (pt_node->is_leaf) {
 		PartialPath* pp = static_cast<PartialPath*>(pt_node->data());
 		if (pp->w < paths.worst_weight()) {
-		    Path p(pp->vertices, pp->vertices + path_length - 1);
+		    std::vector<vertex> p(pp->vertices, pp->vertices + path_length - 1);
 		    p.push_back(v);
 		    paths.add(p, pp->w);
 		}
@@ -125,7 +125,7 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
     delete old_pool;
 }
 
-PathSet lightest_path(const Graph& g_in, const VertexSet& start_vertices,
+PathSet lightest_path(const Graph& g_in, const std::vector<vertex>& start_vertices,
 		      const std::vector<bool>& is_end_vertex,		      
 		      std::size_t path_length, std::size_t num_colors,
 		      std::size_t num_trials, std::size_t num_paths,

@@ -141,32 +141,55 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
     delete old_pool;
 }
 
-PathSet lightest_path(/*const*/ Graph& g, const VertexSet& start_nodes,
+PathSet lightest_path(const Graph& g_in, const VertexSet& start_nodes,
 		      std::size_t path_length, std::size_t num_colors,
 		      std::size_t num_trials, std::size_t num_paths,
-		      std::size_t max_common) {
-    weight min_edge_weight = 1e10;
-    for (vertex v = 0; v < g.num_vertices(); ++v) {
-	for (std::size_t i = 0; i < g.deg(v); ++i) {
-	    weight edge_weight = g.edge_weight(v, i);
-	    if (edge_weight < min_edge_weight)
-		min_edge_weight = edge_weight;
+		      std::size_t max_common, std::size_t preheat_trials) {
+    std::vector<weight> edge_weights;
+    for (vertex v = 0; v < g_in.num_vertices(); ++v)
+	for (std::size_t i = 0; i < g_in.deg(v); ++i)
+	    edge_weights.push_back(g_in.edge_weight(v, i));
+    std::sort(edge_weights.begin(), edge_weights.end());
+    weight min_edge_weight = edge_weights.front();
+
+    PathSet paths(num_paths, max_common);
+    double last_printed = -1;
+    for (std::size_t i = 1; i <= preheat_trials; ++i) {
+	Graph g = g_in;
+	if (i < preheat_trials) {
+	    g.clear_edges();
+	    weight max_edge_weight =
+		edge_weights[i * (double(edge_weights.size()) / preheat_trials)];
+	    for (vertex v = 0; v < g_in.num_vertices(); ++v) {
+		for (std::size_t i = 0; i < g_in.deg(v); ++i) {
+		    vertex w = g_in.neighbor(v, i);
+		    weight edge_weight = g_in.edge_weight(v, i);
+		    if (edge_weight <= max_edge_weight)
+			g.connect(v, w, edge_weight);
+		}
+	    }
+	}
+	g.color_nodes(path_length);
+	dynprog_trial(g, start_nodes, path_length, paths, min_edge_weight);
+	if (timestamp() - last_printed > 1) {
+	    info << "Pre-heating " << i << "/" << preheat_trials
+		 << " m=" << g.num_edges()
+		 << " paths="  << paths.size()
+		 << " best " << paths.best_weight()
+		 << " worst " << paths.worst_weight()
+		 << " peak mem " << peak_mem_usage / 1024 / 1024 << 'M'
+		 << std::endl;
+	    last_printed = timestamp();
 	}
     }
 
-    PathSet paths(num_paths, max_common);
-
-    if (num_colors > path_length) {
-	g.color_nodes(path_length);
-	dynprog_trial(g, start_nodes, path_length, paths, min_edge_weight);
-    }
-    
-    double last_printed = 0;
+    Graph g = g_in;
     for (std::size_t i = 0; i < num_trials; ++i) {
 	if (timestamp() - last_printed > 1) {
 	    info << "Trial " << i << "/" << num_trials << ' '
 		 << paths.size( ) << " paths; best " << paths.best_weight()
 		 << " worst " << paths.worst_weight()
+		 << " peak mem " << peak_mem_usage / 1024 / 1024 << "M "
 		 << std::endl;
 	    last_printed = timestamp();
 	}

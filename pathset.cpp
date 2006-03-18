@@ -17,36 +17,50 @@ std::size_t intersection_size(std::set<T> s1, std::set<T> s2) {
     return count.count;
 }
 
+PathSet::it PathSet::end()   const {
+    if (!is_full()) {
+	return entries.end();
+    } else {
+	PathSet::it i = entries.begin();
+	for (std::size_t j = 0; j < max_size; j++, i++) { }
+	return i;
+    }
+}
+
 void PathSet::add(const Path& p, weight w) {
-    if (size() >= max_size && w >= worst_weight())
+    if (is_full() && w >= worst_weight())
 	return;
 
     Entry entry(p, w);
-    for (it i = begin(); i != end(); ) {
-	if (intersection_size(entry.path_set, i->path_set) > max_common) {
-	    if (w < i->w)
-		entries.erase(i++);
-	    else
+    for (it i = entries.begin(); i != entries.end(); ++i)
+	if (intersection_size(entry.path_set, i->path_set) > max_common)
+	    if (w >= i->w)
 		return;
-	} else {
+
+    for (it i = entries.begin(); i != entries.end(); )
+	if (intersection_size(entry.path_set, i->path_set) > max_common)
+	    entries.erase(i++);
+	else 
 	    ++i;
-	}
-    }
+
     entries.insert(entry);
-    if (size() > max_size)
+    if (entries.size() > max_size + EXTRA_KEEP)
 	entries.erase(*entries.rbegin());
 }
 
-weight PathSet::worst_weight() {
-    if (entries.empty())
+weight PathSet::worst_weight() const {
+    if (!is_full())
 	return 1e10;
-    else
-	return entries.rbegin()->path_weight();
+    else {
+	PathSet::it i = entries.begin();
+	for (std::size_t j = 1; j < max_size; j++, i++) { }
+	return i->path_weight();
+    }
 }
 
-weight PathSet::best_weight() {
+weight PathSet::best_weight() const {
     if (entries.empty())
-	return -1e10;
+	return 1e10;
     else
 	return entries.begin()->path_weight();
 }

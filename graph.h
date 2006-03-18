@@ -69,6 +69,12 @@ private:
 public:
     Vertices_Vec start_nodes;
     std::size_t num_vertices() const { return number_nodes; }
+    std::size_t num_edges() const {
+	std::size_t num = 0;
+	for (std::size_t v = 0; v < num_vertices(); ++v)
+	    num += deg(v);
+	return num / 2;
+    }
     std::size_t deg(vertex v) const {
 	assert(v < num_vertices());
 	return number_neighbours[v];
@@ -96,6 +102,24 @@ public:
 	return n_weights_list[v][i];
     }
     const Vertices_Vec& startnodes() const { return start_nodes; }
+    void connect(vertex u, vertex v, weight w) {
+	assert(u < num_vertices());
+	assert(v < num_vertices());
+	// FIXME check for double edges
+	neighbours_list[u].push_back(v);
+	neighbours_list[v].push_back(u);
+	n_weights_list[u].push_back(w);
+	n_weights_list[v].push_back(w);
+	++number_neighbours[u];
+	++number_neighbours[v];
+    }
+    void clear_edges() {
+	for (std::size_t v = 0; v < num_vertices(); ++v) {
+	    number_neighbours[v] = 0;
+	    neighbours_list[v].clear();
+	    n_weights_list[v].clear();
+	}
+    }
 
     void read_graph(FILE* stream);
     void read_start_nodes(FILE* stream);

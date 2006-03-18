@@ -7,14 +7,15 @@
 
 class PathSet {
 public:
-    PathSet(std::size_t n_max_size = 10, std::size_t n_max_common = 7)
+    PathSet(std::size_t n_max_size, std::size_t n_max_common)
 	: max_size(n_max_size),
 	  max_common(n_max_common) { }
 
-    std::size_t size() { return entries.size(); }
+    std::size_t size() const { return std::min(entries.size(), max_size); }
+    bool is_full() const { return entries.size() >= max_size; }
     void add(const Path& p, weight w);
-    weight best_weight();
-    weight worst_weight();
+    weight best_weight() const;
+    weight worst_weight() const;
     
     class Entry {
 	friend class PathSet;
@@ -32,11 +33,12 @@ public:
     typedef std::set<Entry>::const_iterator it;
 
     it begin() const { return entries.begin(); }
-    it end()   const { return entries.end();   }
+    it end()   const;
 
 private:
     std::size_t max_size, max_common;
     std::set<Entry> entries;
+    enum { EXTRA_KEEP = 500 };
 };
 
 #endif // PATHSET_H

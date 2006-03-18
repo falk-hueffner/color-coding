@@ -25,6 +25,7 @@ static void usage(FILE *stream) {
 	  "  -f F       Filter paths with more than F% in common (default: 70)\n"
 	  "  -t T       T trials\n"
 	  "  -p S       S% success probability (default: 99.9)\n"
+	  "  -x X       X pre-heating trials (default: 50)\n"
 	  "  -r [R]     Random seed R (or random if not given) (default: 1)\n"
 	  "  -s         Print only statistics\n"
 	  "  -h         Display this list of options\n"
@@ -44,10 +45,11 @@ int main(int argc, char *argv[]) {
     double filter = 70;
     std::size_t num_trials = 0;
     double success_prob = 99.9;
+    std::size_t preheat_trials = 50;
     bool stats_only = false;
 
     int c;
-    while ((c = getopt(argc, argv, "i:vl:c:n:f:t:p:r::sh")) != -1) {
+    while ((c = getopt(argc, argv, "i:vl:c:n:f:t:p:x:r::sh")) != -1) {
 	switch (c) {
 	case 'i': start_vertices_file = optarg; break;
 	case 'v': info.turn_on(); break;
@@ -57,6 +59,7 @@ int main(int argc, char *argv[]) {
 	case 'f': filter = atof(optarg); break;
 	case 't': num_trials = atoi(optarg); break;
 	case 'p': success_prob = atof(optarg); break;
+	case 'x': preheat_trials = atoi(optarg); break;
 	case 'r':
 	    if (optarg) {
 		srand(atoi(optarg));
@@ -119,7 +122,7 @@ int main(int argc, char *argv[]) {
 #if 1
     double start = timestamp();
     PathSet paths = lightest_path(g, g.startnodes(), path_length, num_colors, num_trials,
-				  num_paths, max_common);
+				  num_paths, max_common, preheat_trials);
     double stop = timestamp();
     if (stats_only) {
 	printf("%15.2f %6d %12.8f %12.8f\n", stop - start,

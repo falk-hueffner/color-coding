@@ -17,26 +17,8 @@ static PartialPath* find_pp(PTree& t, colorset c) {
     return static_cast<PartialPath*>(t.find_or_insert(c));
 }
 
-static void debug_colorset(colorset c) {
-    debug << '{';
-    std::size_t i = 0;
-    colorset m = 1;
-    bool did_print = false;
-    while (c) {
-	if (m & c) {
-	    if (did_print)
-		debug << ',';
-	    debug << i;
-	    did_print = true;
-	}
-	c &= ~m;
-	m <<= 1;
-	i++;
-    }
-    debug << '}';
-}
-
 void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
+		   const std::vector<bool>& is_end_vertex,		      
 		   std::size_t path_length, PathSet& paths,
 		   weight min_edge_weight) {
     std::size_t leaf_size = sizeof (PartialPath);
@@ -119,6 +101,8 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
     }
     
     for (vertex v = 0; v < g.num_vertices(); ++v) {
+	if (!is_end_vertex[v])
+	    continue;
 	std::size_t num_pt_nodes = 0;
 	if (old_colorsets[v].root)
 	    pt_nodes[num_pt_nodes++] = old_colorsets[v].root;
@@ -141,7 +125,8 @@ void dynprog_trial(const Graph& g, const VertexSet& start_nodes,
     delete old_pool;
 }
 
-PathSet lightest_path(const Graph& g_in, const VertexSet& start_nodes,
+PathSet lightest_path(const Graph& g_in, const VertexSet& start_vertices,
+		      const std::vector<bool>& is_end_vertex,		      
 		      std::size_t path_length, std::size_t num_colors,
 		      std::size_t num_trials, std::size_t num_paths,
 		      std::size_t max_common, std::size_t preheat_trials) {
@@ -170,7 +155,7 @@ PathSet lightest_path(const Graph& g_in, const VertexSet& start_nodes,
 	    }
 	}
 	g.color_nodes(path_length);
-	dynprog_trial(g, start_nodes, path_length, paths, min_edge_weight);
+	dynprog_trial(g, start_vertices, is_end_vertex, path_length, paths, min_edge_weight);
 	if (timestamp() - last_printed > 1) {
 	    info << "Pre-heating " << i << "/" << preheat_trials
 		 << " m=" << g.num_edges()
@@ -194,7 +179,28 @@ PathSet lightest_path(const Graph& g_in, const VertexSet& start_nodes,
 	    last_printed = timestamp();
 	}
 	g.color_nodes(num_colors);
-	dynprog_trial(g, start_nodes, path_length, paths, min_edge_weight);
+	dynprog_trial(g, start_vertices, is_end_vertex, path_length, paths, min_edge_weight);
     }
     return paths;
 }
+
+#if 0
+static void debug_colorset(colorset c) {
+    debug << '{';
+    std::size_t i = 0;
+    colorset m = 1;
+    bool did_print = false;
+    while (c) {
+	if (m & c) {
+	    if (did_print)
+		debug << ',';
+	    debug << i;
+	    did_print = true;
+	}
+	c &= ~m;
+	m <<= 1;
+	i++;
+    }
+    debug << '}';
+}
+#endif

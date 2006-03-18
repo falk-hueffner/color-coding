@@ -1,3 +1,8 @@
+#include <fstream>
+#include <iostream>
+#include <set>
+#include <string>
+
 #include <math.h>
 #include <time.h>
 
@@ -14,22 +19,21 @@
 
 std::size_t peak_mem_usage;
 
-static void usage(FILE *stream) {
-    fputs("colorcode: Find most probable path in a graph\n"
-	  "  stdin      Input graph\n"
-	  "  -i FILE    Read start vertices from FILE\n"
-	  "  -v         Print progress to stderr\n"
-	  "  -l K       Find paths of length K (default: 8)\n"
-	  "  -c C       Use C colors (default: K)\n"
-	  "  -n P       Find the best P paths (default: 100)\n"
-	  "  -f F       Filter paths with more than F% in common (default: 70)\n"
-	  "  -t T       T trials\n"
-	  "  -p S       S% success probability (default: 99.9)\n"
-	  "  -x X       X pre-heating trials (default: 50)\n"
-	  "  -r [R]     Random seed R (or random if not given) (default: 1)\n"
-	  "  -s         Print only statistics\n"
-	  "  -h         Display this list of options\n"
-	  , stream);
+static void usage(std::ostream& out) {
+    out << "colorcode: Find most probable path in a graph\n"
+	   "  stdin      Input graph\n"
+	   "  -i FILE    Read start vertices from FILE\n"
+	   "  -v         Print progress to stderr\n"
+	   "  -l K       Find paths of length K (default: 8)\n"
+	   "  -c C       Use C colors (default: K)\n"
+	   "  -n P       Find the best P paths (default: 100)\n"
+	   "  -f F       Filter paths with more than F% in common (default: 70)\n"
+	   "  -t T       T trials\n"
+	   "  -p S       S% success probability (default: 99.9)\n"
+	   "  -x X       X pre-heating trials (default: 50)\n"
+	   "  -r [R]     Random seed R (or random if not given) (default: 1)\n"
+	   "  -s         Print only statistics\n"
+	   "  -h         Display this list of options\n";
 }
 
 // returns ln(n!)
@@ -37,8 +41,45 @@ static double lfact(std::size_t n) {
     return lgamma(n + 1);
 }
 
+std::set<vertex> read_vertex_file(const std::string& file, const Graph& g) {
+    std::ifstream in(file.c_str());
+    if (!in) {
+	std::cerr << "error: cannot open \"" << file << "\"\n";
+	exit(1);
+    }
+    std::string line;
+    std::size_t lineno = 0;
+    std::set<vertex> vertices;
+    while (std::getline(in, line)) {
+	++lineno;
+	std::string::size_type p = line.find('#');
+	if (p != std::string::npos)
+	    line = line.substr(0, p);
+	line = trim(line);
+	if (line.empty())
+	    continue;
+	if (line.find_first_of(WHITESPACE) != std::string::npos) {
+	    std::cerr << file << ':' << lineno << ": error: syntax error\n";
+	    exit(1);
+	}
+	const vertex* pv = g.lookup_vertex(line);
+	if (!pv) {
+	    std::cerr << file << ':' << lineno << ": error: unknown vertex '"
+		      << line << "'\n";
+	    exit(1);
+	}
+	if (vertices.find(*pv) != vertices.end()) {
+	    std::cerr << file << ':' << lineno << ": warning: ignoring duplicate vertex '"
+		      << line << "'\n";
+	} else {
+	    vertices.insert(*pv);
+	}
+    }
+    return vertices;
+}
+
 int main(int argc, char *argv[]) {
-    const char *start_vertices_file = NULL;
+    std::string start_vertices_file, end_vertices_file;
     std::size_t path_length = 8;
     std::size_t num_colors = 0;
     std::size_t num_paths = 100;
@@ -49,10 +90,10 @@ int main(int argc, char *argv[]) {
     bool stats_only = false;
 
     int c;
-    while ((c = getopt(argc, argv, "i:vl:c:n:f:t:p:x:r::sh")) != -1) {
+    while ((c = getopt(argc, argv, "i:e:l:c:n:f:t:p:x:r::vsh")) != -1) {
 	switch (c) {
 	case 'i': start_vertices_file = optarg; break;
-	case 'v': info.turn_on(); break;
+	case 'e': end_vertices_file = optarg; break;
 	case 'l': path_length = atoi(optarg); break;
 	case 'c': num_colors = atoi(optarg); break;
 	case 'n': num_paths = atoi(optarg); break;
@@ -73,28 +114,29 @@ int main(int argc, char *argv[]) {
 #endif
 	    }
 	    break;
+	case 'v': info.turn_on(); break;
 	case 's': stats_only = true; break;
-	case 'h': usage(stdout); exit(0); break;
-	default:  usage(stderr); exit(1); break;
+	case 'h': usage(std::cout); exit(0); break;
+	default:  usage(std::cerr); exit(1); break;
 	}
     }
     if (optind < argc) {
-	usage(stderr);
+	usage(std::cerr);
 	exit(1);
     }
 
     if (path_length >= 31) {
-	fprintf(stderr, "error: path length must be < 31\n");
+	std::cerr << "error: path length must be < 31\n";
 	exit(1);
     }
     if (num_colors == 0)
 	num_colors = path_length;
     if (num_colors < path_length) {
-	fprintf(stderr, "error: need at least as many colors as the path length\n");
+	std::cerr << "error: need at least as many colors as the path length\n";
 	exit(1);
     }
     if (num_colors >= 31) {
-	fprintf(stderr, "error: number of colors must be < 31\n");
+	std::cerr << "error: number of colors must be < 31\n";
 	exit(1);
     }
 
@@ -108,21 +150,33 @@ int main(int argc, char *argv[]) {
 	num_trials = std::size_t(ceil(log1p(-success_prob / 100) / log1p(-colorful_prob)));
     }
 
-    if (start_vertices_file) {
-	FILE* file = fopen(start_vertices_file, "r");
-	g.read_start_nodes(file);
-	fclose(file);
+    std::vector<vertex> start_vertices;
+    if (start_vertices_file != "") {
+	std::set<vertex> start_vertices_set = read_vertex_file(start_vertices_file, g);
+	start_vertices = std::vector<vertex>(start_vertices_set.begin(),
+					     start_vertices_set.end());
     } else {
 	for (std::size_t i = 0; i < g.num_vertices(); ++i)
-	    g.start_nodes.push_back(i);
+	    start_vertices.push_back(i);
+    }
+
+    std::vector<bool> is_end_vertex(g.num_vertices());
+    if (end_vertices_file != "") {
+	std::set<vertex> end_vertices = read_vertex_file(end_vertices_file, g);
+	for (std::set<vertex>::const_iterator it = end_vertices.begin();
+	     it != end_vertices.end(); ++it)
+	    is_end_vertex[*it] = true;
+    } else {
+	for (std::size_t i = 0; i < g.num_vertices(); ++i)
+	    is_end_vertex[i] = true;
     }
 
     std::size_t max_common = int(path_length * (filter / 100));
 
 #if 1
     double start = timestamp();
-    PathSet paths = lightest_path(g, g.startnodes(), path_length, num_colors, num_trials,
-				  num_paths, max_common, preheat_trials);
+    PathSet paths = lightest_path(g, start_vertices, is_end_vertex, path_length, num_colors,
+				  num_trials, num_paths, max_common, preheat_trials);
     double stop = timestamp();
     if (stats_only) {
 	printf("%15.2f %6d %12.8f %12.8f\n", stop - start,

@@ -120,6 +120,13 @@ public:
 	    n_weights_list[v].clear();
 	}
     }
+    const vertex* lookup_vertex(const std::string& n) const {
+	std::map<std::string, vertex>::const_iterator pv = node_list1.find(n);
+	if (pv != node_list1.end())
+	    return &pv->second;
+	else
+	    return NULL;
+    }
 
     void read_graph(FILE* stream);
     void read_start_nodes(FILE* stream);

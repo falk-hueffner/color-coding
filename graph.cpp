@@ -115,8 +115,6 @@ void Graph::read_start_nodes(FILE* stream) {
 	    start_nodes.push_back(n1i);
 	}
     }
-    fclose(stream);
-
 }
 
 //-------------------------------------------------------------------------------

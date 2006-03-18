@@ -28,8 +28,8 @@ public:
 //private:
     // little-endian patricia trees
     struct Leaf {
-	bool  is_leaf;		// 1 in leafs, 0 in branches
-	key_t key;		// key
+	bool  is_leaf	:  1;	// 1 in leafs, 0 in branches
+	key_t key	: 31;	// key
     };
     struct Node : public Leaf {
 	key_t branch_bit;	// as a power of two

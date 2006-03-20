@@ -21,11 +21,11 @@ void dynprog_trial(const Graph& g, const std::vector<vertex>& start_vertices,
 		   const std::vector<bool>& is_end_vertex,
 		   std::size_t path_length, PathSet& paths,
 		   weight min_edge_weight) {
-    std::size_t leaf_size = sizeof (PartialPath);
     Mempool* old_pool = new Mempool();
     PTree* old_colorsets = new PTree[g.num_vertices()];
+    std::size_t old_path_size = 0;
     for (std::size_t i = 0; i < g.num_vertices(); ++i)
-	new (old_colorsets + i) PTree(old_pool, leaf_size);
+	new (old_colorsets + i) PTree(old_pool, sizeof (PartialPath) + old_path_size);
     PTree::Node* pt_nodes[g.num_vertices()];
 
     for (std::size_t i = 0; i < start_vertices.size(); ++i) {
@@ -37,12 +37,11 @@ void dynprog_trial(const Graph& g, const std::vector<vertex>& start_vertices,
     for (std::size_t l = 0; l < path_length - 1; ++l) {
 	weight weight_threshold =
 	    paths.worst_weight() - ((path_length - 1) - l - 1) * min_edge_weight;
-	leaf_size += sizeof (vertex);
 	Mempool* new_pool = new Mempool();
 	PTree* new_colorsets = new PTree[g.num_vertices()];
+	std::size_t new_path_size = (l + 1) * sizeof (vertex);
 	for (std::size_t i = 0; i < g.num_vertices(); ++i)
-	    new (new_colorsets + i) PTree(new_pool, leaf_size);
-
+	    new (new_colorsets + i) PTree(new_pool, sizeof (PartialPath) + new_path_size);
 #if 0
 	std::size_t life = 0, dead = 0;
 	for (vertex v = 0; v < g.num_vertices(); ++v) {
@@ -53,7 +52,6 @@ void dynprog_trial(const Graph& g, const std::vector<vertex>& start_vertices,
 	}
 	std::cerr << "l = " << l << " life = " << life << " dead = " << dead << endl;
 #endif
-	
 	for (vertex v = 0; v < g.num_vertices(); ++v) {
 	    if (!old_colorsets[v].root)
 		continue;
@@ -75,7 +73,7 @@ void dynprog_trial(const Graph& g, const std::vector<vertex>& start_vertices,
 							  pt_node->key | w_color);
 			    if (new_weight < new_pp->w) {
 				new_pp->w = new_weight;
-				memcpy(new_pp->vertices, old_pp->vertices, l * sizeof (vertex));
+				memcpy(new_pp->vertices, old_pp->vertices, old_path_size);
 				new_pp->vertices[l] = v;
 			    }
 			}
@@ -98,6 +96,7 @@ void dynprog_trial(const Graph& g, const std::vector<vertex>& start_vertices,
 	delete old_pool;
 	old_colorsets = new_colorsets;
 	old_pool = new_pool;
+	old_path_size = new_path_size;
     }
     
     for (vertex v = 0; v < g.num_vertices(); ++v) {

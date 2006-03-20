@@ -411,19 +411,21 @@ void Graph::display_results(int number_results) {
 
 void Graph::analyse_graph() {
     int number_edges=0, max_degree=0, max_comp_size=0, size, num_comp = 0;
-    int prob, i, i2, i3, j;
-    Numbers_Vec degree_list(31, 0);
+    int i, i2, i3, j, deg_list_length = 101;
+    Numbers_Vec degree_list(deg_list_length, 0);
     Numbers_Vec probability_list(20, 0);
     Numbers_Vec comp_size_list(31, 0);
+    Weights_Vec degree_prob_list(deg_list_length, 0);
     vertex vertex2,vertex3;
     int pottriads=0,triadscount=0;
     double clustercoeff;
+    float prob, prob_sum;
     set<vertex> processed_vertices;
     
     for (i = 0; i < number_nodes; i++) {
         number_edges += number_neighbours[i];
 	if (max_degree < number_neighbours[i]) max_degree = number_neighbours[i];
-	if (number_neighbours[i] < 31) degree_list[number_neighbours[i]]++;
+	if (number_neighbours[i] < deg_list_length) degree_list[number_neighbours[i]]++;
 
 	if (processed_vertices.find(i) == processed_vertices.end()) {
 	    num_comp++;
@@ -433,10 +435,12 @@ void Graph::analyse_graph() {
 	}
 	
 	pottriads += number_neighbours[i] * (number_neighbours[i] - 1) / 2;
+	prob_sum = 0;
 	for (j = 0; j < number_neighbours[i]; j++) {
+	    prob = exp(-n_weights_list[i][j]);
+	    prob_sum += prob;
 	    if (i < neighbours_list[i][j]) {
-	        prob=(int) (exp(-n_weights_list[i][j]) * 20);
-		probability_list[prob]++;
+	        probability_list[(int)(prob * 20)]++;
 	    }
 	    vertex2 = neighbours_list[i][j];
 	    for (i2 = 0; i2 < number_neighbours[vertex2]; i2++) {
@@ -447,6 +451,8 @@ void Graph::analyse_graph() {
 	    }
 	    
 	}
+	if (number_neighbours[i] < deg_list_length) 
+	    degree_prob_list[number_neighbours[i]] += prob_sum / number_neighbours[i];
     }
     clustercoeff = ((double) triadscount / (2 * ((double) pottriads)));
     number_edges /= 2;
@@ -455,9 +461,10 @@ void Graph::analyse_graph() {
     cout << "Number of edges: " << number_edges << endl;
     cout << endl << "Cluster coefficient: " << clustercoeff << endl;
 
-    cout << endl << "Degree   Number of vertices" << endl;
-    for (i = 1; i < 31; i++) {
-        cout << i << "\t\t" << degree_list[i] << endl;
+    cout << endl << "Degree   Number of vertices   Average edge probability" << endl;
+    for (i = 1; i < deg_list_length; i++) {
+        cout << i << "\t\t" << degree_list[i] << "\t\t" 
+	     << degree_prob_list[i] / degree_list[i]<< endl;
     }
 
     cout << endl << "Average vertex-degree: " << (float) (number_edges * 2) / number_nodes << endl;
@@ -478,6 +485,15 @@ void Graph::analyse_graph() {
         cout << i * 0.05 << " .. " << (i + 1) * 0.05 << "\t" <<  probability_list[i] << endl;
     }
 }
+
+//-------------------------------------------------------------------------------
+// Get Comp Size
+// -> Recursive function to compute component size 
+// 
+// Inputparameter: vertex
+//		   v_set    ->  set of the vertices, which are allready processed
+// Returnparamter: size of the componentpart
+//-------------------------------------------------------------------------------
 
 int Graph::get_comp_size(vertex v, set<vertex> &v_set) {
     if (v_set.find(v) != v_set.end()) return 0;

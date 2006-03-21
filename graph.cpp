@@ -9,7 +9,7 @@ std::size_t Graph::num_edges() const {
     return num / 2;
 }
 
-const std::string& Graph::vertex_name(vertex_t u) {
+const std::string& Graph::vertex_name(vertex_t u) const {
      assert(u < num_vertices());
      return m_vertex_names[u];
 }
@@ -62,4 +62,31 @@ Graph::Graph(std::istream& in) {
 	}
 	connect(v[0], v[1], atof(fields[2].c_str()));
     }
+}
+
+Graph Graph::induced_subgraph(const std::vector<vertex_t>& vertices) {
+    Graph g = *this;
+    g.clear_edges();
+    std::vector<bool> is_contained(num_vertices());
+    for (std::size_t i = 0; i < vertices.size(); ++i)
+	is_contained[vertices[i]] = true;
+
+    for (vertex_t u = 0; u < num_vertices(); ++u)
+	if (is_contained[u])
+	    for (Graph::neighbor_it n = neighbors_begin(u); n != neighbors_end(u); ++n)
+		if (u < n->neighbor && is_contained[n->neighbor])
+		    g.connect(u, n->neighbor, n->weight);
+
+    return g;
+}
+
+std::ostream& operator<<(std::ostream& out, const Graph& g) {
+    for (vertex_t u = 0; u < g.num_vertices(); ++u)
+	for (Graph::neighbor_it n = g.neighbors_begin(u); n != g.neighbors_end(u); ++n)
+	    if (u < n->neighbor)
+		out << g.vertex_name(u) << ' '
+		    << g.vertex_name(n->neighbor) << ' '
+		    << n->weight << std::endl;
+
+    return out;
 }

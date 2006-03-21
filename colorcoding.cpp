@@ -15,6 +15,7 @@
 #include "debug.h"
 #include "find_path.h"
 #include "graph.h"
+#include "mst.h"
 #include "problem.h"
 #include "util.h"
 
@@ -201,6 +202,16 @@ int main(int argc, char *argv[]) {
 	    for (std::size_t j = 0; j < i->path().size(); ++j)
 		std::cout << ' ' << g.vertex_name(i->path()[j]);
 	    std::cout << std::endl;
+#if 0
+	    if (problem.find_trees) {
+		Graph h = g.induced_subgraph(i->path());
+		std::cout << h.num_vertices() << std::endl;
+		std::cout << h.num_edges() << std::endl;
+		std::cout << h << std::endl;
+		Graph t = mst(h);
+		std::cout << t << std::endl;
+	    }
+#endif
 	}
     }
 

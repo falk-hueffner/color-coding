@@ -13,6 +13,7 @@ OBJS	= \
 	debug.o		\
 	find_path.o	\
 	graph.o		\
+	mst.o		\
 	pathset.o	\
 	ptree.o		\
 	util.o

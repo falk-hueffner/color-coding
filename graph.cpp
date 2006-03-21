@@ -3,13 +3,13 @@
 
 using namespace std;
 
-colorset ins[] = {
+colorset_t ins[] = {
     1, 1 << 1, 1 << 2, 1 << 3, 1 << 4, 1 << 5, 1 << 6, 1 << 7, 1 << 8, 1 << 9, 1 << 10,
     1 << 11, 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16, 1 << 17, 1 << 18, 1 << 19,
     1 << 20, 1 << 21, 1 << 22, 1 << 23, 1 << 24, 1 << 25, 1 << 26, 1 << 27, 1 << 28,
     1 << 29, 1 << 30, 1 << 31    
 };
-colorset del[] = {
+colorset_t del[] = {
     ~1, ~(1 << 1), ~(1 << 2), ~(1 << 3), ~(1 << 4), ~(1 << 5), ~(1 << 6), ~(1 << 7),
     ~(1 << 8), ~(1 << 9), ~(1 << 10), ~(1 << 11), ~(1 << 12), ~(1 << 13), ~(1 << 14),
     ~(1 << 15), ~(1 << 16), ~(1 << 17), ~(1 << 18), ~(1 << 19), ~(1 << 20), ~(1 << 21),
@@ -27,7 +27,7 @@ colorset del[] = {
 
 void Graph::read_graph(FILE* stream) {
     int i, j;
-    vertex n1i, n2i;
+    vertex_t n1i, n2i;
     char n1[10], n2[10];
     name n1s, n2s;
     float w;
@@ -98,7 +98,7 @@ void Graph::read_graph(FILE* stream) {
 
 void Graph::read_start_nodes(FILE* stream) {
     char n1[10];
-    vertex n1i;
+    vertex_t n1i;
     name n1s;
     Names_Vec start_vec;
 
@@ -155,8 +155,8 @@ Weight_Path_Pair Graph::search_path(int path_length, float weight_border)
     Colorset_Vertex_Pair entry;
 
     int i, j, nn;
-    vertex node, actn;
-    weight weight_sum;
+    vertex_t node, actn;
+    weight_t weight_sum;
 
     for (i = 0; i < start_nodes.size(); i++) {
 	paths[0].insert(Matrix_Entry_Pair(Colorset_Vertex_Pair(ins[colors[start_nodes[i]]],
@@ -199,9 +199,9 @@ Weight_Path_Pair Graph::search_path(int path_length, float weight_border)
     Weight_Path_Pair compl_res;
 
     if (result.begin() != result.end()) {
-	colorset act_color = (result.begin()->second).first;
-	vertex act_node = (result.begin()->second).second;
-	vertex last_node = ((paths[path_length - 1].find(result.begin()->second))->second).first;
+	colorset_t act_color = (result.begin()->second).first;
+	vertex_t act_node = (result.begin()->second).second;
+	vertex_t last_node = ((paths[path_length - 1].find(result.begin()->second))->second).first;
 
 	res_path[path_length - 1] = act_node;
 
@@ -242,10 +242,10 @@ Weight_Path_Pair Graph::search_path_array(int path_length, int number_colors,
     stack<Colorset_Vertex_Pair> nodes_to_do[2];
 
     int i, j, nn;
-    colorset pathcolor, new_pathcolor;
-    vertex node, act_node;
+    colorset_t pathcolor, new_pathcolor;
+    vertex_t node, act_node;
     bool act_stack = false;
-    weight weight_sum;
+    weight_t weight_sum;
 
 //   array_weights.assign((int)pow(2,number_colors),VEC_FLT(number_nodes,INT_MAX));
 //   array_last_nodes.assign((int)pow(2,number_colors),VEC_INT(number_nodes,INT_MAX));
@@ -303,10 +303,10 @@ Weight_Path_Pair Graph::search_path_array(int path_length, int number_colors,
     Weight_Path_Pair compl_res;
 
     if (result.begin() != result.end()) {
-	colorset act_color = (result.begin()->second).first;
+	colorset_t act_color = (result.begin()->second).first;
 
 	act_node = (result.begin()->second).second;
-	vertex last_node = array_last_nodes[act_color][act_node];
+	vertex_t last_node = array_last_nodes[act_color][act_node];
 
 	res_path[path_length - 1] = act_node;
 
@@ -341,7 +341,7 @@ void Graph::compute_results(int number_colors, int path_length,
 
     Weight_Path_Pair res;
 
-    weight weight_border = INT_MAX;
+    weight_t weight_border = INT_MAX;
 
     results.clear();
 
@@ -416,11 +416,11 @@ void Graph::analyse_graph() {
     Numbers_Vec probability_list(20, 0);
     Numbers_Vec comp_size_list(31, 0);
     Weights_Vec degree_prob_list(deg_list_length, 0);
-    vertex vertex2,vertex3;
+    vertex_t vertex2,vertex3;
     int pottriads=0,triadscount=0;
     double clustercoeff;
     float prob, prob_sum;
-    set<vertex> processed_vertices;
+    set<vertex_t> processed_vertices;
     
     for (i = 0; i < number_nodes; i++) {
         number_edges += number_neighbours[i];
@@ -495,7 +495,7 @@ void Graph::analyse_graph() {
 // Returnparamter: size of the componentpart
 //-------------------------------------------------------------------------------
 
-int Graph::get_comp_size(vertex v, set<vertex> &v_set) {
+int Graph::get_comp_size(vertex_t v, set<vertex_t> &v_set) {
     if (v_set.find(v) != v_set.end()) return 0;
     int i,size = 1;
     v_set.insert(v);

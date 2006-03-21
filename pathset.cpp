@@ -27,7 +27,7 @@ PathSet::it PathSet::end()   const {
     }
 }
 
-void PathSet::add(const std::vector<vertex>& p, weight w) {
+void PathSet::add(const std::vector<vertex_t>& p, weight_t w) {
     if (is_full() && w >= worst_weight())
 	return;
 
@@ -48,7 +48,7 @@ void PathSet::add(const std::vector<vertex>& p, weight w) {
 	entries.erase(*entries.rbegin());
 }
 
-weight PathSet::worst_weight() const {
+weight_t PathSet::worst_weight() const {
     if (!is_full())
 	return 1e10;
     else {
@@ -58,14 +58,14 @@ weight PathSet::worst_weight() const {
     }
 }
 
-weight PathSet::best_weight() const {
+weight_t PathSet::best_weight() const {
     if (entries.empty())
 	return 1e10;
     else
 	return entries.begin()->path_weight();
 }
 
-PathSet::Entry::Entry(const std::vector<vertex>& n_p, weight n_w)
+PathSet::Entry::Entry(const std::vector<vertex_t>& n_p, weight_t n_w)
     : p(n_p), w(n_w), path_set(p.begin(), p.end()) { }
 
 bool PathSet::Entry::operator<(const Entry& other) const {

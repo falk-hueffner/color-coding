@@ -19,7 +19,7 @@ using namespace std;
 
 typedef string name;
 
-typedef vector<vertex> Vertices_Vec;
+typedef vector<vertex_t> Vertices_Vec;
 typedef vector<int> Colors_Vec;
 typedef vector<int> Numbers_Vec;
 typedef vector<float> Weights_Vec;
@@ -28,27 +28,27 @@ typedef vector<name> Names_Vec;
 typedef vector<Vertices_Vec> Vertices_Array;
 typedef vector<Weights_Vec> Weights_Array;
 
-typedef map<string, vertex> Name_Number_Map;
+typedef map<string, vertex_t> Name_Number_Map;
 typedef Name_Number_Map::iterator Name_Number_Map_Iter;
-typedef pair<string, vertex> Name_Number_Pair;
+typedef pair<string, vertex_t> Name_Number_Pair;
 
-typedef map<vertex, string> Number_Name_Map;
+typedef map<vertex_t, string> Number_Name_Map;
 typedef Number_Name_Map::iterator Number_Name_Map_Iter;
-typedef pair<vertex, string> Number_Name_Pair;
+typedef pair<vertex_t, string> Number_Name_Pair;
 
-typedef pair<colorset, vertex> Colorset_Vertex_Pair;
-typedef pair<vertex, weight> Vertex_Weight_Pair;
+typedef pair<colorset_t, vertex_t> Colorset_Vertex_Pair;
+typedef pair<vertex_t, weight_t> Vertex_Weight_Pair;
 
 typedef pair<Colorset_Vertex_Pair, Vertex_Weight_Pair> Matrix_Entry_Pair;
 typedef map<Colorset_Vertex_Pair, Vertex_Weight_Pair> Matrix_Entry_Map;
 typedef Matrix_Entry_Map::iterator Matrix_Entry_Map_Iter;
 
-typedef pair<weight, Colorset_Vertex_Pair> Weight_Pathvertex_Pair;
-typedef map<weight, Colorset_Vertex_Pair> Weight_Pathvertex_Map;
+typedef pair<weight_t, Colorset_Vertex_Pair> Weight_Pathvertex_Pair;
+typedef map<weight_t, Colorset_Vertex_Pair> Weight_Pathvertex_Map;
 typedef Weight_Pathvertex_Map::iterator Weight_Pathvertex_Map_Iter;
 
-typedef pair<weight, Vertices_Vec> Weight_Path_Pair;
-typedef map<weight, Vertices_Vec> Weight_Path_Map;
+typedef pair<weight_t, Vertices_Vec> Weight_Path_Pair;
+typedef map<weight_t, Vertices_Vec> Weight_Path_Map;
 typedef Weight_Path_Map::iterator Weight_Path_Map_Iter;
 
 class Graph {
@@ -75,34 +75,34 @@ public:
 	    num += deg(v);
 	return num / 2;
     }
-    std::size_t deg(vertex v) const {
+    std::size_t deg(vertex_t v) const {
 	assert(v < num_vertices());
 	return number_neighbours[v];
     }
-    std::size_t color(vertex v) const {
+    std::size_t color(vertex_t v) const {
 	assert(v < num_vertices());
 	return colors[v];
     }
-    colorset color_set(vertex v) const {
+    colorset_t color_set(vertex_t v) const {
 	assert(v < num_vertices());
-	return static_cast<colorset>(1) << colors[v];
+	return static_cast<colorset_t>(1) << colors[v];
     }
-    std::string node_name(vertex v) const {
+    std::string node_name(vertex_t v) const {
 	assert(v < num_vertices());
 	return node_list2.find(v)->second;
     }
-    vertex neighbor(vertex v, std::size_t i) const {
+    vertex_t neighbor(vertex_t v, std::size_t i) const {
 	assert(v < num_vertices());
 	assert(i < deg(v));	
 	return neighbours_list[v][i];
     }
-    weight edge_weight(vertex v, std::size_t i) const {
+    weight_t edge_weight(vertex_t v, std::size_t i) const {
 	assert(v < num_vertices());
 	assert(i < deg(v));	
 	return n_weights_list[v][i];
     }
     const Vertices_Vec& startnodes() const { return start_nodes; }
-    void connect(vertex u, vertex v, weight w) {
+    void connect(vertex_t u, vertex_t v, weight_t w) {
 	assert(u < num_vertices());
 	assert(v < num_vertices());
 	// FIXME check for double edges
@@ -120,8 +120,8 @@ public:
 	    n_weights_list[v].clear();
 	}
     }
-    const vertex* lookup_vertex(const std::string& n) const {
-	std::map<std::string, vertex>::const_iterator pv = node_list1.find(n);
+    const vertex_t* lookup_vertex(const std::string& n) const {
+	std::map<std::string, vertex_t>::const_iterator pv = node_list1.find(n);
 	if (pv != node_list1.end())
 	    return &pv->second;
 	else
@@ -138,7 +138,7 @@ public:
 			 int number_iterations, int number_results);
     void display_results(int number_results);
     void analyse_graph();
-    int get_comp_size(vertex v, set<vertex> &v_set);
+    int get_comp_size(vertex_t v, set<vertex_t> &v_set);
 };
 
 #endif				// _GRAPH_

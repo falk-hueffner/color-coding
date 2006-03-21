@@ -10,21 +10,21 @@
 extern std::size_t peak_mem_usage;
 
 struct PartialPath {
-    weight w;
-    vertex vertices[];
+    weight_t w;
+    vertex_t vertices[];
 };
 
-static PartialPath* find_pp(PTree& t, colorset c) {
+static PartialPath* find_pp(PTree& t, colorset_t c) {
     return static_cast<PartialPath*>(t.find_or_insert(c));
 }
 
 void dynprog_trial(const ColoredGraph& g,
-		   const std::vector<vertex>& start_vertices,
+		   const std::vector<vertex_t>& start_vertices,
 		   const std::vector<bool>& is_end_vertex,
 		   bool find_trees,
 		   std::size_t path_length,
 		   PathSet& paths,
-		   weight min_edge_weight) {
+		   weight_t min_edge_weight) {
     Mempool* old_pool = new Mempool();
     PTree* old_colorsets = new PTree[g.num_vertices()];
     std::size_t old_path_size = 0;
@@ -33,22 +33,22 @@ void dynprog_trial(const ColoredGraph& g,
     PTree::Node* pt_nodes[g.num_vertices()];
 
     for (std::size_t i = 0; i < start_vertices.size(); ++i) {
-	vertex s = start_vertices[i];
+	vertex_t s = start_vertices[i];
 	PartialPath *pp = find_pp(old_colorsets[s], g.color_set(s));
 	pp->w = 0;
     }
 
     for (std::size_t l = 0; l < path_length - 1; ++l) {
-	weight weight_threshold =
+	weight_t weight_threshold =
 	    paths.worst_weight() - ((path_length - 1) - l - 1) * min_edge_weight;
 	Mempool* new_pool = new Mempool();
 	PTree* new_colorsets = new PTree[g.num_vertices()];
-	std::size_t new_path_size = (l + 1) * sizeof (vertex);
+	std::size_t new_path_size = (l + 1) * sizeof (vertex_t);
 	for (std::size_t i = 0; i < g.num_vertices(); ++i)
 	    new (new_colorsets + i) PTree(new_pool, sizeof (PartialPath) + new_path_size);
 #if 0
 	std::size_t life = 0, dead = 0;
-	for (vertex v = 0; v < g.num_vertices(); ++v) {
+	for (vertex_t v = 0; v < g.num_vertices(); ++v) {
 	    if (old_colorsets[v].root)
 		++life;
 	    else
@@ -56,13 +56,13 @@ void dynprog_trial(const ColoredGraph& g,
 	}
 	std::cerr << "l = " << l << " life = " << life << " dead = " << dead << endl;
 #endif
-	for (vertex v = 0; v < g.num_vertices(); ++v) {
+	for (vertex_t v = 0; v < g.num_vertices(); ++v) {
 	    if (!old_colorsets[v].root)
 		continue;
 	    for (std::size_t i = 0; i < g.deg(v); ++i) {
-		vertex w = g.neighbor(v, i);
-		weight edge_weight = g.edge_weight(v, i);
-		colorset w_color = g.color_set(w);
+		vertex_t w = g.neighbor(v, i);
+		weight_t edge_weight = g.edge_weight(v, i);
+		colorset_t w_color = g.color_set(w);
 		std::size_t num_pt_nodes = 0;
 		pt_nodes[num_pt_nodes++] = old_colorsets[v].root;
 		while (num_pt_nodes) {
@@ -71,7 +71,7 @@ void dynprog_trial(const ColoredGraph& g,
 			continue;
 		    if (pt_node->is_leaf) {
 			PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
-			weight new_weight = old_pp->w + edge_weight;
+			weight_t new_weight = old_pp->w + edge_weight;
 			if (new_weight < weight_threshold) {
 			    PartialPath* new_pp = find_pp(new_colorsets[w],
 							  pt_node->key | w_color);
@@ -112,7 +112,7 @@ void dynprog_trial(const ColoredGraph& g,
 	old_path_size = new_path_size;
     }
     
-    for (vertex v = 0; v < g.num_vertices(); ++v) {
+    for (vertex_t v = 0; v < g.num_vertices(); ++v) {
 	if (!is_end_vertex[v])
 	    continue;
 	std::size_t num_pt_nodes = 0;
@@ -123,7 +123,7 @@ void dynprog_trial(const ColoredGraph& g,
 	    if (pt_node->is_leaf) {
 		PartialPath* pp = static_cast<PartialPath*>(pt_node->data());
 		if (pp->w < paths.worst_weight()) {
-		    std::vector<vertex> p(pp->vertices, pp->vertices + path_length - 1);
+		    std::vector<vertex_t> p(pp->vertices, pp->vertices + path_length - 1);
 		    p.push_back(v);
 		    paths.add(p, pp->w);
 		}
@@ -140,12 +140,12 @@ void dynprog_trial(const ColoredGraph& g,
 PathSet lightest_path(const Problem& problem,
 		      std::size_t num_trials, std::size_t num_paths,
 		      std::size_t max_common, std::size_t preheat_trials) {
-    std::vector<weight> edge_weights;
-    for (vertex v = 0; v < problem.g.num_vertices(); ++v)
+    std::vector<weight_t> edge_weights;
+    for (vertex_t v = 0; v < problem.g.num_vertices(); ++v)
 	for (std::size_t i = 0; i < problem.g.deg(v); ++i)
 	    edge_weights.push_back(problem.g.edge_weight(v, i));
     std::sort(edge_weights.begin(), edge_weights.end());
-    weight min_edge_weight = edge_weights.front();
+    weight_t min_edge_weight = edge_weights.front();
 
     PathSet paths(num_paths, max_common);
     double last_printed = -1;
@@ -153,12 +153,12 @@ PathSet lightest_path(const Problem& problem,
 	ColoredGraph g = problem.g;
 	if (i < preheat_trials) {
 	    g.clear_edges();
-	    weight max_edge_weight =
+	    weight_t max_edge_weight =
 		edge_weights[std::size_t(i * (double(edge_weights.size()) / preheat_trials))];
-	    for (vertex v = 0; v < problem.g.num_vertices(); ++v) {
+	    for (vertex_t v = 0; v < problem.g.num_vertices(); ++v) {
 		for (std::size_t i = 0; i < problem.g.deg(v); ++i) {
-		    vertex w = problem.g.neighbor(v, i);
-		    weight edge_weight = problem.g.edge_weight(v, i);
+		    vertex_t w = problem.g.neighbor(v, i);
+		    weight_t edge_weight = problem.g.edge_weight(v, i);
 		    if (edge_weight <= max_edge_weight)
 			g.connect(v, w, edge_weight);
 		}

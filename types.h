@@ -4,10 +4,10 @@
 #include <vector>
 #include <stdint.h>
 
-typedef uint32_t vertex;
-typedef uint32_t colorset;
-typedef unsigned color_t;
-typedef float weight;
+typedef uint32_t   vertex_t;
+typedef float      weight_t;
+typedef unsigned   color_t;
+typedef uint32_t   colorset_t;
 
 #define MAX_COLORS 31		// one bit is used up in PTree::Node
 

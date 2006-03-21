@@ -44,7 +44,7 @@ static double lfact(std::size_t n) {
     return lgamma(n + 1);
 }
 
-std::set<vertex> read_vertex_file(const std::string& file, const Graph& g) {
+std::set<vertex_t> read_vertex_file(const std::string& file, const Graph& g) {
     std::ifstream in(file.c_str());
     if (!in) {
 	std::cerr << "error: cannot open \"" << file << "\"\n";
@@ -52,7 +52,7 @@ std::set<vertex> read_vertex_file(const std::string& file, const Graph& g) {
     }
     std::string line;
     std::size_t lineno = 0;
-    std::set<vertex> vertices;
+    std::set<vertex_t> vertices;
     while (std::getline(in, line)) {
 	++lineno;
 	std::string::size_type p = line.find('#');
@@ -65,7 +65,7 @@ std::set<vertex> read_vertex_file(const std::string& file, const Graph& g) {
 	    std::cerr << file << ':' << lineno << ": error: syntax error\n";
 	    exit(1);
 	}
-	const vertex* pv = g.lookup_vertex(line);
+	const vertex_t* pv = g.lookup_vertex(line);
 	if (!pv) {
 	    std::cerr << file << ':' << lineno << ": error: unknown vertex '"
 		      << line << "'\n";
@@ -159,11 +159,11 @@ int main(int argc, char *argv[]) {
 	num_trials = std::size_t(ceil(log1p(-success_prob / 100) / log1p(-colorful_prob)));
     }
 
-    std::vector<vertex> start_vertices;
+    std::vector<vertex_t> start_vertices;
     if (start_vertices_file != "") {
-	std::set<vertex> start_vertices_set = read_vertex_file(start_vertices_file, g);
-	start_vertices = std::vector<vertex>(start_vertices_set.begin(),
-					     start_vertices_set.end());
+	std::set<vertex_t> start_vertices_set = read_vertex_file(start_vertices_file, g);
+	start_vertices = std::vector<vertex_t>(start_vertices_set.begin(),
+					       start_vertices_set.end());
     } else {
 	for (std::size_t i = 0; i < g.num_vertices(); ++i)
 	    start_vertices.push_back(i);
@@ -171,8 +171,8 @@ int main(int argc, char *argv[]) {
 
     std::vector<bool> is_end_vertex(g.num_vertices());
     if (end_vertices_file != "") {
-	std::set<vertex> end_vertices = read_vertex_file(end_vertices_file, g);
-	for (std::set<vertex>::const_iterator it = end_vertices.begin();
+	std::set<vertex_t> end_vertices = read_vertex_file(end_vertices_file, g);
+	for (std::set<vertex_t>::const_iterator it = end_vertices.begin();
 	     it != end_vertices.end(); ++it)
 	    is_end_vertex[*it] = true;
     } else {

@@ -5,6 +5,7 @@
 #include "find_path.h"
 #include "ptree.h"
 #include "util.h"
+#include "colored_graph.h"
 
 extern std::size_t peak_mem_usage;
 
@@ -17,7 +18,7 @@ static PartialPath* find_pp(PTree& t, colorset c) {
     return static_cast<PartialPath*>(t.find_or_insert(c));
 }
 
-void dynprog_trial(const Graph& g,
+void dynprog_trial(const ColoredGraph& g,
 		   const std::vector<vertex>& start_vertices,
 		   const std::vector<bool>& is_end_vertex,
 		   bool find_trees,
@@ -149,7 +150,7 @@ PathSet lightest_path(const Problem& problem,
     PathSet paths(num_paths, max_common);
     double last_printed = -1;
     for (std::size_t i = 1; i <= preheat_trials; ++i) {
-	Graph g = problem.g;
+	ColoredGraph g = problem.g;
 	if (i < preheat_trials) {
 	    g.clear_edges();
 	    weight max_edge_weight =
@@ -163,7 +164,7 @@ PathSet lightest_path(const Problem& problem,
 		}
 	    }
 	}
-	g.color_nodes(problem.path_length);
+	g.color_randomly(problem.path_length);
 	dynprog_trial(g, problem.start_vertices, problem.is_end_vertex, problem.find_trees,
 		      problem.path_length, paths, min_edge_weight);
 	if (timestamp() - last_printed > 1) {
@@ -178,7 +179,7 @@ PathSet lightest_path(const Problem& problem,
 	}
     }
 
-    Graph g = problem.g;
+    ColoredGraph g = problem.g;
     for (std::size_t i = 0; i < num_trials; ++i) {
 	if (timestamp() - last_printed > 1) {
 	    info << "Trial " << i << "/" << num_trials << ' '
@@ -188,7 +189,7 @@ PathSet lightest_path(const Problem& problem,
 		 << std::endl;
 	    last_printed = timestamp();
 	}
-	g.color_nodes(problem.num_colors);
+	g.color_randomly(problem.num_colors);
 	dynprog_trial(g, problem.start_vertices, problem.is_end_vertex,
 		      problem.find_trees, problem.path_length,
 		      paths, min_edge_weight);

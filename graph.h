@@ -24,13 +24,15 @@ public:
 
     struct Edge {
 	Edge() { }
-	Edge(vertex_t n_neighbor, weight_t n_w) : neighbor(n_neighbor), w(n_w) { }
+	Edge(vertex_t n_neighbor, weight_t n_weight)
+	    : neighbor(n_neighbor), weight(n_weight) { }
 	vertex_t neighbor;
-	weight_t w;
+	weight_t weight;
     };
 
-    vertex_t neighbor(vertex_t u, std::size_t i) const { return m_neighbors[u][i].neighbor; }
-    weight_t edge_weight(vertex_t u, std::size_t i) const { return m_neighbors[u][i].w; }
+    typedef std::vector<Edge>::const_iterator neighbor_it;
+    neighbor_it neighbors_begin(vertex_t u) const { return m_neighbors[u].begin(); }
+    neighbor_it neighbors_end(vertex_t u) const { return m_neighbors[u].end(); }
 
     void clear_edges();
     void connect(vertex_t u, vertex_t v, weight_t weight);

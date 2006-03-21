@@ -59,9 +59,8 @@ void dynprog_trial(const ColoredGraph& g,
 	for (vertex_t v = 0; v < g.num_vertices(); ++v) {
 	    if (!old_colorsets[v].root)
 		continue;
-	    for (std::size_t i = 0; i < g.deg(v); ++i) {
-		vertex_t w = g.neighbor(v, i);
-		weight_t edge_weight = g.edge_weight(v, i);
+	    for (Graph::neighbor_it n = g.neighbors_begin(v); n != g.neighbors_end(v); ++n) {
+		vertex_t w = n->neighbor;
 		colorset_t w_color = g.color_set(w);
 		std::size_t num_pt_nodes = 0;
 		pt_nodes[num_pt_nodes++] = old_colorsets[v].root;
@@ -71,7 +70,7 @@ void dynprog_trial(const ColoredGraph& g,
 			continue;
 		    if (pt_node->is_leaf) {
 			PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
-			weight_t new_weight = old_pp->weight + edge_weight;
+			weight_t new_weight = old_pp->weight + n->weight;
 			if (new_weight < weight_threshold) {
 			    PartialPath* new_pp = find_pp(new_colorsets[w],
 							  pt_node->key | w_color);
@@ -141,9 +140,11 @@ PathSet lightest_path(const Problem& problem,
 		      std::size_t num_trials, std::size_t num_paths,
 		      std::size_t max_common, std::size_t preheat_trials) {
     std::vector<weight_t> edge_weights;
+    
     for (vertex_t v = 0; v < problem.g.num_vertices(); ++v)
-	for (std::size_t i = 0; i < problem.g.deg(v); ++i)
-	    edge_weights.push_back(problem.g.edge_weight(v, i));
+	for (Graph::neighbor_it n = problem.g.neighbors_begin(v);
+	     n != problem.g.neighbors_end(v); ++n)
+	    edge_weights.push_back(n->weight);
     std::sort(edge_weights.begin(), edge_weights.end());
     weight_t min_edge_weight = edge_weights.front();
 
@@ -155,14 +156,14 @@ PathSet lightest_path(const Problem& problem,
 	    g.clear_edges();
 	    weight_t max_edge_weight =
 		edge_weights[std::size_t(i * (double(edge_weights.size()) / preheat_trials))];
+	    
 	    for (vertex_t v = 0; v < problem.g.num_vertices(); ++v) {
-		for (std::size_t i = 0; i < problem.g.deg(v); ++i) {
-		    vertex_t w = problem.g.neighbor(v, i);
-		    weight_t edge_weight = problem.g.edge_weight(v, i);
-		    if (edge_weight <= max_edge_weight)
-			g.connect(v, w, edge_weight);
-		}
+		for (Graph::neighbor_it n = problem.g.neighbors_begin(v);
+		     n != problem.g.neighbors_end(v); ++n)
+		    if (n->weight <= max_edge_weight)
+			g.connect(v, n->neighbor, n->weight);
 	    }
+	    
 	}
 	g.color_randomly(problem.path_length);
 	dynprog_trial(g, problem.start_vertices, problem.is_end_vertex, problem.find_trees,

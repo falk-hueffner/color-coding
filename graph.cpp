@@ -71,8 +71,8 @@ void Graph::read_graph(FILE* stream) {
 
 	(neighbours_list[n1i]).push_back(n2i);
 	(neighbours_list[n2i]).push_back(n1i);
-	(n_weights_list[n1i]).push_back(-log(w));
-	(n_weights_list[n2i]).push_back(-log(w));
+	(n_weights_list[n1i]).push_back(w);
+	(n_weights_list[n2i]).push_back(w);
 
     }
 

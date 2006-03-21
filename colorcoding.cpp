@@ -189,7 +189,6 @@ int main(int argc, char *argv[]) {
     problem.path_length = path_length;
     problem.num_colors = num_colors;
 
-#if 1
     double start = timestamp();
     PathSet paths = lightest_path(problem, num_trials, num_paths, max_common, preheat_trials);
     double stop = timestamp();
@@ -204,16 +203,6 @@ int main(int argc, char *argv[]) {
 	    std::cout << std::endl;
 	}
     }
-#else
-    protein_network.compute_results(number_colors, path_length, number_iterations, 100);
 
-    stop = timestamp();
-
-    protein_network.display_results(10);
-
-    debug.turn_on();
-    
-    debug << endl << "Benötigte Zeit (in Sekunden): " << (stop - start) << endl;
-#endif
     return 0;
 }

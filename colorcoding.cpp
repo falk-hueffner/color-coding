@@ -22,6 +22,7 @@ std::size_t peak_mem_usage;
 static void usage(std::ostream& out) {
     out << "colorcode: Find most probable path in a graph\n"
 	   "  stdin      Input graph\n"
+	   "  -y	 find trees instead of paths\n"
 	   "  -i FILE    Read start vertices from FILE\n"
 	   "  -v         Print progress to stderr\n"
 	   "  -l K       Find paths of length K (default: 8)\n"
@@ -79,6 +80,7 @@ std::set<vertex> read_vertex_file(const std::string& file, const Graph& g) {
 }
 
 int main(int argc, char *argv[]) {
+    bool find_trees = false;
     std::string start_vertices_file, end_vertices_file;
     std::size_t path_length = 8;
     std::size_t num_colors = 0;
@@ -90,8 +92,9 @@ int main(int argc, char *argv[]) {
     bool stats_only = false;
 
     int c;
-    while ((c = getopt(argc, argv, "i:e:l:c:n:f:t:p:x:r::vsh")) != -1) {
+    while ((c = getopt(argc, argv, "yi:e:l:c:n:f:t:p:x:r::vsh")) != -1) {
 	switch (c) {
+	case 'y': find_trees = true; break;
 	case 'i': start_vertices_file = optarg; break;
 	case 'e': end_vertices_file = optarg; break;
 	case 'l': path_length = atoi(optarg); break;
@@ -175,7 +178,8 @@ int main(int argc, char *argv[]) {
 
 #if 1
     double start = timestamp();
-    PathSet paths = lightest_path(g, start_vertices, is_end_vertex, path_length, num_colors,
+    PathSet paths = lightest_path(g, start_vertices, is_end_vertex, find_trees,
+				  path_length, num_colors,
 				  num_trials, num_paths, max_common, preheat_trials);
     double stop = timestamp();
     if (stats_only) {

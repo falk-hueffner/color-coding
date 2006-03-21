@@ -17,9 +17,12 @@ static PartialPath* find_pp(PTree& t, colorset c) {
     return static_cast<PartialPath*>(t.find_or_insert(c));
 }
 
-void dynprog_trial(const Graph& g, const std::vector<vertex>& start_vertices,
+void dynprog_trial(const Graph& g,
+		   const std::vector<vertex>& start_vertices,
 		   const std::vector<bool>& is_end_vertex,
-		   std::size_t path_length, PathSet& paths,
+		   bool find_trees,
+		   std::size_t path_length,
+		   PathSet& paths,
 		   weight min_edge_weight) {
     Mempool* old_pool = new Mempool();
     PTree* old_colorsets = new PTree[g.num_vertices()];
@@ -76,6 +79,15 @@ void dynprog_trial(const Graph& g, const std::vector<vertex>& start_vertices,
 				memcpy(new_pp->vertices, old_pp->vertices, old_path_size);
 				new_pp->vertices[l] = v;
 			    }
+			    if (find_trees) {
+				PartialPath* new_pp = find_pp(new_colorsets[v],
+							      pt_node->key | w_color);
+				if (new_weight < new_pp->w) {
+				    new_pp->w = new_weight;
+				    memcpy(new_pp->vertices, old_pp->vertices, old_path_size);
+				    new_pp->vertices[l] = w;
+				}
+			    }
 			}
 		    } else {
 			pt_nodes[num_pt_nodes++] = pt_node->left;
@@ -124,8 +136,10 @@ void dynprog_trial(const Graph& g, const std::vector<vertex>& start_vertices,
     delete old_pool;
 }
 
-PathSet lightest_path(const Graph& g_in, const std::vector<vertex>& start_vertices,
-		      const std::vector<bool>& is_end_vertex,		      
+PathSet lightest_path(const Graph& g_in,
+		      const std::vector<vertex>& start_vertices,
+		      const std::vector<bool>& is_end_vertex,
+		      bool find_trees,
 		      std::size_t path_length, std::size_t num_colors,
 		      std::size_t num_trials, std::size_t num_paths,
 		      std::size_t max_common, std::size_t preheat_trials) {
@@ -154,7 +168,8 @@ PathSet lightest_path(const Graph& g_in, const std::vector<vertex>& start_vertic
 	    }
 	}
 	g.color_nodes(path_length);
-	dynprog_trial(g, start_vertices, is_end_vertex, path_length, paths, min_edge_weight);
+	dynprog_trial(g, start_vertices, is_end_vertex, find_trees,
+		      path_length, paths, min_edge_weight);
 	if (timestamp() - last_printed > 1) {
 	    info << "Pre-heating " << i << "/" << preheat_trials
 		 << " m=" << g.num_edges()
@@ -178,7 +193,8 @@ PathSet lightest_path(const Graph& g_in, const std::vector<vertex>& start_vertic
 	    last_printed = timestamp();
 	}
 	g.color_nodes(num_colors);
-	dynprog_trial(g, start_vertices, is_end_vertex, path_length, paths, min_edge_weight);
+	dynprog_trial(g, start_vertices, is_end_vertex, find_trees,
+		      path_length, paths, min_edge_weight);
     }
     return paths;
 }

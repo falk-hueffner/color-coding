@@ -1,4 +1,4 @@
-CXX	= g++-4.2
+CXX	= g++
 # gcc-arch can be obtained from http://people.debian.org/~falk/gcc-arch
 CXXFLAGS= -O3 $(shell CC=$(CC) gcc-arch) -g -W -Wall -Wno-sign-compare -pipe
 # disable internal consistency checking for some speedup

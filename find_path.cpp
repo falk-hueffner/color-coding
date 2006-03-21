@@ -136,40 +136,36 @@ void dynprog_trial(const Graph& g,
     delete old_pool;
 }
 
-PathSet lightest_path(const Graph& g_in,
-		      const std::vector<vertex>& start_vertices,
-		      const std::vector<bool>& is_end_vertex,
-		      bool find_trees,
-		      std::size_t path_length, std::size_t num_colors,
+PathSet lightest_path(const Problem& problem,
 		      std::size_t num_trials, std::size_t num_paths,
 		      std::size_t max_common, std::size_t preheat_trials) {
     std::vector<weight> edge_weights;
-    for (vertex v = 0; v < g_in.num_vertices(); ++v)
-	for (std::size_t i = 0; i < g_in.deg(v); ++i)
-	    edge_weights.push_back(g_in.edge_weight(v, i));
+    for (vertex v = 0; v < problem.g.num_vertices(); ++v)
+	for (std::size_t i = 0; i < problem.g.deg(v); ++i)
+	    edge_weights.push_back(problem.g.edge_weight(v, i));
     std::sort(edge_weights.begin(), edge_weights.end());
     weight min_edge_weight = edge_weights.front();
 
     PathSet paths(num_paths, max_common);
     double last_printed = -1;
     for (std::size_t i = 1; i <= preheat_trials; ++i) {
-	Graph g = g_in;
+	Graph g = problem.g;
 	if (i < preheat_trials) {
 	    g.clear_edges();
 	    weight max_edge_weight =
 		edge_weights[std::size_t(i * (double(edge_weights.size()) / preheat_trials))];
-	    for (vertex v = 0; v < g_in.num_vertices(); ++v) {
-		for (std::size_t i = 0; i < g_in.deg(v); ++i) {
-		    vertex w = g_in.neighbor(v, i);
-		    weight edge_weight = g_in.edge_weight(v, i);
+	    for (vertex v = 0; v < problem.g.num_vertices(); ++v) {
+		for (std::size_t i = 0; i < problem.g.deg(v); ++i) {
+		    vertex w = problem.g.neighbor(v, i);
+		    weight edge_weight = problem.g.edge_weight(v, i);
 		    if (edge_weight <= max_edge_weight)
 			g.connect(v, w, edge_weight);
 		}
 	    }
 	}
-	g.color_nodes(path_length);
-	dynprog_trial(g, start_vertices, is_end_vertex, find_trees,
-		      path_length, paths, min_edge_weight);
+	g.color_nodes(problem.path_length);
+	dynprog_trial(g, problem.start_vertices, problem.is_end_vertex, problem.find_trees,
+		      problem.path_length, paths, min_edge_weight);
 	if (timestamp() - last_printed > 1) {
 	    info << "Pre-heating " << i << "/" << preheat_trials
 		 << " m=" << g.num_edges()
@@ -182,7 +178,7 @@ PathSet lightest_path(const Graph& g_in,
 	}
     }
 
-    Graph g = g_in;
+    Graph g = problem.g;
     for (std::size_t i = 0; i < num_trials; ++i) {
 	if (timestamp() - last_printed > 1) {
 	    info << "Trial " << i << "/" << num_trials << ' '
@@ -192,9 +188,10 @@ PathSet lightest_path(const Graph& g_in,
 		 << std::endl;
 	    last_printed = timestamp();
 	}
-	g.color_nodes(num_colors);
-	dynprog_trial(g, start_vertices, is_end_vertex, find_trees,
-		      path_length, paths, min_edge_weight);
+	g.color_nodes(problem.num_colors);
+	dynprog_trial(g, problem.start_vertices, problem.is_end_vertex,
+		      problem.find_trees, problem.path_length,
+		      paths, min_edge_weight);
     }
     return paths;
 }

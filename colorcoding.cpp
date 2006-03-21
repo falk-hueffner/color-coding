@@ -13,9 +13,10 @@
 #endif
 
 #include "debug.h"
-#include "graph.h"
-#include "util.h"
 #include "find_path.h"
+#include "graph.h"
+#include "problem.h"
+#include "util.h"
 
 std::size_t peak_mem_usage;
 
@@ -181,11 +182,17 @@ int main(int argc, char *argv[]) {
 
     std::size_t max_common = int(path_length * (filter / 100));
 
+    Problem problem;
+    problem.g = g;
+    problem.start_vertices = start_vertices;
+    problem.is_end_vertex = is_end_vertex;
+    problem.find_trees = find_trees;
+    problem.path_length = path_length;
+    problem.num_colors = num_colors;
+
 #if 1
     double start = timestamp();
-    PathSet paths = lightest_path(g, start_vertices, is_end_vertex, find_trees,
-				  path_length, num_colors,
-				  num_trials, num_paths, max_common, preheat_trials);
+    PathSet paths = lightest_path(problem, num_trials, num_paths, max_common, preheat_trials);
     double stop = timestamp();
     if (stats_only) {
 	printf("%15.2f %6d %12.8f %12.8f\n", stop - start,

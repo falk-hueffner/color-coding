@@ -24,6 +24,7 @@ static void usage(std::ostream& out) {
 	   "  stdin      Input graph\n"
 	   "  -y	 find trees instead of paths\n"
 	   "  -i FILE    Read start vertices from FILE\n"
+	   "  -e FILE    Read end vertices from FILE\n"
 	   "  -v         Print progress to stderr\n"
 	   "  -l K       Find paths of length K (default: 8)\n"
 	   "  -c C       Use C colors (default: K)\n"
@@ -128,8 +129,8 @@ int main(int argc, char *argv[]) {
 	exit(1);
     }
 
-    if (path_length >= 31) {
-	std::cerr << "error: path length must be < 31\n";
+    if (path_length > MAX_COLORS) {
+	std::cerr << "error: path length must be <= " << MAX_COLORS << std::endl;
 	exit(1);
     }
     if (num_colors == 0)
@@ -138,8 +139,12 @@ int main(int argc, char *argv[]) {
 	std::cerr << "error: need at least as many colors as the path length\n";
 	exit(1);
     }
-    if (num_colors >= 31) {
-	std::cerr << "error: number of colors must be < 31\n";
+    if (num_colors > MAX_COLORS) {
+	std::cerr << "error: number of colors must be <= " << MAX_COLORS << std::endl;
+	exit(1);
+    }
+    if (find_trees && end_vertices_file != "") {
+	std::cerr << "error: end vertices not supported when looking for trees\n";
 	exit(1);
     }
 

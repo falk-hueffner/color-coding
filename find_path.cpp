@@ -143,7 +143,7 @@ PathSet lightest_path(const Graph& g_in, const std::vector<vertex>& start_vertic
 	if (i < preheat_trials) {
 	    g.clear_edges();
 	    weight max_edge_weight =
-		edge_weights[i * (double(edge_weights.size()) / preheat_trials)];
+		edge_weights[std::size_t(i * (double(edge_weights.size()) / preheat_trials))];
 	    for (vertex v = 0; v < g_in.num_vertices(); ++v) {
 		for (std::size_t i = 0; i < g_in.deg(v); ++i) {
 		    vertex w = g_in.neighbor(v, i);

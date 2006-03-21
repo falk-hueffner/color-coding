@@ -96,9 +96,7 @@ void dynprog_trial(const ColoredGraph& g,
 		}
 	    }
 	}
-	std::size_t mem_usage = old_pool->mem_usage() + new_pool->mem_usage();
-	if (mem_usage > peak_mem_usage)
-	    peak_mem_usage = mem_usage;
+	peak_mem_usage = std::max(peak_mem_usage, old_pool->mem_usage() + new_pool->mem_usage());
 #if 0
 	std::size_t old_mem = old_pool->mem_usage(), new_mem = new_pool->mem_usage();
 	std::cerr << "l=" << l << ": " << old_mem << " + l=" << l+1 << ": " << new_mem

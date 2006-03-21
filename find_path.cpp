@@ -10,7 +10,7 @@
 extern std::size_t peak_mem_usage;
 
 struct PartialPath {
-    weight_t w;
+    weight_t weight;
     vertex_t vertices[];
 };
 
@@ -35,7 +35,7 @@ void dynprog_trial(const ColoredGraph& g,
     for (std::size_t i = 0; i < start_vertices.size(); ++i) {
 	vertex_t s = start_vertices[i];
 	PartialPath *pp = find_pp(old_colorsets[s], g.color_set(s));
-	pp->w = 0;
+	pp->weight = 0;
     }
 
     for (std::size_t l = 0; l < path_length - 1; ++l) {
@@ -71,20 +71,20 @@ void dynprog_trial(const ColoredGraph& g,
 			continue;
 		    if (pt_node->is_leaf) {
 			PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
-			weight_t new_weight = old_pp->w + edge_weight;
+			weight_t new_weight = old_pp->weight + edge_weight;
 			if (new_weight < weight_threshold) {
 			    PartialPath* new_pp = find_pp(new_colorsets[w],
 							  pt_node->key | w_color);
-			    if (new_weight < new_pp->w) {
-				new_pp->w = new_weight;
+			    if (new_weight < new_pp->weight) {
+				new_pp->weight = new_weight;
 				memcpy(new_pp->vertices, old_pp->vertices, old_path_size);
 				new_pp->vertices[l] = v;
 			    }
 			    if (find_trees) {
 				PartialPath* new_pp = find_pp(new_colorsets[v],
 							      pt_node->key | w_color);
-				if (new_weight < new_pp->w) {
-				    new_pp->w = new_weight;
+				if (new_weight < new_pp->weight) {
+				    new_pp->weight = new_weight;
 				    memcpy(new_pp->vertices, old_pp->vertices, old_path_size);
 				    new_pp->vertices[l] = w;
 				}
@@ -122,10 +122,10 @@ void dynprog_trial(const ColoredGraph& g,
 	    PTree::Node* pt_node = pt_nodes[--num_pt_nodes];
 	    if (pt_node->is_leaf) {
 		PartialPath* pp = static_cast<PartialPath*>(pt_node->data());
-		if (pp->w < paths.worst_weight()) {
+		if (pp->weight < paths.worst_weight()) {
 		    std::vector<vertex_t> p(pp->vertices, pp->vertices + path_length - 1);
 		    p.push_back(v);
-		    paths.add(p, pp->w);
+		    paths.add(p, pp->weight);
 		}
 	    } else {
 		pt_nodes[num_pt_nodes++] = pt_node->left;

@@ -201,7 +201,7 @@ int main(int argc, char *argv[]) {
 	for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {
 	    std::cout << i->path_weight();
 	    for (std::size_t j = 0; j < i->path().size(); ++j)
-		std::cout << ' ' << g.node_name(i->path()[j]);
+		std::cout << ' ' << g.vertex_name(i->path()[j]);
 	    std::cout << std::endl;
 	}
     }

@@ -87,7 +87,7 @@ public:
 	assert(v < num_vertices());
 	return static_cast<colorset_t>(1) << colors[v];
     }
-    std::string node_name(vertex_t v) const {
+    std::string vertex_name(vertex_t v) const {
 	assert(v < num_vertices());
 	return node_list2.find(v)->second;
     }
@@ -102,14 +102,14 @@ public:
 	return n_weights_list[v][i];
     }
     const Vertices_Vec& startnodes() const { return start_nodes; }
-    void connect(vertex_t u, vertex_t v, weight_t w) {
+    void connect(vertex_t u, vertex_t v, weight_t weight) {
 	assert(u < num_vertices());
 	assert(v < num_vertices());
 	// FIXME check for double edges
 	neighbours_list[u].push_back(v);
 	neighbours_list[v].push_back(u);
-	n_weights_list[u].push_back(w);
-	n_weights_list[v].push_back(w);
+	n_weights_list[u].push_back(weight);
+	n_weights_list[v].push_back(weight);
 	++number_neighbours[u];
 	++number_neighbours[v];
     }

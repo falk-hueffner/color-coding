@@ -14,20 +14,20 @@ public:
 
     std::size_t size() const { return std::min(entries.size(), max_size); }
     bool is_full() const { return entries.size() >= max_size; }
-    void add(const std::vector<vertex_t>& p, weight_t w);
+    void add(const std::vector<vertex_t>& p, weight_t weight);
     weight_t best_weight() const;
     weight_t worst_weight() const;
     
     class Entry {
 	friend class PathSet;
     public:
-	Entry(const std::vector<vertex_t>& n_p, weight_t n_w);
+	Entry(const std::vector<vertex_t>& n_p, weight_t n_weight);
 	bool operator<(const Entry& other) const;
 	const std::vector<vertex_t>& path() const { return p; }
-	weight_t path_weight() const { return w; }
+	weight_t path_weight() const { return weight; }
     private:
 	std::vector<vertex_t> p;
-	weight_t w;
+	weight_t weight;
 	std::set<vertex_t> path_set;
     };
 

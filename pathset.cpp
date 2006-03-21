@@ -27,14 +27,14 @@ PathSet::it PathSet::end()   const {
     }
 }
 
-void PathSet::add(const std::vector<vertex_t>& p, weight_t w) {
-    if (is_full() && w >= worst_weight())
+void PathSet::add(const std::vector<vertex_t>& p, weight_t weight) {
+    if (is_full() && weight >= worst_weight())
 	return;
 
-    Entry entry(p, w);
+    Entry entry(p, weight);
     for (it i = entries.begin(); i != entries.end(); ++i)
 	if (intersection_size(entry.path_set, i->path_set) > max_common)
-	    if (w >= i->w)
+	    if (weight >= i->weight)
 		return;
 
     for (it i = entries.begin(); i != entries.end(); )
@@ -65,11 +65,11 @@ weight_t PathSet::best_weight() const {
 	return entries.begin()->path_weight();
 }
 
-PathSet::Entry::Entry(const std::vector<vertex_t>& n_p, weight_t n_w)
-    : p(n_p), w(n_w), path_set(p.begin(), p.end()) { }
+PathSet::Entry::Entry(const std::vector<vertex_t>& n_p, weight_t n_weight)
+    : p(n_p), weight(n_weight), path_set(p.begin(), p.end()) { }
 
 bool PathSet::Entry::operator<(const Entry& other) const {
-    if (w != other.w)
-	return w < other.w;
+    if (weight != other.weight)
+	return weight < other.weight;
     return p < other.p;
 }

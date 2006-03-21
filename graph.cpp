@@ -9,6 +9,22 @@ std::size_t Graph::num_edges() const {
     return num / 2;
 }
 
+weight_t Graph::edge_weight(vertex_t u, vertex_t v) const {
+    for (Graph::neighbor_it n = neighbors_begin(u); n != neighbors_end(u); ++n)
+	if (n->neighbor == v)
+	    return n->weight;
+    abort();
+}
+
+weight_t Graph::weight() const {
+    weight_t weight = 0;
+    for (vertex_t u = 0; u < num_vertices(); ++u)
+	for (Graph::neighbor_it n = neighbors_begin(u); n != neighbors_end(u); ++n)
+	    if (u < n->neighbor)
+		weight += n->weight;
+    return weight;
+}
+
 const std::string& Graph::vertex_name(vertex_t u) const {
      assert(u < num_vertices());
      return m_vertex_names[u];

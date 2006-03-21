@@ -15,6 +15,8 @@ public:
 
     std::size_t num_vertices() const { return m_neighbors.size(); }
     std::size_t num_edges() const;
+    weight_t edge_weight(vertex_t u, vertex_t v) const;
+    weight_t weight() const;
     std::size_t deg(vertex_t u) const {
 	assert(u < num_vertices());
 	return m_neighbors[u].size();

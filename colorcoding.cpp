@@ -202,16 +202,23 @@ int main(int argc, char *argv[]) {
 	    for (std::size_t j = 0; j < i->path().size(); ++j)
 		std::cout << ' ' << g.vertex_name(i->path()[j]);
 	    std::cout << std::endl;
-#if 0
 	    if (problem.find_trees) {
 		Graph h = g.induced_subgraph(i->path());
-		std::cout << h.num_vertices() << std::endl;
-		std::cout << h.num_edges() << std::endl;
-		std::cout << h << std::endl;
 		Graph t = mst(h);
-		std::cout << t << std::endl;
+		if (fabs(t.weight() - i->path_weight()) > 1e-6) {
+		    std::cerr << "internal error: MST weight is " << t.weight()
+			      << t << std::endl;
+		    exit(1);
+		}
+	    } else {
+		weight_t weight = 0;
+		for (std::size_t j = 0; j < i->path().size() - 1; ++j)
+		    weight += g.edge_weight(i->path()[j], i->path()[j + 1]);
+		if (fabs(weight - i->path_weight()) > 1e-6) {
+		    std::cerr << "internal error: path weight is " << weight << std::endl;
+		    exit(1);
+		}
 	    }
-#endif
 	}
     }
 

@@ -27,6 +27,14 @@ std::string trim(const std::string& s) {
     return std::string(s, b, e - b + 1);
 }
 
-std::string strip_comment(const std::string& s) {
-    return std::string(s, s.find('#'));
+std::vector<std::string> split(const std::string& s) {
+    std::vector<std::string> result;
+    std::string::size_type left = s.find_first_not_of(WHITESPACE);
+    std::string::size_type right = s.find_first_of(WHITESPACE, left);
+    while (left < right) {
+	result.push_back(s.substr(left, right - left));
+	left = s.find_first_not_of(WHITESPACE, right);
+	right = s.find_first_of(WHITESPACE, left);
+    }
+    return result;
 }

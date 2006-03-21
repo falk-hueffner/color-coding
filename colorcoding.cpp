@@ -149,8 +149,7 @@ int main(int argc, char *argv[]) {
 	exit(1);
     }
 
-    Graph g;
-    g.read_graph(stdin);
+    Graph g(std::cin);
 
     if (num_trials == 0) {
 	std::size_t k = path_length;

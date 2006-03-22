@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
 		Graph h = g.induced_subgraph(i->path());
 		Graph t = mst(h);
 		if (fabs(t.weight() - i->path_weight()) > 1e-6) {
-		    std::cerr << "internal error: MST weight is " << t.weight()
+		    std::cerr << "internal error: MST weight is " << t.weight() << std::endl
 			      << t << std::endl;
 		    exit(1);
 		}

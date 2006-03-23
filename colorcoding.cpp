@@ -68,11 +68,9 @@ std::set<vertex_t> read_vertex_file(const std::string& file, const Graph& g) {
 	}
 	const vertex_t* pv = g.lookup_vertex(line);
 	if (!pv) {
-	    std::cerr << file << ':' << lineno << ": error: unknown vertex '"
-		      << line << "'\n";
-	    exit(1);
-	}
-	if (vertices.find(*pv) != vertices.end()) {
+	    std::cerr << file << ':' << lineno << ": warning: unknown vertex '"
+		      << line << "'\n";	    
+	} else if (vertices.find(*pv) != vertices.end()) {
 	    std::cerr << file << ':' << lineno << ": warning: ignoring duplicate vertex '"
 		      << line << "'\n";
 	} else {

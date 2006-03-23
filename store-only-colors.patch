@@ -1,0 +1,245 @@
+Index: find_path.cpp
+===================================================================
+RCS file: /var/lib/cvs/colorcode/find_path.cpp,v
+retrieving revision 1.16
+diff -u -r1.16 find_path.cpp
+--- find_path.cpp	20 Mar 2006 15:08:14 -0000	1.16
++++ find_path.cpp	20 Mar 2006 17:57:14 -0000
+@@ -1,5 +1,6 @@
+ #include <vector>
+ #include <set>
++#include <queue>
+ 
+ #include "debug.h"
+ #include "find_path.h"
+@@ -8,9 +9,15 @@
+ 
+ extern std::size_t peak_mem_usage;
+ 
++#define STORE_ONLY_COLORS 1
++
+ struct PartialPath {
+     weight w;
++#if STORE_ONLY_COLORS
++    unsigned char vertices[];
++#else
+     vertex vertices[];
++#endif
+ };
+ 
+ static PartialPath* find_pp(PTree& t, colorset c) {
+@@ -20,7 +27,8 @@
+ void dynprog_trial(const Graph& g, const std::vector<vertex>& start_vertices,
+ 		   const std::vector<bool>& is_end_vertex,
+ 		   std::size_t path_length, PathSet& paths,
+-		   weight min_edge_weight) {
++		   std::size_t num_colors, weight min_edge_weight) {
++    std::size_t color_size = bits_needed(num_colors);
+     Mempool* old_pool = new Mempool();
+     PTree* old_colorsets = new PTree[g.num_vertices()];
+     std::size_t old_path_size = 0;
+@@ -39,7 +47,11 @@
+ 	    paths.worst_weight() - ((path_length - 1) - l - 1) * min_edge_weight;
+ 	Mempool* new_pool = new Mempool();
+ 	PTree* new_colorsets = new PTree[g.num_vertices()];
++#if STORE_ONLY_COLORS
++	std::size_t new_path_size = (((l + 1) * color_size) + 7) / 8;
++#else
+ 	std::size_t new_path_size = (l + 1) * sizeof (vertex);
++#endif
+ 	for (std::size_t i = 0; i < g.num_vertices(); ++i)
+ 	    new (new_colorsets + i) PTree(new_pool, sizeof (PartialPath) + new_path_size);
+ #if 0
+@@ -74,7 +86,11 @@
+ 			    if (new_weight < new_pp->w) {
+ 				new_pp->w = new_weight;
+ 				memcpy(new_pp->vertices, old_pp->vertices, old_path_size);
++#if STORE_ONLY_COLORS
++				poke_bits(new_pp->vertices, color_size, l, g.color(v));
++#else
+ 				new_pp->vertices[l] = v;
++#endif
+ 			    }
+ 			}
+ 		    } else {
+@@ -110,8 +126,76 @@
+ 	    if (pt_node->is_leaf) {
+ 		PartialPath* pp = static_cast<PartialPath*>(pt_node->data());
+ 		if (pp->w < paths.worst_weight()) {
++#if STORE_ONLY_COLORS
++		    //std::cerr << "color sequence: ";
++		    //for (std::size_t i = 0; i < path_length - 1; ++i)
++		    //std::cerr << peek_bits(pp->vertices, color_size, i) << ' ';
++		    //std::cerr << g.color(v) << std::endl;
++
++		    std::queue<vertex> q;
++		    std::vector<weight> wt(g.num_vertices(), 1e8);
++		    std::vector<vertex> pred(g.num_vertices(), -1);
++		    std::size_t color_v = g.color(v);
++		    std::size_t layer = path_length - 1 - 1;
++		    std::size_t color_neigh = peek_bits(pp->vertices, color_size, layer);
++		    //std::cerr << "color_neigh " << color_neigh << "\n";
++		    wt[v] = 0;
++		    q.push(v);
++		    while (!q.empty()) {
++			vertex v = q.front();
++			//std::cerr << "popped " << v << " @ " << g.color(v) << "\n";
++			q.pop();
++			if (g.color(v) != color_v) {
++			    --layer;
++			    color_v = g.color(v);
++			    color_neigh = peek_bits(pp->vertices, color_size, layer);
++			    //std::cerr << "color_neigh " << color_neigh << "\n";
++			}
++			for (std::size_t i = 0; i < g.deg(v); ++i) {
++			    vertex w = g.neighbor(v, i);
++			    //std::cerr << "neighbor " << w << " @ " << g.color(w) << "\n";
++			    if (g.color(w) == color_neigh) {
++				weight edge_weight = g.edge_weight(v, i);
++				if (wt[v] + edge_weight < wt[w]) {
++				    if (pred[w] == -1 && layer > 0) {
++					q.push(w);
++					//std::cerr << "pushed " << w << " @ " << g.color(w) << "\n";
++				    }
++				    wt[w] = wt[v] + edge_weight;
++				    pred[w] = v;
++				}
++			    }
++			}
++		    }
++		    assert(layer == 0);
++		    std::size_t start_color = peek_bits(pp->vertices, color_size, 0);
++		    vertex start = -1;
++		    weight best_weight = 1e8;
++		    for (std::size_t i = 0; i < g.num_vertices(); ++i) {
++			if (g.color(i) == start_color) {
++			    if (wt[i] < best_weight) {
++				start = i;
++				best_weight = wt[i];
++			    }
++			}
++		    }
++
++		    std::vector<vertex> p;
++		    for (std::size_t i = 0; i < path_length; ++i) {
++			p.push_back(start);
++			start = pred[start];
++		    }
++#else
+ 		    std::vector<vertex> p(pp->vertices, pp->vertices + path_length - 1);
+ 		    p.push_back(v);
++#endif
++#if 0
++		    std::cerr << pp->w;
++		    for (std::size_t i = 0; i < p.size(); ++i)
++			std::cerr << ' ' << p[i];
++		    std::cerr << std::endl;
++#endif
++		    
+ 		    paths.add(p, pp->w);
+ 		}
+ 	    } else {
+@@ -154,7 +238,8 @@
+ 	    }
+ 	}
+ 	g.color_nodes(path_length);
+-	dynprog_trial(g, start_vertices, is_end_vertex, path_length, paths, min_edge_weight);
++	dynprog_trial(g, start_vertices, is_end_vertex, path_length, paths,
++		      num_colors, min_edge_weight);
+ 	if (timestamp() - last_printed > 1) {
+ 	    info << "Pre-heating " << i << "/" << preheat_trials
+ 		 << " m=" << g.num_edges()
+@@ -178,7 +263,8 @@
+ 	    last_printed = timestamp();
+ 	}
+ 	g.color_nodes(num_colors);
+-	dynprog_trial(g, start_vertices, is_end_vertex, path_length, paths, min_edge_weight);
++	dynprog_trial(g, start_vertices, is_end_vertex, path_length, paths,
++		      num_colors, min_edge_weight);
+     }
+     return paths;
+ }
+Index: util.cpp
+===================================================================
+RCS file: /var/lib/cvs/colorcode/util.cpp,v
+retrieving revision 1.2
+diff -u -r1.2 util.cpp
+--- util.cpp	18 Mar 2006 19:17:52 -0000	1.2
++++ util.cpp	20 Mar 2006 16:07:14 -0000
+@@ -1,4 +1,6 @@
++#include <cassert>
+ #include <string>
++#include <vector>
+ 
+ #include <time.h>
+ 
+@@ -27,6 +29,51 @@
+     return std::string(s, b, e - b + 1);
+ }
+ 
+-std::string strip_comment(const std::string& s) {
+-    return std::string(s, s.find('#'));
++std::vector<std::string> split(const std::string& s) {
++    std::vector<std::string> result;
++    std::string::size_type left = s.find_first_not_of(WHITESPACE);
++    std::string::size_type right = s.find_first_of(WHITESPACE, left);
++    while (left < right) {
++	result.push_back(s.substr(left, right - left));
++	left = s.find_first_not_of(WHITESPACE, right);
++	right = s.find_first_of(WHITESPACE, left);
++    }
++    return result;
++}
++
++unsigned bits_needed(unsigned max) {
++    unsigned bits = 0;
++    while (max) {
++	max >>= 1;
++	++bits;
++    }
++    return bits;
++}
++
++unsigned peek_bits(const unsigned char* p, unsigned word_size, std::size_t offset) {
++    assert(word_size <= 8);
++    offset *= word_size;
++    unsigned mask = (1 << word_size) - 1;
++    unsigned r = offset % 8;
++    unsigned lo = p[offset / 8];
++    unsigned hi = p[(offset + word_size - 1) / 8];
++    lo >>= r;
++    hi <<= (8 - r);
++    return (lo | hi) & mask;
++}
++
++void poke_bits(unsigned char* p, std::size_t word_size, std::size_t offset, std::size_t val) {
++    assert(word_size <= 8);
++    offset *= word_size;
++    unsigned r = offset % 8;
++    unsigned mask = (1 << word_size) - 1;
++    unsigned lo = p[offset / 8];
++    unsigned hi = p[(offset + word_size - 1) / 8];
++    lo &= ~(mask << r);
++    hi &= ~(mask >> (8 - r));
++    lo |= (val << r);
++    hi |= (val >> (8 - r));
++    // since possibly &hi == &lo, we need to write back hi first.
++    p[(offset + word_size - 1) / 8] = hi;
++    p[offset / 8] = lo;
+ }
+Index: util.h
+===================================================================
+RCS file: /var/lib/cvs/colorcode/util.h,v
+retrieving revision 1.2
+diff -u -r1.2 util.h
+--- util.h	18 Mar 2006 19:17:52 -0000	1.2
++++ util.h	20 Mar 2006 16:07:08 -0000
+@@ -8,4 +8,8 @@
+ double timestamp();
+ std::string trim(const std::string& s);
+ 
++unsigned bits_needed(unsigned max);
++unsigned peek_bits(const unsigned char* p, unsigned word_size, std::size_t offset);
++void poke_bits(unsigned char* p, std::size_t word_size, std::size_t offset, std::size_t val);
++
+ #endif // UTIL_H

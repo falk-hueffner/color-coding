@@ -10,7 +10,7 @@
 
 class PTree {
 public:
-    typedef uint32_t key_t;
+    typedef colorset_t key_t;
 
     PTree() { }
     PTree(Mempool* n_mempool, std::size_t n_leaf_size = 0)
@@ -28,8 +28,8 @@ public:
 //private:
     // little-endian patricia trees
     struct Leaf {
-	bool  is_leaf	:  1;	// 1 in leafs, 0 in branches
-	key_t key	: 31;	// key
+	bool  is_leaf : 1;	// 1 in leafs, 0 in branches
+	key_t key : MAX_COLORS; // key
     };
     struct Node : public Leaf {
 	key_t branch_bit;	// as a power of two

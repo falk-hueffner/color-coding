@@ -45,6 +45,14 @@ static double lfact(std::size_t n) {
     return lgamma(n + 1);
 }
 
+std::size_t trials_for_prob(std::size_t path_length, std::size_t num_colors,
+			    double success_prob) {
+    std::size_t k = path_length;
+    std::size_t x = num_colors - path_length;
+    double colorful_prob = exp(lfact(k + x) - lfact(x) - k * log(double(k + x)));
+    return std::size_t(ceil(log1p(-success_prob / 100) / log1p(-colorful_prob)));
+}
+
 std::set<vertex_t> read_vertex_file(const std::string& file, const Graph& g) {
     std::ifstream in(file.c_str());
     if (!in) {
@@ -150,12 +158,8 @@ int main(int argc, char *argv[]) {
 
     Graph g(std::cin);
 
-    if (num_trials == 0) {
-	std::size_t k = path_length;
-	std::size_t x = num_colors - path_length;
-	double colorful_prob = exp(lfact(k + x) - lfact(x) - k * log(double(k + x)));
-	num_trials = std::size_t(ceil(log1p(-success_prob / 100) / log1p(-colorful_prob)));
-    }
+    if (num_trials == 0)
+	num_trials = trials_for_prob(path_length, num_colors, success_prob);
 
     std::vector<vertex_t> start_vertices;
     if (start_vertices_file != "") {

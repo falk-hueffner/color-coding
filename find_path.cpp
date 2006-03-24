@@ -18,13 +18,14 @@ static PartialPath* find_pp(PTree& t, colorset_t c) {
     return static_cast<PartialPath*>(t.find_or_insert(c));
 }
 
-void dynprog_trial(const ColoredGraph& g,
+bool dynprog_trial(const ColoredGraph& g,
 		   const std::vector<vertex_t>& start_vertices,
 		   const std::vector<bool>& is_end_vertex,
 		   bool find_trees,
 		   std::size_t path_length,
 		   PathSet& paths,
 		   weight_t min_edge_weight) {
+    std::size_t max_mem_usage = 768 * 1024 * 1024;
     Mempool* old_pool = new Mempool();
     PTree* old_colorsets = new PTree[g.num_vertices()];
     std::size_t old_path_size = 0;
@@ -88,6 +89,16 @@ void dynprog_trial(const ColoredGraph& g,
 				    new_pp->vertices[l] = w;
 				}
 			    }
+			    if (old_pool->mem_usage() + new_pool->mem_usage() > max_mem_usage) {
+				peak_mem_usage = std::max(peak_mem_usage,
+							  old_pool->mem_usage()
+							  + new_pool->mem_usage());
+				delete[] old_colorsets;
+				delete old_pool;
+				delete[] new_colorsets;
+				delete new_pool;
+				return false;
+			    }
 			}
 		    } else {
 			pt_nodes[num_pt_nodes++] = pt_node->left;
@@ -132,6 +143,7 @@ void dynprog_trial(const ColoredGraph& g,
     }
     delete[] old_colorsets;
     delete old_pool;
+    return true;
 }
 
 PathSet lightest_path(const Problem& problem,

@@ -48,7 +48,7 @@ public:
 	leaf->is_leaf = true;
 	leaf->key = c;
 	// Application specific hack: initialize first entry to a large FP number
-	*(float*) (leaf->data()) = 1e8;
+	*(float*) (leaf->data()) = WEIGHT_MAX;
 	return leaf;
     }
     Node* alloc_branch() {

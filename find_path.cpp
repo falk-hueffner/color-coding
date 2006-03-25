@@ -120,7 +120,7 @@ private:
         }
     }
 
-    static const std::size_t max_lb_edges = 3;
+    static const std::size_t max_lb_edges = 2;
     weight_t min_edge_weight;
     std::vector<weight_t> min_neighbor_weight;
     std::vector<std::vector<weight_t> > min_to_goal;

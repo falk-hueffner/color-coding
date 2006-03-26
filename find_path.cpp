@@ -51,19 +51,23 @@ public:
 	}
 
 	for (vertex_t v = 0; v < problem.g.num_vertices(); ++v) {
-	    for (std::size_t l = 0; l < problem.path_length - 1; ++l) {		
-		std::size_t edges_left = l;
-		if (edges_left) {
-		    std::size_t to_anywhere = std::min(edges_left, max_lb_edges);
-		    min_weight[l+1][v] += min_to_anywhere[to_anywhere - 1][v];
-		    edges_left -= to_anywhere;
+	    for (std::size_t l = 0; l < problem.path_length - 1; ++l) {
+		for (std::size_t to_anywhere = 0;
+		     to_anywhere <= std::min(l, max_lb_edges); ++to_anywhere) {
+		    weight_t min_w = 0;
+		    std::size_t edges_left = l;
+		    if (to_anywhere) {
+			min_w += min_to_anywhere[to_anywhere - 1][v];
+			edges_left -= to_anywhere;
+		    }
+		    while (edges_left > max_lb_edges) {
+			min_w += min_anywhere_to_anywhere[max_lb_edges - 1];
+			edges_left -= max_lb_edges;
+		    }
+		    if (edges_left)
+			min_w += min_anywhere_to_goal[edges_left - 1];
+		    min_weight[l+1][v] = std::max(min_weight[l+1][v], min_w);
 		}
-		while (edges_left > max_lb_edges) {
-		    min_weight[l+1][v] += min_anywhere_to_anywhere[max_lb_edges - 1];
-		    edges_left -= max_lb_edges;
-		}
-		if (edges_left)
-		    min_weight[l+1][v] += min_anywhere_to_goal[edges_left - 1];
 	    }
 	}
     }

@@ -41,8 +41,14 @@ public:
 		if (n->weight < min_neighbor_weight[v])
 		    min_neighbor_weight[v] = n->weight;
 
-	for (vertex_t v = 0; v < problem.g.num_vertices(); ++v)
+	double last_printed = -1;
+	for (vertex_t v = 0; v < problem.g.num_vertices(); ++v) {
+	    if (info.is_on() && timestamp() - last_printed > 1) {
+		fprintf(stderr, "lower-b %6zd/%6zd\n", v, problem.g.num_vertices());
+		last_printed = timestamp();
+	    }
 	    dynprog(problem, v);
+	}
 
 	for (std::size_t l = 0; l < max_lb_edges; ++l) {
 	    min_anywhere_to_goal[l] = *std::min_element(min_to_goal[l].begin(), min_to_goal[l].end());

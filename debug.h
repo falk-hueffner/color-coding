@@ -18,6 +18,7 @@ public:
 	return *this;
     }
 
+    bool is_on() const { return on; }
     void turn_on() { on = true; }
     void turn_off() { on = false; }
 

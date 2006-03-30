@@ -67,8 +67,9 @@ public:
 			edges_left -= to_anywhere;
 		    }
 		    while (edges_left > max_lb_edges) {
-			min_w += min_anywhere_to_anywhere[max_lb_edges - 1];
-			edges_left -= max_lb_edges;
+			std::size_t step = std::min(max_lb_edges, edges_left - max_lb_edges);
+			min_w += min_anywhere_to_anywhere[step - 1];
+			edges_left -= step;
 		    }
 		    if (edges_left)
 			min_w += min_anywhere_to_goal[edges_left - 1];

@@ -11,7 +11,7 @@
 extern std::size_t peak_mem_usage;
 
 PathSet lightest_path(const Problem& problem, std::size_t num_paths,
-		      std::size_t max_common) {
+		      std::size_t max_common, Bounds::Mode mode, std::size_t max_lb_edges) {
     std::vector<weight_t> edge_weights;
     
     for (vertex_t v = 0; v < problem.g.num_vertices(); ++v)
@@ -21,7 +21,7 @@ PathSet lightest_path(const Problem& problem, std::size_t num_paths,
     std::sort(edge_weights.begin(), edge_weights.end());
 
     PathSet paths(num_paths, max_common);
-    Bounds bounds(problem);
+    Bounds bounds(problem, mode, max_lb_edges);
     std::size_t colors;
     std::size_t max_preheat_trials =
 	(problem.auto_preheat_trials ? 10 : problem.num_preheat_trials);

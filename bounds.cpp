@@ -4,13 +4,17 @@
 #include "debug.h"
 #include "util.h"
 
-Bounds::Bounds(const Problem& problem)
-    : min_neighbor_weight(problem.g.num_vertices(), WEIGHT_MAX),
+Bounds::Bounds(const Problem& problem, Bounds::Mode mode, std::size_t n_max_lb_edges)
+    : max_lb_edges(n_max_lb_edges),
+      min_neighbor_weight(problem.g.num_vertices(), WEIGHT_MAX),
       min_to_goal(max_lb_edges, std::vector<weight_t>(problem.g.num_vertices(), WEIGHT_MAX)),
       min_to_anywhere(min_to_goal),
       min_anywhere_to_goal(max_lb_edges, WEIGHT_MAX),
       min_anywhere_to_anywhere(max_lb_edges, WEIGHT_MAX),
       min_weight(problem.path_length, problem.g.num_vertices()) {
+    if (mode == NONE)
+	return;
+
     std::vector<weight_t> edge_weights;
     for (vertex_t v = 0; v < problem.g.num_vertices(); ++v)
 	for (Graph::neighbor_it n = problem.g.neighbors_begin(v);
@@ -18,6 +22,13 @@ Bounds::Bounds(const Problem& problem)
 	    edge_weights.push_back(n->weight);
     std::sort(edge_weights.begin(), edge_weights.end());
     min_edge_weight = edge_weights.front();
+
+    if (mode == EDGE_WEIGHT) {
+	for (vertex_t v = 0; v < problem.g.num_vertices(); ++v) 
+	    for (std::size_t l = 0; l < problem.path_length - 1; ++l)
+		min_weight[l+1][v] = min_edge_weight * l;
+	return;
+    }
 
     for (vertex_t v = 0; v < problem.g.num_vertices(); ++v)
 	for (Graph::neighbor_it n = problem.g.neighbors_begin(v);
@@ -109,4 +120,3 @@ void Bounds::dynprog(const Problem& problem, std::size_t s) {
 	std::swap(old_path_sets, new_path_sets);
     }
 }
-const std::size_t Bounds::max_lb_edges;

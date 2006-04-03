@@ -8,7 +8,9 @@
 
 class Bounds {
 public:
-    Bounds(const Problem& problem);
+    enum Mode { NONE, EDGE_WEIGHT, DYNPROG };
+
+    Bounds(const Problem& problem, Mode mode, std::size_t max_lb_edges);
     weight_t h(vertex_t v, std::size_t edges_left) const {
 	return min_weight[edges_left][v];
     }
@@ -16,7 +18,7 @@ public:
 private:
     void dynprog(const Problem& problem, std::size_t s);
 
-    static const std::size_t max_lb_edges = 2;
+    std::size_t max_lb_edges;
     weight_t min_edge_weight;
     std::vector<weight_t> min_neighbor_weight;
     std::vector<std::vector<weight_t> > min_to_goal;

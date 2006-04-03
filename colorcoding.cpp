@@ -36,6 +36,8 @@ static void usage(std::ostream& out) {
 	   "  -t T       T trials\n"
 	   "  -p S       S% success probability (default: 99.9)\n"
 	   "  -x X       X pre-heating trials (default: 50)\n"
+	   "  -b X       Heuristic. 'n': none; 'e': min. edge weight;\n"
+ 	   "             x: dynamic programming, max. path length x (default: 2)\n"
 	   "  -r [R]     Random seed R (or random if not given) (default: 1)\n"
 	   "  -s         Print only statistics\n"
 	   "  -h         Display this list of options\n";
@@ -88,9 +90,11 @@ int main(int argc, char *argv[]) {
     std::size_t preheat_trials = 50;
     bool stats_only = false;
     Problem problem;
+    Bounds::Mode mode = Bounds::DYNPROG;
+    std::size_t max_lb_edges = 2;
 
     int c;
-    while ((c = getopt(argc, argv, "yi:e:l:c:n:f:t:p:x:r::vsh")) != -1) {
+    while ((c = getopt(argc, argv, "yi:e:l:c:n:f:t:p:x:b:r::vsh")) != -1) {
 	switch (c) {
 	case 'y': find_trees = true; break;
 	case 'i': start_vertices_file = optarg; break;
@@ -102,6 +106,16 @@ int main(int argc, char *argv[]) {
 	case 't': num_trials = atoi(optarg); problem.auto_trials = false; break;
 	case 'p': success_prob = atof(optarg); break;
 	case 'x': preheat_trials = atoi(optarg); problem.auto_preheat_trials = false; break;
+	case 'b':
+	    if (optarg == std::string("n")) {
+		mode = Bounds::NONE;
+	    } else if (optarg == std::string("e")) {
+		mode = Bounds::EDGE_WEIGHT;
+	    } else {
+		mode = Bounds::DYNPROG;
+		max_lb_edges = atoi(optarg);
+	    }
+	    break;
 	case 'r':
 	    if (optarg) {
 		srand(atoi(optarg));
@@ -187,7 +201,7 @@ int main(int argc, char *argv[]) {
     problem.num_colors = num_colors;
 
     double start = timestamp();
-    PathSet paths = lightest_path(problem, num_paths, max_common);
+    PathSet paths = lightest_path(problem, num_paths, max_common, mode, max_lb_edges);
     double stop = timestamp();
     if (stats_only) {
 	printf("%15.2f %6d %12.8f %12.8f\n", stop - start,

@@ -29,7 +29,7 @@ PathSet lightest_path(const Problem& problem,
     std::size_t colors = problem.path_length;
     std::size_t max_preheat_trials = 2;
     std::size_t preheat_trials = 0;
-    std::size_t max_trials = trials_for_prob(problem.path_length, colors, 99.9);
+    std::size_t max_trials = trials_for_prob(problem.path_length, colors, 0.999);
     std::size_t trials = 0;
     std::size_t punt = 0;
     bool preheating = true;

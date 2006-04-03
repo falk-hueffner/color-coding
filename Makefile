@@ -17,6 +17,7 @@ OBJS	= \
 	mst.o		\
 	pathset.o	\
 	ptree.o		\
+	trial.o		\
 	util.o
 
 CXXOMPILE = $(CXX) $(CXXFLAGS) $(INCLUDES)

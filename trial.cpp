@@ -13,7 +13,7 @@ std::size_t trials_for_prob(std::size_t path_length, std::size_t num_colors,
     std::size_t k = path_length;
     std::size_t x = num_colors - path_length;
     double colorful_prob = exp(lfact(k + x) - lfact(x) - k * log(double(k + x)));
-    return std::size_t(ceil(log1p(-success_prob / 100) / log1p(-colorful_prob)));
+    return std::size_t(ceil(log1p(-success_prob) / log1p(-colorful_prob)));
 }
 
 struct PartialPath {

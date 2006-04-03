@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
     Graph g(std::cin);
 
     if (num_trials == 0)
-	num_trials = trials_for_prob(path_length, num_colors, success_prob);
+	num_trials = trials_for_prob(path_length, num_colors, success_prob / 100);
 
     std::vector<vertex_t> start_vertices;
     if (start_vertices_file != "") {

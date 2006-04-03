@@ -9,6 +9,7 @@ LDPATH	=
 LIBS	=
 
 OBJS	= \
+	bounds.o	\
 	colorcoding.o	\
 	debug.o		\
 	find_path.o	\

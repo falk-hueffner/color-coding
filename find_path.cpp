@@ -79,7 +79,7 @@ PathSet lightest_path(const Problem& problem,
 		    max_preheat_trials *= 2;
 		    preheat_trials = 0;
 		    colors = MAX_COLORS;
-		    max_trials = trials_for_prob(problem.path_length, colors, 99.9);
+		    max_trials = trials_for_prob(problem.path_length, colors, 0.999);
 		    g = problem.g;
 		}
 	    } else {
@@ -88,7 +88,7 @@ PathSet lightest_path(const Problem& problem,
 		if (!hit_color_ceiling && colors < MAX_COLORS) {
 		    ++colors;
 		    trials = 0;
-		    max_trials = trials_for_prob(problem.path_length, colors, 99.9);
+		    max_trials = trials_for_prob(problem.path_length, colors, 0.999);
 		}
 	    }
 	} else {
@@ -99,7 +99,7 @@ PathSet lightest_path(const Problem& problem,
 		hit_color_ceiling = true;
 		if (colors > problem.path_length) {
 		    --colors;
-		    max_trials = trials_for_prob(problem.path_length, colors, 99.9);
+		    max_trials = trials_for_prob(problem.path_length, colors, 0.999);
 		} else {
 		    preheating = true;
 		}

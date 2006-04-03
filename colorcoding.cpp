@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
     double success_prob = 99.9;
     std::size_t preheat_trials = 50;
     bool stats_only = false;
+    Problem problem;
 
     int c;
     while ((c = getopt(argc, argv, "yi:e:l:c:n:f:t:p:x:r::vsh")) != -1) {
@@ -98,9 +99,9 @@ int main(int argc, char *argv[]) {
 	case 'c': num_colors = atoi(optarg); break;
 	case 'n': num_paths = atoi(optarg); break;
 	case 'f': filter = atof(optarg); break;
-	case 't': num_trials = atoi(optarg); break;
+	case 't': num_trials = atoi(optarg); problem.auto_trials = false; break;
 	case 'p': success_prob = atof(optarg); break;
-	case 'x': preheat_trials = atoi(optarg); break;
+	case 'x': preheat_trials = atoi(optarg); problem.auto_preheat_trials = false; break;
 	case 'r':
 	    if (optarg) {
 		srand(atoi(optarg));
@@ -131,6 +132,9 @@ int main(int argc, char *argv[]) {
     }
     if (num_colors == 0)
 	num_colors = path_length;
+    else
+	problem.auto_colors = false;
+
     if (num_colors < path_length) {
 	std::cerr << "error: need at least as many colors as the path length\n";
 	exit(1);
@@ -172,16 +176,18 @@ int main(int argc, char *argv[]) {
 
     std::size_t max_common = int(path_length * (filter / 100));
 
-    Problem problem;
     problem.g = g;
     problem.start_vertices = start_vertices;
     problem.is_end_vertex = is_end_vertex;
     problem.find_trees = find_trees;
     problem.path_length = path_length;
+    problem.num_preheat_trials = preheat_trials;
+    problem.num_trials = num_trials;
+    problem.success_prob = success_prob / 100;
     problem.num_colors = num_colors;
 
     double start = timestamp();
-    PathSet paths = lightest_path(problem, num_trials, num_paths, max_common, preheat_trials);
+    PathSet paths = lightest_path(problem, num_paths, max_common);
     double stop = timestamp();
     if (stats_only) {
 	printf("%15.2f %6d %12.8f %12.8f\n", stop - start,

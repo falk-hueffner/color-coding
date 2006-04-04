@@ -47,6 +47,7 @@ bool dynprog_trial(const ColoredGraph& g,
     }
 
     for (std::size_t l = 0; l < path_length - 1; ++l) {
+	std::size_t edges_left = (path_length - 1) - l - 1;
 	weight_t paths_worst_weight = paths.worst_weight();
 	Mempool* new_pool = new Mempool();
 	PTree* new_colorsets = new PTree[g.num_vertices()];
@@ -68,6 +69,8 @@ bool dynprog_trial(const ColoredGraph& g,
 		continue;
 	    for (Graph::neighbor_it n = g.neighbors_begin(v); n != g.neighbors_end(v); ++n) {
 		vertex_t w = n->neighbor;
+		if (edges_left == 0 && !is_end_vertex[w])
+		    continue;
 		colorset_t w_color = g.color_set(w);
 		std::size_t num_pt_nodes = 0;
 		pt_nodes[num_pt_nodes++] = old_colorsets[v].root;
@@ -78,22 +81,21 @@ bool dynprog_trial(const ColoredGraph& g,
 		    if (pt_node->is_leaf) {
 			PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
 			weight_t new_weight = old_pp->weight + n->weight;
-			std::size_t edges_left = (path_length - 1) - l - 1;
 			if (new_weight + bounds.h(w, edges_left) < paths_worst_weight) {
-			    PartialPath* new_pp = find_pp(new_colorsets[w],
-							  pt_node->key | w_color);
-			    if (new_weight < new_pp->weight) {
-				new_pp->weight = new_weight;
-				memcpy(new_pp->vertices, old_pp->vertices, old_path_size);
-				new_pp->vertices[l] = v;
-			    }
-			    if (find_trees) {
-				PartialPath* new_pp = find_pp(new_colorsets[v],
+			    if (edges_left == 0) {
+				std::vector<vertex_t> p(old_pp->vertices,
+							old_pp->vertices
+							+ path_length - 2);
+				p.push_back(v);
+				p.push_back(w);
+				paths.add(p, new_weight);
+			    } else {
+				PartialPath* new_pp = find_pp(new_colorsets[w],
 							      pt_node->key | w_color);
 				if (new_weight < new_pp->weight) {
 				    new_pp->weight = new_weight;
 				    memcpy(new_pp->vertices, old_pp->vertices, old_path_size);
-				    new_pp->vertices[l] = w;
+				    new_pp->vertices[l] = v;
 				}
 			    }
 			    if (old_pool->mem_usage() + new_pool->mem_usage() > max_mem_usage) {
@@ -126,28 +128,7 @@ bool dynprog_trial(const ColoredGraph& g,
 	old_pool = new_pool;
 	old_path_size = new_path_size;
     }
-    
-    for (vertex_t v = 0; v < g.num_vertices(); ++v) {
-	if (!is_end_vertex[v])
-	    continue;
-	std::size_t num_pt_nodes = 0;
-	if (old_colorsets[v].root)
-	    pt_nodes[num_pt_nodes++] = old_colorsets[v].root;
-	while (num_pt_nodes) {
-	    PTree::Node* pt_node = pt_nodes[--num_pt_nodes];
-	    if (pt_node->is_leaf) {
-		PartialPath* pp = static_cast<PartialPath*>(pt_node->data());
-		if (pp->weight < paths.worst_weight()) {
-		    std::vector<vertex_t> p(pp->vertices, pp->vertices + path_length - 1);
-		    p.push_back(v);
-		    paths.add(p, pp->weight);
-		}
-	    } else {
-		pt_nodes[num_pt_nodes++] = pt_node->left;
-		pt_nodes[num_pt_nodes++] = pt_node->right;
-	    }
-	}
-    }
+
     delete[] old_colorsets;
     delete old_pool;
     return true;

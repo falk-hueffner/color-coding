@@ -28,7 +28,7 @@ PathSet lightest_path(const Problem& problem, std::size_t num_paths,
     std::size_t preheat_trials = 0;
     std::size_t trials = 0;
     std::size_t punt = 0;
-    std::size_t color_ceil = MAX_COLORS;
+    std::size_t color_ceil = problem.auto_colors ? MAX_COLORS : problem.num_colors;
     std::size_t max_trials;
     do {
 	ColoredGraph g = problem.g;

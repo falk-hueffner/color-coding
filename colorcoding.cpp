@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 	case 'i': start_vertices_file = optarg; break;
 	case 'e': end_vertices_file = optarg; break;
 	case 'l': path_length = atoi(optarg); break;
-	case 'c': num_colors = atoi(optarg); break;
+	case 'c': num_colors = atoi(optarg); problem.auto_colors = false; break;
 	case 'n': num_paths = atoi(optarg); break;
 	case 'f': filter = atof(optarg); break;
 	case 't': num_trials = atoi(optarg); problem.auto_trials = false; break;
@@ -146,8 +146,6 @@ int main(int argc, char *argv[]) {
     }
     if (num_colors == 0)
 	num_colors = path_length;
-    else
-	problem.auto_colors = false;
 
     if (num_colors < path_length) {
 	std::cerr << "error: need at least as many colors as the path length\n";

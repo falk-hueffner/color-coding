@@ -6,7 +6,7 @@
 struct Problem {
     Problem() : find_trees(false),
 		path_length(0),
-		auto_preheat_trials(true), auto_colors(true),
+		auto_preheat_trials(true), auto_trials(true), auto_colors(true),
 		num_preheat_trials(0), num_colors(0) { }
     Graph g;
     std::vector<vertex_t> start_vertices;

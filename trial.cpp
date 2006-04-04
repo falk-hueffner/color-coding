@@ -18,7 +18,7 @@ std::size_t trials_for_prob(std::size_t path_length, std::size_t num_colors,
 
 struct PartialPath {
     weight_t weight;
-    vertex_t vertices[];
+    small_vertex_t vertices[];
 };
 
 inline PartialPath* find_pp(PTree& t, colorset_t c) {
@@ -32,7 +32,7 @@ bool dynprog_trial(const ColoredGraph& g,
 		   std::size_t path_length,
 		   PathSet& paths,
 		   const Bounds& bounds) {
-    std::size_t max_mem_usage = 768 * 1024 * 1024;
+    std::size_t max_mem_usage =768 * 1024 * 1024;
     Mempool* old_pool = new Mempool();
     PTree* old_colorsets = new PTree[g.num_vertices()];
     std::size_t old_path_size = 0;
@@ -51,7 +51,7 @@ bool dynprog_trial(const ColoredGraph& g,
 	weight_t paths_worst_weight = paths.worst_weight();
 	Mempool* new_pool = new Mempool();
 	PTree* new_colorsets = new PTree[g.num_vertices()];
-	std::size_t new_path_size = (l + 1) * sizeof (vertex_t);
+	std::size_t new_path_size = (l + 1) * sizeof (small_vertex_t);
 	for (std::size_t i = 0; i < g.num_vertices(); ++i)
 	    new (new_colorsets + i) PTree(new_pool, sizeof (PartialPath) + new_path_size);
 #if 0

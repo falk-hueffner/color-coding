@@ -162,6 +162,12 @@ int main(int argc, char *argv[]) {
 
     Graph g(std::cin);
 
+    if (g.num_vertices() > MAX_VERTEX) {
+	std::cerr << "error: graph has" << g.num_vertices() << " vertices, but only"
+		  << MAX_VERTEX << " supported\n";
+	exit(1);
+    }
+
     if (num_trials == 0)
 	num_trials = trials_for_prob(path_length, num_colors, success_prob / 100);
 

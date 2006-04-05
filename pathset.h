@@ -43,7 +43,7 @@ private:
     std::size_t max_size, max_common;
     std::set<Entry> entries;
     weight_t m_worst_weight;
-    enum { EXTRA_KEEP = 500 };
+    enum { EXTRA_KEEP = 20 };
 };
 
 #endif // PATHSET_H

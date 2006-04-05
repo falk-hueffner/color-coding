@@ -15,6 +15,7 @@ bool dynprog_trial(const ColoredGraph& g,
 		   const std::vector<bool>& is_end_vertex,
 		   bool find_trees,
 		   std::size_t path_length,
+		   std::size_t num_colors,
 		   PathSet& paths,
 		   const Bounds& bounds);
 

@@ -38,3 +38,40 @@ std::vector<std::string> split(const std::string& s) {
     }
     return result;
 }
+
+unsigned bits_needed(unsigned max) {
+    unsigned bits = 0;
+    while (max) {
+	max >>= 1;
+	++bits;
+    }
+    return bits;
+}
+
+unsigned peek_bits(const unsigned char* p, unsigned word_size, std::size_t offset) {
+    //assert(word_size <= 8);
+    offset *= word_size;
+    unsigned mask = (1 << word_size) - 1;
+    unsigned r = offset % 8;
+    unsigned lo = p[offset / 8];
+    unsigned hi = p[(offset + word_size - 1) / 8];
+    lo >>= r;
+    hi <<= (8 - r);
+    return (lo | hi) & mask;
+}
+
+void poke_bits(unsigned char* p, std::size_t word_size, std::size_t offset, std::size_t val) {
+    //assert(word_size <= 8);
+    offset *= word_size;
+    unsigned r = offset % 8;
+    unsigned mask = (1 << word_size) - 1;
+    unsigned lo = p[offset / 8];
+    unsigned hi = p[(offset + word_size - 1) / 8];
+    lo &= ~(mask << r);
+    hi &= ~(mask >> (8 - r));
+    lo |= (val << r);
+    hi |= (val >> (8 - r));
+    // since possibly &hi == &lo, we need to write back hi first.
+    p[(offset + word_size - 1) / 8] = hi;
+    p[offset / 8] = lo;
+}

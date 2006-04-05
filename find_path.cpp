@@ -64,8 +64,8 @@ PathSet lightest_path(const Problem& problem, std::size_t num_paths,
 		std::size_t old_paths_size = paths.size();
 	weight_t old_worst_weight = paths.worst_weight();
 	bool ok = dynprog_trial(g, problem.start_vertices, problem.is_end_vertex,
-				problem.find_trees, problem.path_length, paths,
-				bounds);
+				problem.find_trees, problem.path_length, colors,
+				paths, bounds);
 	bool bound_improved = old_paths_size != paths.size()
 	    || old_worst_weight != paths.worst_weight();
 	if (preheating) {

@@ -1,7 +1,12 @@
-#include "trial.h"
+#include <queue>
+
 #include "ptree.h"
+#include "trial.h"
+#include "util.h"
 
 extern std::size_t peak_mem_usage;
+
+#define STORE_ONLY_COLORS 1
 
 // returns ln(n!)
 inline double lfact(std::size_t n) {
@@ -18,11 +23,68 @@ std::size_t trials_for_prob(std::size_t path_length, std::size_t num_colors,
 
 struct PartialPath {
     weight_t weight;
+#if STORE_ONLY_COLORS
+    unsigned char vertices[];
+#else
     small_vertex_t vertices[];
+#endif
 };
 
 inline PartialPath* find_pp(PTree& t, colorset_t c) {
     return static_cast<PartialPath*>(t.find_or_insert(c));
+}
+
+inline std::vector<vertex_t>
+recover_path(const ColoredGraph& g, vertex_t v, const unsigned char *vertices,
+	     std::size_t color_size, std::size_t path_length) {
+    std::queue<vertex_t> q;
+    std::vector<weight_t> wt(g.num_vertices(), WEIGHT_MAX);
+    std::vector<vertex_t> pred(g.num_vertices(), (vertex_t) -1);
+    std::size_t color_v = g.color(v);
+    std::size_t layer = path_length - 1 - 1;
+    std::size_t color_neigh = peek_bits(vertices, color_size, layer);
+    wt[v] = 0;
+    q.push(v);
+    while (!q.empty()) {
+	vertex_t v = q.front();
+	q.pop();
+	if (g.color(v) != color_v) {
+	    --layer;
+	    color_v = g.color(v);
+	    color_neigh = peek_bits(vertices, color_size, layer);
+	}
+	for (Graph::neighbor_it n = g.neighbors_begin(v); n != g.neighbors_end(v); ++n) {
+	    vertex_t w = n->neighbor;
+	    if (g.color(w) == color_neigh) {
+		weight_t edge_weight = n->weight;
+		if (wt[v] + edge_weight < wt[w]) {
+		    if (pred[w] == -1 && layer > 0)
+			q.push(w);
+		    wt[w] = wt[v] + edge_weight;
+		    pred[w] = v;
+		}
+	    }
+	}
+    }
+    assert(layer == 0);
+    std::size_t start_color = peek_bits(vertices, color_size, 0);
+    vertex_t start = (vertex_t) -1;
+    weight_t best_weight = WEIGHT_MAX;
+    for (std::size_t i = 0; i < g.num_vertices(); ++i) {
+	if (g.color(i) == start_color) {
+	    if (wt[i] < best_weight) {
+		start = i;
+		best_weight = wt[i];
+	    }
+	}
+    }
+    
+    std::vector<vertex_t> p;
+    for (std::size_t i = 0; i < path_length; ++i) {
+	p.push_back(start);
+	start = pred[start];
+    }
+    return p;
 }
 
 bool dynprog_trial(const ColoredGraph& g,
@@ -30,9 +92,11 @@ bool dynprog_trial(const ColoredGraph& g,
 		   const std::vector<bool>& is_end_vertex,
 		   bool find_trees,
 		   std::size_t path_length,
+		   std::size_t num_colors,
 		   PathSet& paths,
 		   const Bounds& bounds) {
-    std::size_t max_mem_usage =768 * 1024 * 1024;
+    std::size_t max_mem_usage = 768 * 1024 * 1024;
+    std::size_t color_size = bits_needed(num_colors);
     Mempool* old_pool = new Mempool();
     PTree* old_colorsets = new PTree[g.num_vertices()];
     std::size_t old_path_size = 0;
@@ -51,7 +115,11 @@ bool dynprog_trial(const ColoredGraph& g,
 	weight_t paths_worst_weight = paths.worst_weight();
 	Mempool* new_pool = new Mempool();
 	PTree* new_colorsets = new PTree[g.num_vertices()];
+#if STORE_ONLY_COLORS
+	std::size_t new_path_size = (((l + 1) * color_size) + 7) / 8;
+#else
 	std::size_t new_path_size = (l + 1) * sizeof (small_vertex_t);
+#endif
 	for (std::size_t i = 0; i < g.num_vertices(); ++i)
 	    new (new_colorsets + i) PTree(new_pool, sizeof (PartialPath) + new_path_size);
 #if 0
@@ -83,11 +151,18 @@ bool dynprog_trial(const ColoredGraph& g,
 			weight_t new_weight = old_pp->weight + n->weight;
 			if (new_weight + bounds.h(w, edges_left) < paths_worst_weight) {
 			    if (edges_left == 0) {
+#if STORE_ONLY_COLORS
+				std::vector<vertex_t> p
+				    = recover_path(g, v, old_pp->vertices,
+						   color_size, path_length - 1);
+				p.push_back(w);
+#else
 				std::vector<vertex_t> p(old_pp->vertices,
 							old_pp->vertices
 							+ path_length - 2);
 				p.push_back(v);
 				p.push_back(w);
+#endif
 				paths.add(p, new_weight);
 			    } else {
 				PartialPath* new_pp = find_pp(new_colorsets[w],
@@ -95,7 +170,11 @@ bool dynprog_trial(const ColoredGraph& g,
 				if (new_weight < new_pp->weight) {
 				    new_pp->weight = new_weight;
 				    memcpy(new_pp->vertices, old_pp->vertices, old_path_size);
+#if STORE_ONLY_COLORS
+				    poke_bits(new_pp->vertices, color_size, l, g.color(v));
+#else
 				    new_pp->vertices[l] = v;
+#endif
 				}
 			    }
 			    if (old_pool->mem_usage() + new_pool->mem_usage() > max_mem_usage) {

@@ -112,7 +112,6 @@ bool dynprog_trial(const ColoredGraph& g,
 
     for (std::size_t l = 0; l < path_length - 1; ++l) {
 	std::size_t edges_left = (path_length - 1) - l - 1;
-	weight_t paths_worst_weight = paths.worst_weight();
 	Mempool* new_pool = new Mempool();
 	PTree* new_colorsets = new PTree[g.num_vertices()];
 #if STORE_ONLY_COLORS
@@ -149,7 +148,7 @@ bool dynprog_trial(const ColoredGraph& g,
 		    if (pt_node->is_leaf) {
 			PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
 			weight_t new_weight = old_pp->weight + n->weight;
-			if (new_weight + bounds.h(w, edges_left) < paths_worst_weight) {
+			if (new_weight + bounds.h(w, edges_left) < paths.worst_weight()) {
 			    if (edges_left == 0) {
 #if STORE_ONLY_COLORS
 				std::vector<vertex_t> p

@@ -32,16 +32,17 @@ void PathSet::add(const std::vector<vertex_t>& p, weight_t weight) {
 	return;
 
     Entry entry(p, weight);
-    for (it i = entries.begin(); i != entries.end(); ++i)
-	if (intersection_size(entry.path_set, i->path_set) > max_common)
+    std::vector<it> to_delete;
+    for (it i = entries.begin(); i != entries.end(); ++i) {
+	if (intersection_size(entry.path_set, i->path_set) > max_common) {
 	    if (weight >= i->weight)
 		return;
+	    to_delete.push_back(i);
+	}
+    }
 
-    for (it i = entries.begin(); i != entries.end(); )
-	if (intersection_size(entry.path_set, i->path_set) > max_common)
-	    entries.erase(i++);
-	else 
-	    ++i;
+    for (std::size_t i = 0; i < to_delete.size(); ++i)
+	entries.erase(to_delete[i]);
 
     entries.insert(entry);
     if (entries.size() > max_size + EXTRA_KEEP)

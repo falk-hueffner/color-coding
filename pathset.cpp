@@ -46,15 +46,16 @@ void PathSet::add(const std::vector<vertex_t>& p, weight_t weight) {
     entries.insert(entry);
     if (entries.size() > max_size + EXTRA_KEEP)
 	entries.erase(*entries.rbegin());
+    update_worst_weight();
 }
 
-weight_t PathSet::worst_weight() const {
+void PathSet::update_worst_weight() {
     if (!is_full())
-	return WEIGHT_MAX;
+	m_worst_weight = WEIGHT_MAX;
     else {
 	PathSet::it i = entries.begin();
 	for (std::size_t j = 1; j < max_size; j++, i++) { }
-	return i->path_weight();
+	m_worst_weight = i->path_weight();
     }
 }
 

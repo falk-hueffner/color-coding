@@ -10,13 +10,15 @@ class PathSet {
 public:
     PathSet(std::size_t n_max_size, std::size_t n_max_common)
 	: max_size(n_max_size),
-	  max_common(n_max_common) { }
+	  max_common(n_max_common) {
+	update_worst_weight();
+    }
 
     std::size_t size() const { return std::min(entries.size(), max_size); }
     bool is_full() const { return entries.size() >= max_size; }
     void add(const std::vector<vertex_t>& p, weight_t weight);
     weight_t best_weight() const;
-    weight_t worst_weight() const;
+    weight_t worst_weight() const { return m_worst_weight; }
     
     class Entry {
 	friend class PathSet;
@@ -37,8 +39,10 @@ public:
     it end()   const;
 
 private:
+    void update_worst_weight();
     std::size_t max_size, max_common;
     std::set<Entry> entries;
+    weight_t m_worst_weight;
     enum { EXTRA_KEEP = 500 };
 };
 

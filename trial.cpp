@@ -36,7 +36,8 @@ inline PartialPath* find_pp(PTree& t, colorset_t c) {
 }
 
 inline std::vector<vertex_t>
-recover_path(const ColoredGraph& g, vertex_t v, const unsigned char *vertices,
+recover_path(const ColoredGraph& g, const std::vector<bool>& is_start_vertex,
+	     vertex_t v, const unsigned char *vertices,
 	     std::size_t color_size, std::size_t path_length) {
     std::queue<vertex_t> q;
     std::vector<weight_t> wt(g.num_vertices(), WEIGHT_MAX);
@@ -72,7 +73,7 @@ recover_path(const ColoredGraph& g, vertex_t v, const unsigned char *vertices,
     vertex_t start = (vertex_t) -1;
     weight_t best_weight = WEIGHT_MAX;
     for (std::size_t i = 0; i < g.num_vertices(); ++i) {
-	if (g.color(i) == start_color) {
+	if (is_start_vertex[i] && g.color(i) == start_color) {
 	    if (wt[i] < best_weight) {
 		start = i;
 		best_weight = wt[i];
@@ -154,7 +155,7 @@ bool dynprog_trial(const ColoredGraph& g,
 			    if (edges_left == 0) {
 #if STORE_ONLY_COLORS
 				std::vector<vertex_t> p
-				    = recover_path(g, v, old_pp->vertices,
+				    = recover_path(g, is_start_vertex, v, old_pp->vertices,
 						   color_size, path_length - 1);
 				p.push_back(w);
 #else

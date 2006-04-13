@@ -171,14 +171,15 @@ int main(int argc, char *argv[]) {
     if (num_trials == 0)
 	num_trials = trials_for_prob(path_length, num_colors, success_prob / 100);
 
-    std::vector<vertex_t> start_vertices;
+    std::vector<bool> is_start_vertex(g.num_vertices());
     if (start_vertices_file != "") {
-	std::set<vertex_t> start_vertices_set = read_vertex_file(start_vertices_file, g);
-	start_vertices = std::vector<vertex_t>(start_vertices_set.begin(),
-					       start_vertices_set.end());
+	std::set<vertex_t> start_vertices = read_vertex_file(start_vertices_file, g);
+	for (std::set<vertex_t>::const_iterator it = start_vertices.begin();
+	     it != start_vertices.end(); ++it)
+	    is_start_vertex[*it] = true;
     } else {
 	for (std::size_t i = 0; i < g.num_vertices(); ++i)
-	    start_vertices.push_back(i);
+	    is_start_vertex[i] = true;
     }
 
     std::vector<bool> is_end_vertex(g.num_vertices());
@@ -195,7 +196,7 @@ int main(int argc, char *argv[]) {
     std::size_t max_common = int(path_length * (filter / 100));
 
     problem.g = g;
-    problem.start_vertices = start_vertices;
+    problem.is_start_vertex = is_start_vertex;
     problem.is_end_vertex = is_end_vertex;
     problem.find_trees = find_trees;
     problem.path_length = path_length;

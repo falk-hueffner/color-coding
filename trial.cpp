@@ -89,7 +89,7 @@ recover_path(const ColoredGraph& g, vertex_t v, const unsigned char *vertices,
 }
 
 bool dynprog_trial(const ColoredGraph& g,
-		   const std::vector<vertex_t>& start_vertices,
+		   const std::vector<bool>& is_start_vertex,
 		   const std::vector<bool>& is_end_vertex,
 		   bool find_trees,
 		   std::size_t path_length,
@@ -105,10 +105,11 @@ bool dynprog_trial(const ColoredGraph& g,
 	new (old_colorsets + i) PTree(old_pool, sizeof (PartialPath) + old_path_size);
     PTree::Node* pt_nodes[g.num_vertices()];
 
-    for (std::size_t i = 0; i < start_vertices.size(); ++i) {
-	vertex_t s = start_vertices[i];
-	PartialPath *pp = find_pp(old_colorsets[s], g.color_set(s));
-	pp->weight = 0;
+    for (vertex_t s = 0; s < is_start_vertex.size(); ++s) {
+	if (is_start_vertex[s]) {
+	    PartialPath *pp = find_pp(old_colorsets[s], g.color_set(s));
+	    pp->weight = 0;
+	}
     }
 
     for (std::size_t l = 0; l < path_length - 1; ++l) {

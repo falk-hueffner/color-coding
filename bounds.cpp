@@ -39,7 +39,7 @@ Bounds::Bounds(const Problem& problem, Bounds::Mode mode, std::size_t n_max_lb_e
     double last_printed = -1;
     for (vertex_t v = 0; v < problem.g.num_vertices(); ++v) {
 	if (info.is_on() && timestamp() - last_printed > 1) {
-	    fprintf(stderr, "lower-b %6zd/%6zd\n", v, problem.g.num_vertices());
+	    fprintf(stderr, "lower-b %6d/%6zu\n", int(v), problem.g.num_vertices());
 	    last_printed = timestamp();
 	}
 	dynprog(problem, v);

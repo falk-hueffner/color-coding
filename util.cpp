@@ -39,7 +39,7 @@ std::vector<std::string> split(const std::string& s) {
     return result;
 }
 
-unsigned bits_needed(unsigned max) {
+unsigned bits_needed(std::size_t max) {
     unsigned bits = 0;
     while (max) {
 	max >>= 1;

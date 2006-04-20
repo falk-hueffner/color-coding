@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
     PathSet paths = lightest_path(problem, num_paths, max_common, mode, max_lb_edges);
     double stop = timestamp();
     if (stats_only) {
-	printf("%15.2f %6d %12.8f %12.8f\n", stop - start,
+	printf("%15.2f %6zu %12.8f %12.8f\n", stop - start,
 	       peak_mem_usage / 1024 / 1024, paths.best_weight(), paths.worst_weight());
     } else {
 	for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {

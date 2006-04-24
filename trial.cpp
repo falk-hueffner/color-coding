@@ -146,7 +146,7 @@ bool dynprog_trial(const ColoredGraph& g,
 		pt_nodes[num_pt_nodes++] = old_colorsets[v].root;
 		while (num_pt_nodes) {
 		    PTree::Node* pt_node = pt_nodes[--num_pt_nodes];
-		    if (pt_node->key & w_color)
+		    if (pt_node->contains(w_color))
 			continue;
 		    if (pt_node->is_leaf) {
 			PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());

@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <cstddef>
 
-#include "types.h"
 #include "mempool.h"
-
+#include "types.h"
+#include "util.h"
 
 class PTree {
 public:
@@ -32,10 +32,25 @@ public:
 	key_t key : MAX_COLORS; // key
     };
     struct Node : public Leaf {
-	key_t branch_bit;	// as a power of two
+	key_t m_branch_bit;	// as a power of two
 	Node* left;		// subtree where branchBit is 0
 	Node* right;		// subtree where branchBit is 1
 
+	key_t branch_bit() const {
+	    return m_branch_bit;
+	}
+	key_t mask() const {
+	    return branch_bit() - 1;
+	}
+	bool matches(key_t k) const {
+	    return (mask() & k) == key;
+	}
+	Node** pchild(key_t k) {
+	    return (k & branch_bit()) ? &right : &left;
+	}
+	bool contains(key_t k) {
+	    return (key & k) != 0;
+	}
 	void* data() {
 	    assert(is_leaf);
 	    return reinterpret_cast<unsigned char*>(this) + sizeof (PTree::Leaf);
@@ -51,9 +66,12 @@ public:
 	*(float*) (leaf->data()) = WEIGHT_MAX;
 	return leaf;
     }
-    Node* alloc_branch() {
+    Node* alloc_branch(key_t k, const Node* old_node) {
+	key_t branch_bit = isolate_lowest_bit(k ^ old_node->key);
 	Node* branch = static_cast<PTree::Node*>(mempool->alloc(sizeof (Node)));
 	branch->is_leaf = false;
+	branch->m_branch_bit = branch_bit;
+	branch->key = k & (branch_bit - 1);
 	return branch;
     }
 

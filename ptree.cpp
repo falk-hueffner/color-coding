@@ -2,6 +2,7 @@
 
 #include "ptree.h"
 
+#if 0
 bool PTree::contains(key_t c) const {
     if (!root)
 	return false;
@@ -15,6 +16,7 @@ bool PTree::contains(key_t c) const {
     }
     return node->key == c;
 }
+#endif
 
 void* PTree::find_or_insert(key_t c) {
     if (!root) {
@@ -24,15 +26,12 @@ void* PTree::find_or_insert(key_t c) {
     Node* node = root;
     Node** pparent = &root;
     while (1) {
-	if (node->is_leaf || ((node->branch_bit - 1) & c) != node->key) {
+	if (node->is_leaf || !node->matches(c)) {
 	    if (node->is_leaf && node->key == c)
 		return node->data();
 	    PTree::Node* leaf = alloc_leaf(c);
-	    PTree::Node* branch = alloc_branch();
-	    PTree::key_t cmp = c ^ node->key;
-	    branch->branch_bit = cmp & -cmp;  // extract trailing bit
-	    branch->key = c & (branch->branch_bit - 1);
-	    if (c & branch->branch_bit) {
+	    PTree::Node* branch = alloc_branch(c, node);
+	    if (c & branch->branch_bit()) {
 		branch->left  = node;
 		branch->right = leaf;
 	    } else {
@@ -42,11 +41,12 @@ void* PTree::find_or_insert(key_t c) {
 	    *pparent = branch;
 	    return leaf->data();
 	}
-	pparent = (c & node->branch_bit) ? &node->right : &node->left;
+	pparent = node->pchild(c);
 	node = *pparent;
     }
 }
 
+#if 0
 void PTree::dump() const {
     std::cerr << "{\n";
     if (root)
@@ -73,3 +73,4 @@ void PTree::Node::dump(int indent) const {
     } else
 	std::cerr << std::endl;
 }
+#endif

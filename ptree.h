@@ -32,24 +32,22 @@ public:
 	key_t key : MAX_COLORS; // key
     };
     struct Node : public Leaf {
-	key_t m_branch_bit;	// as a power of two
 	Node* left;		// subtree where branchBit is 0
 	Node* right;		// subtree where branchBit is 1
 
-	key_t branch_bit() const {
-	    return m_branch_bit;
-	}
-	key_t mask() const {
-	    return branch_bit() - 1;
-	}
-	bool matches(key_t k) const {
-	    return (mask() & k) == key;
+	bool branch_matches(key_t k) const {
+	    key_t cmp = k ^ key;
+	    cmp ^= cmp - 1;
+	    return cmp >= key;
 	}
 	Node** pchild(key_t k) {
-	    return (k & branch_bit()) ? &right : &left;
+	    return ((k ^ key) & key) ? &left : &right;
 	}
 	bool contains(key_t k) {
-	    return (key & k) != 0;
+	    if (is_leaf)
+		return (key & k) != 0;
+	    else
+		return k < (key >> 1) && (key & k) != 0;
 	}
 	void* data() {
 	    assert(is_leaf);
@@ -58,7 +56,7 @@ public:
 	void dump(int indent = 0) const;
     };
 
-    Node* alloc_leaf(key_t c) {
+    inline Node* alloc_leaf(key_t c) {
 	Node* leaf = static_cast<PTree::Node*>(mempool->alloc(sizeof (Leaf) + leaf_size));
 	leaf->is_leaf = true;
 	leaf->key = c;
@@ -66,12 +64,19 @@ public:
 	*(float*) (leaf->data()) = WEIGHT_MAX;
 	return leaf;
     }
-    Node* alloc_branch(key_t k, const Node* old_node) {
-	key_t branch_bit = isolate_lowest_bit(k ^ old_node->key);
+    inline Node* alloc_branch(key_t k, Node* node, Node* leaf) {
+	key_t branch_bit = isolate_lowest_bit(k ^ node->key);
 	Node* branch = static_cast<PTree::Node*>(mempool->alloc(sizeof (Node)));
 	branch->is_leaf = false;
-	branch->m_branch_bit = branch_bit;
 	branch->key = k & (branch_bit - 1);
+	branch->key |= branch_bit;
+	if (k & branch_bit) {
+	    branch->left  = node;
+	    branch->right = leaf;
+	} else {
+	    branch->left  = leaf;
+	    branch->right = node;
+	}
 	return branch;
     }
 

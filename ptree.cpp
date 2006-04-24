@@ -26,18 +26,11 @@ void* PTree::find_or_insert(key_t c) {
     Node* node = root;
     Node** pparent = &root;
     while (1) {
-	if (node->is_leaf || !node->matches(c)) {
+	if (node->is_leaf || !node->branch_matches(c)) {
 	    if (node->is_leaf && node->key == c)
 		return node->data();
 	    PTree::Node* leaf = alloc_leaf(c);
-	    PTree::Node* branch = alloc_branch(c, node);
-	    if (c & branch->branch_bit()) {
-		branch->left  = node;
-		branch->right = leaf;
-	    } else {
-		branch->left  = leaf;
-		branch->right = node;
-	    }
+	    PTree::Node* branch = alloc_branch(c, node, leaf);
 	    *pparent = branch;
 	    return leaf->data();
 	}

@@ -23,7 +23,7 @@ OBJS	= \
 CXXOMPILE = $(CXX) $(CXXFLAGS) $(INCLUDES)
 CXXLINK	= $(CXX) $(CXXFLAGS) $(LDPATH) $(LIBS)
 
-all: depend colorcoding generate_graph analyse_graph
+all: depend colorcoding generate_graph analyse_graph optimal-x
 
 colorcoding: $(OBJS)
 	$(CXXLINK) $^ -o $@
@@ -32,6 +32,9 @@ generate_graph: generate_graph.o
 	$(CXXLINK) $^ -o $@
 
 analyse_graph: analyse_graph.o graph2.o debug.o
+	$(CXXLINK) $^ -o $@
+
+optimal-x: optimal-x.c
 	$(CXXLINK) $^ -o $@
 
 %.o: %.cpp

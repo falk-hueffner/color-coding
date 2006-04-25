@@ -1,4 +1,6 @@
-CXX	= /home/mit/theinf1/hueffner/bin/g++-4.2
+VERSION = 1.0
+#CXX	= /home/mit/theinf1/hueffner/bin/g++-4.2
+CXX	= g++-3.3
 # gcc-arch can be obtained from http://people.debian.org/~falk/gcc-arch
 CXXFLAGS= -O3 $(shell CC=$(CC) /home/mit/theinf1/hueffner/bin/gcc-arch) -g -W -Wall -Wno-sign-compare -pipe
 # disable internal consistency checking for some speedup
@@ -46,6 +48,40 @@ clean:
 
 realclean: clean
 	rm -f *~ *.bak
+
+DIST_FILES = \
+	README		\
+	bounds.cpp	\
+	bounds.h	\
+	colorcoding.cpp	\
+	colored_graph.h	\
+	debug.cpp	\
+	debug.h		\
+	find_path.cpp	\
+	find_path.h	\
+	graph.cpp	\
+	graph.h		\
+	mempool.h	\
+	pathset.cpp	\
+	pathset.h	\
+	problem.h	\
+	ptree.cpp	\
+	ptree.h		\
+	trial.cpp	\
+	trial.h		\
+	types.h		\
+	util.cpp	\
+	util.h
+
+dist:
+	rm -rf colorcoding-$(VERSION)
+	mkdir colorcoding-$(VERSION)
+	cp $(DIST_FILES) colorcoding-$(VERSION)
+	cp Makefile.dist colorcoding-$(VERSION)/Makefile
+	cp netz.txt colorcoding-$(VERSION)/example.graph
+	cp /usr/share/common-licenses/GPL colorcoding-$(VERSION)/LICENSE
+	(cd colorcoding-$(VERSION) && touch .depend && make depend)
+	GZIP=--best tar -cvvzf colorcoding-$(VERSION).tar.gz colorcoding-$(VERSION)
 
 .depend: depend
 

@@ -1,9 +1,15 @@
-#include <math.h>
 #include <queue>
+
+#include <math.h>
+#include <string.h>
 
 #include "ptree.h"
 #include "trial.h"
 #include "util.h"
+
+// Some C++ compilers don't provide C99 prototypes
+extern "C" double lgamma(double x);
+extern "C" double log1p(double x);
 
 extern std::size_t peak_mem_usage;
 
@@ -25,9 +31,9 @@ std::size_t trials_for_prob(std::size_t path_length, std::size_t num_colors,
 struct PartialPath {
     weight_t weight;
 #if STORE_ONLY_COLORS
-    unsigned char vertices[];
+    unsigned char vertices[1];
 #else
-    small_vertex_t vertices[];
+    small_vertex_t vertices[1];
 #endif
 };
 
@@ -102,8 +108,9 @@ bool dynprog_trial(const ColoredGraph& g,
     PTree* old_colorsets = new PTree[g.num_vertices()];
     std::size_t old_path_size = 0;
     for (std::size_t i = 0; i < g.num_vertices(); ++i)
-	new (old_colorsets + i) PTree(old_pool, sizeof (PartialPath) + old_path_size);
-    PTree::Node* pt_nodes[g.num_vertices()];
+	new (old_colorsets + i) PTree(old_pool, sizeof (weight_t) + old_path_size);
+    //PTree::Node* pt_nodes[g.num_vertices()];
+    PTree::Node** pt_nodes = new PTree::Node*[g.num_vertices()];
 
     for (vertex_t s = 0; s < is_start_vertex.size(); ++s) {
 	if (is_start_vertex[s]) {
@@ -122,7 +129,7 @@ bool dynprog_trial(const ColoredGraph& g,
 	std::size_t new_path_size = (l + 1) * sizeof (small_vertex_t);
 #endif
 	for (std::size_t i = 0; i < g.num_vertices(); ++i)
-	    new (new_colorsets + i) PTree(new_pool, sizeof (PartialPath) + new_path_size);
+	    new (new_colorsets + i) PTree(new_pool, sizeof (weight_t) + new_path_size);
 #if 0
 	std::size_t life = 0, dead = 0;
 	for (vertex_t v = 0; v < g.num_vertices(); ++v) {
@@ -186,6 +193,7 @@ bool dynprog_trial(const ColoredGraph& g,
 				delete old_pool;
 				delete[] new_colorsets;
 				delete new_pool;
+				delete[] pt_nodes;
 				return false;
 			    }
 			}
@@ -211,5 +219,6 @@ bool dynprog_trial(const ColoredGraph& g,
 
     delete[] old_colorsets;
     delete old_pool;
+    delete[] pt_nodes;
     return true;
 }

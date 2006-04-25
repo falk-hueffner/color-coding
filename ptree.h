@@ -52,7 +52,6 @@ public:
 	    assert(is_leaf);
 	    return reinterpret_cast<unsigned char*>(this) + sizeof (PTree::Leaf);
 	}
-	void dump(int indent = 0) const;
     };
 
     inline Node* alloc_leaf(key_t c) {

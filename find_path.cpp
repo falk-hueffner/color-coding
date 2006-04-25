@@ -38,7 +38,7 @@ PathSet lightest_path(const Problem& problem, std::size_t num_paths,
 	    if (preheat_trials + 1 < max_preheat_trials) {
 		g.clear_edges();
 		double ratio = double(preheat_trials + 1) / (max_preheat_trials);
-		weight_t max_edge_weight = edge_weights[lrint(edge_weights.size() * ratio)];
+		weight_t max_edge_weight = edge_weights[int(edge_weights.size() * ratio + 0.5)];
 		for (vertex_t v = 0; v < problem.g.num_vertices(); ++v)
 		    for (Graph::neighbor_it n = problem.g.neighbors_begin(v);
 			 n != problem.g.neighbors_end(v); ++n)

@@ -1,0 +1,51 @@
+This package contains the source code accompanying the paper
+
+Falk Hüffner, Sebastian Wernicke and Thomas Zichner:
+Algorithm Engineering for Color-Coding to Detect Signaling Pathways
+in Protein Interaction Networks.
+
+Its purpose is to find minimum-weight paths of a prespecified length
+in a weighted undirected graph.
+
+The program is written in ISO C++. It has only be tested on Unix
+systems, but should be portable to other systems. Sources can be
+obtained at http://theinf1.informatik.uni-jena.de/colorcoding/. They
+are distributed under the terms of the GNU General Public License
+(GPL, see COPYING).
+
+It has been tested on:
+
+* Debian GNU/Linux (i386) 3.1 with GNU g++ 3.3.5, 3.4.4, and 4.1.0
+* Digital Unix 5.1 (Alpha) with GNU g++ 3.3.2 and DEC C++ V6.3-008
+  (needs the "-std strict_ansi" option)
+* Solaris 9 (UltraSPARC) with GNU g++ 4.0.2
+
+If you have the "make" utility (as any Unix system has), you can
+compile with "make".
+
+The program is called "colorcoding". By default, it reads a graph from
+standard input and writes the paths found to standard output. The
+graph format is a simple text format, where each line describes one
+edge, given by its two endpoints and the edge weight separated by
+whitespace:
+
+v0 v1 0.32
+v1 v2 1.22
+v2 v0 0.01
+
+Vertex names can be any combination of letters, digits, and _. Note
+that this graph format cannot describe degree-0 vertices; however,
+they are irrelevant for finding paths anyway.
+
+The output is a set of (by default 100) paths of minimum weight in the
+graph. Each line describes one path by giving its total weight and the
+list of vertices. Example:
+
+# ./colorcoding < example.graph 
+1.73 10 3 5 4 7 2 1 6
+
+There are many options that affect program behavior; see ./colorcoding -h
+for a listing.
+
+-- Falk Hueffner (http://theinf1.informatik.uni-jena.de/~hueffner/)
+   April 25, 2006

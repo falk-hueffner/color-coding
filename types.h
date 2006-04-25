@@ -1,10 +1,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
-#include <vector>
-
-#include <limits.h>
 #include <float.h>
+#include <limits.h>
 #include <stdint.h>
 
 typedef unsigned   vertex_t;

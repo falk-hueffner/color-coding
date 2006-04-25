@@ -25,15 +25,14 @@ public:
     void set_leaf_size(std::size_t n_leaf_size) { leaf_size = n_leaf_size; }
     void dump() const;
 
-//private:
     // little-endian patricia trees
     struct Leaf {
 	bool  is_leaf : 1;	// 1 in leafs, 0 in branches
 	key_t key : MAX_COLORS; // key
     };
     struct Node : public Leaf {
-	Node* left;		// subtree where branchBit is 0
-	Node* right;		// subtree where branchBit is 1
+	Node* left;		// subtree where the branch bit is 0
+	Node* right;		// subtree where the branch bit is 1
 
 	bool branch_matches(key_t k) const {
 	    key_t cmp = k ^ key;

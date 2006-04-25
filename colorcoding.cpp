@@ -15,7 +15,6 @@
 #include "debug.h"
 #include "find_path.h"
 #include "graph.h"
-#include "mst.h"
 #include "problem.h"
 #include "util.h"
 #include "trial.h"

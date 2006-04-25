@@ -3,7 +3,15 @@
 
 #include <float.h>
 #include <limits.h>
-#include <stdint.h>
+
+#include "util.h"
+
+typedef unsigned short uint16_t;
+typedef unsigned int   uint32_t;
+
+COMPILE_TIME_ASSERT(CHAR_BIT == 8);
+COMPILE_TIME_ASSERT(sizeof (uint16_t) == 2);
+COMPILE_TIME_ASSERT(sizeof (uint32_t) == 4);
 
 typedef unsigned   vertex_t;
 typedef uint16_t   small_vertex_t;

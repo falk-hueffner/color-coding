@@ -1,7 +1,6 @@
 #ifndef PTREE_HH
 #define PTREE_HH
 
-#include <stdint.h>
 #include <cstddef>
 
 #include "mempool.h"

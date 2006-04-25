@@ -13,11 +13,7 @@ public:
 
     PTree() { }
     PTree(Mempool* n_mempool, std::size_t n_leaf_size = 0)
-	: mempool(n_mempool), root(NULL), leaf_size(n_leaf_size) {
-	// ensure alignment
-	leaf_size += sizeof (void*) - 1;
-	leaf_size -= leaf_size % sizeof (void*);
-    }
+	: mempool(n_mempool), root(NULL), leaf_size(n_leaf_size) { }
 
     bool contains(key_t k) const;
     void* find_or_insert(key_t k);

@@ -15,6 +15,9 @@ public:
 
     void* alloc(std::size_t n) {
 	assert(n <= CHUNK_SIZE);
+	// ensure alignment
+	n += sizeof (void*) - 1;
+	n -= n % sizeof (void*);
 	if (top + n > end) {
 	    chunks.push_back(new unsigned char[CHUNK_SIZE]);
 	    top = chunks.back();

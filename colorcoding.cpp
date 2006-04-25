@@ -25,7 +25,6 @@ std::size_t peak_mem_usage;
 static void usage(std::ostream& out) {
     out << "colorcode: Find most probable path in a graph\n"
 	   "  stdin      Input graph\n"
-//	   "  -y	 find trees instead of paths\n"
 	   "  -i FILE    Read start vertices from FILE\n"
 	   "  -e FILE    Read end vertices from FILE\n"
 	   "  -v         Print progress to stderr\n"
@@ -79,7 +78,6 @@ std::set<vertex_t> read_vertex_file(const std::string& file, const Graph& g) {
 }
 
 int main(int argc, char *argv[]) {
-    bool find_trees = false;
     std::string start_vertices_file, end_vertices_file;
     std::size_t path_length = 8;
     std::size_t num_colors = 0;
@@ -96,7 +94,6 @@ int main(int argc, char *argv[]) {
     int c;
     while ((c = getopt(argc, argv, "yi:e:l:c:n:f:t:p:x:b:r::vsh")) != -1) {
 	switch (c) {
-	case 'y': find_trees = true; break;
 	case 'i': start_vertices_file = optarg; break;
 	case 'e': end_vertices_file = optarg; break;
 	case 'l': path_length = atoi(optarg); break;
@@ -155,10 +152,6 @@ int main(int argc, char *argv[]) {
 	std::cerr << "error: number of colors must be <= " << MAX_COLORS << std::endl;
 	exit(1);
     }
-    if (find_trees && end_vertices_file != "") {
-	std::cerr << "error: end vertices not supported when looking for trees\n";
-	exit(1);
-    }
 
     Graph g(std::cin);
 
@@ -198,7 +191,6 @@ int main(int argc, char *argv[]) {
     problem.g = g;
     problem.is_start_vertex = is_start_vertex;
     problem.is_end_vertex = is_end_vertex;
-    problem.find_trees = find_trees;
     problem.path_length = path_length;
     problem.num_preheat_trials = preheat_trials;
     problem.num_trials = num_trials;
@@ -217,22 +209,12 @@ int main(int argc, char *argv[]) {
 	    for (std::size_t j = 0; j < i->path().size(); ++j)
 		std::cout << ' ' << g.vertex_name(i->path()[j]);
 	    std::cout << std::endl;
-	    if (problem.find_trees) {
-		Graph h = g.induced_subgraph(i->path());
-		Graph t = mst(h);
-		if (fabs(t.weight() - i->path_weight()) > 1e-6) {
-		    std::cerr << "internal error: MST weight is " << t.weight() << std::endl
-			      << t << std::endl;
-		    exit(1);
-		}
-	    } else {
-		weight_t weight = 0;
-		for (std::size_t j = 0; j < i->path().size() - 1; ++j)
-		    weight += g.edge_weight(i->path()[j], i->path()[j + 1]);
-		if (fabs(weight - i->path_weight()) > 1e-6) {
-		    std::cerr << "internal error: path weight is " << weight << std::endl;
-		    exit(1);
-		}
+	    weight_t weight = 0;
+	    for (std::size_t j = 0; j < i->path().size() - 1; ++j)
+		weight += g.edge_weight(i->path()[j], i->path()[j + 1]);
+	    if (fabs(weight - i->path_weight()) > 1e-6) {
+		std::cerr << "internal error: path weight is " << weight << std::endl;
+		exit(1);
 	    }
 	}
     }

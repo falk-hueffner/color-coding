@@ -7,6 +7,7 @@ struct counter {
     counter() : count(0) { }
     std::size_t count;
     void push_back(const T&) { ++count; }
+    typedef T value_type;
     typedef const T& const_reference;
 };
 
@@ -32,8 +33,8 @@ void PathSet::add(const std::vector<vertex_t>& p, weight_t weight) {
 	return;
 
     Entry entry(p, weight);
-    std::vector<it> to_delete;
-    for (it i = entries.begin(); i != entries.end(); ++i) {
+    std::vector<m_it> to_delete;
+    for (m_it i = entries.begin(); i != entries.end(); ++i) {
 	if (intersection_size(entry.path_set, i->path_set) > max_common) {
 	    if (weight >= i->weight)
 		return;

@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "graph.h"
 #include "util.h"
 

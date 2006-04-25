@@ -11,7 +11,7 @@ Bounds::Bounds(const Problem& problem, Bounds::Mode mode, std::size_t n_max_lb_e
       min_to_anywhere(min_to_goal),
       min_anywhere_to_goal(max_lb_edges, WEIGHT_MAX),
       min_anywhere_to_anywhere(max_lb_edges, WEIGHT_MAX),
-      min_weight(problem.path_length, problem.g.num_vertices()) {
+      min_weight(problem.path_length, std::vector<weight_t>(problem.g.num_vertices())) {
     if (mode == NONE)
 	return;
 

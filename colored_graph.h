@@ -1,6 +1,8 @@
 #ifndef COLORED_GRAPH_H
 #define COLORED_GRAPH_H
 
+#include <stdlib.h>
+
 #include "types.h"
 #include "graph.h"
 

@@ -34,6 +34,7 @@ public:
     };
 
     typedef std::set<Entry>::const_iterator it;
+    typedef std::set<Entry>::iterator m_it;
 
     it begin() const { return entries.begin(); }
     it end()   const;

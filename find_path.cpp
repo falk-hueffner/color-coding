@@ -55,13 +55,16 @@ PathSet lightest_path(const Problem& problem, std::size_t num_paths,
 	    : problem.num_trials;
 	g.color_randomly(colors);
 	if (info.is_on())
-	    fprintf(stderr, "%7s %6zd/%6zd edges=%zd colors=%zd %zdM %zd:[%10.8f,%10.8f]\n",
+	    fprintf(stderr, "%7s %6lu/%6lu edges=%lu colors=%lu %luM %lu:[%10.8f,%10.8f]\n",
 		    preheating ? "preheat" : "trial",
-		    preheating ? preheat_trials : trials,
-		    preheating ? max_preheat_trials : max_trials,
-		    g.num_edges(),
-		    colors, peak_mem_usage / 1024 / 1024,
-		    paths.size(), paths.best_weight(), paths.worst_weight());
+		    (unsigned long) (preheating ? preheat_trials : trials),
+		    (unsigned long) (preheating ? max_preheat_trials : max_trials),
+		    (unsigned long) g.num_edges(),
+		    (unsigned long) colors,
+		    (unsigned long) (peak_mem_usage / 1024 / 1024),
+		    (unsigned long) paths.size(),
+		    paths.best_weight(),
+		    paths.worst_weight());
 		std::size_t old_paths_size = paths.size();
 	weight_t old_worst_weight = paths.worst_weight();
 	bool ok = dynprog_trial(g, problem.is_start_vertex, problem.is_end_vertex,

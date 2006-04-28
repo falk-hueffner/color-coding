@@ -7,7 +7,7 @@ in Protein Interaction Networks.
 Its purpose is to find minimum-weight paths of a prespecified length
 in a weighted undirected graph.
 
-The program is written in ISO C++. It has only be tested on Unix
+The program is written in ISO C++. It has only been tested on Unix
 systems, but should be portable to other systems. Sources can be
 obtained at http://theinf1.informatik.uni-jena.de/colorcoding/. They
 are distributed under the terms of the GNU General Public License
@@ -19,6 +19,7 @@ It has been tested on:
 * Digital Unix 5.1 (Alpha) with GNU g++ 3.3.2 and DEC C++ V6.3-008
   (needs the "-std strict_ansi" option)
 * Solaris 9 (UltraSPARC) with GNU g++ 4.0.2
+* Windows XP/Cygwin 1.4
 
 If you have the "make" utility (as any Unix system has), you can
 compile with "make".

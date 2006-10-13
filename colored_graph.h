@@ -17,7 +17,7 @@ public:
 	assert(u < num_vertices());
 	return m_colors[u];
     }
-    colorset_t color_set(vertex_t u) const {
+    colorset_t color_singleton(vertex_t u) const {
 	assert(u < num_vertices());
 	return static_cast<colorset_t>(1) << m_colors[u];
     }

@@ -114,7 +114,7 @@ bool dynprog_trial(const ColoredGraph& g,
 
     for (vertex_t s = 0; s < is_start_vertex.size(); ++s) {
 	if (is_start_vertex[s]) {
-	    PartialPath *pp = find_pp(old_colorsets[s], g.color_set(s));
+	    PartialPath *pp = find_pp(old_colorsets[s], g.color_singleton(s));
 	    pp->weight = 0;
 	}
     }
@@ -147,7 +147,7 @@ bool dynprog_trial(const ColoredGraph& g,
 		vertex_t w = n->neighbor;
 		if (edges_left == 0 && !is_end_vertex[w])
 		    continue;
-		colorset_t w_color = g.color_set(w);
+		colorset_t w_color = g.color_singleton(w);
 		std::size_t num_pt_nodes = 0;
 		pt_nodes[num_pt_nodes++] = old_colorsets[v].root;
 		while (num_pt_nodes) {

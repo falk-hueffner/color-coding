@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#define COMPILE_TIME_ASSERT(expr)	extern char UNIQUE_NAME[expr ? 1 : -1]
+#define COMPILE_TIME_ASSERT(expr)	extern char UNIQUE_NAME[(expr) ? 1 : -1]
 #define UNIQUE_NAME			MAKE_NAME(__LINE__)
 #define MAKE_NAME(line)			MAKE_NAME2(line)
 #define MAKE_NAME2(line)		constraint_ ## line

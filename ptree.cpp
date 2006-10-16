@@ -2,7 +2,7 @@
 
 #include "ptree.h"
 
-void* PTree::find_or_insert(key_t c) {
+void* PTree::find_or_insert(key_t c, std::size_t leaf_size) {
     if (!root) {
 	root = alloc_leaf(c);
 	return root->data();
@@ -13,7 +13,7 @@ void* PTree::find_or_insert(key_t c) {
 	if (node->is_leaf || !node->branch_matches(c)) {
 	    if (node->is_leaf && node->key == c)
 		return node->data();
-	    PTree::Node* leaf = alloc_leaf(c);
+	    PTree::Node* leaf = alloc_leaf(c, leaf_size);
 	    PTree::Node* branch = alloc_branch(c, node, leaf);
 	    *pparent = branch;
 	    return leaf->data();

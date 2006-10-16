@@ -16,7 +16,8 @@ public:
 	: mempool(n_mempool), root(NULL), leaf_size(n_leaf_size) { }
 
     bool contains(key_t k) const;
-    void* find_or_insert(key_t k);
+    void* find_or_insert(key_t k, std::size_t leaf_size);
+    void* find_or_insert(key_t k) { return find_or_insert(k, leaf_size); }
     void set_leaf_size(std::size_t n_leaf_size) { leaf_size = n_leaf_size; }
     void dump() const;
 
@@ -49,7 +50,7 @@ public:
 	}
     };
 
-    inline Node* alloc_leaf(key_t c) {
+    inline Node* alloc_leaf(key_t c, std::size_t leaf_size) {
 	Node* leaf = static_cast<PTree::Node*>(mempool->alloc(sizeof (Leaf) + leaf_size));
 	leaf->is_leaf = true;
 	leaf->key = c;
@@ -57,6 +58,11 @@ public:
 	*(weight_t*) (leaf->data()) = WEIGHT_MAX;
 	return leaf;
     }
+    
+    inline Node* alloc_leaf(key_t c) {
+	return alloc_leaf(c, leaf_size);
+    }
+
     inline Node* alloc_branch(key_t k, Node* node, Node* leaf) {
 	key_t branch_bit = isolate_lowest_bit(k ^ node->key);
 	Node* branch = static_cast<PTree::Node*>(mempool->alloc(sizeof (Node)));

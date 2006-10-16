@@ -30,7 +30,6 @@ bool dynprog_trial(const ColoredGraph& g,
     const std::size_t path_length = match_weights.size();
 
     Mempool* old_pool = new Mempool();
-    //PTree* old_colorsets = new PTree[g.num_vertices()];
     std::vector<std::vector<PTree> >* old_colorsets
 	= new std::vector<std::vector<PTree> >(max_deletions + 1, g.num_vertices());
     PTree::Node** pt_node_stack = new PTree::Node*[g.num_vertices()];
@@ -145,8 +144,6 @@ bool dynprog_trial(const ColoredGraph& g,
 	    continue;
 
 	// add insertions
-
-	
 	for (std::size_t deletions = 0; deletions <= max_deletions; ++ deletions) {
 	    for (vertex_t v = 0; v < g.num_vertices(); ++v) {
 		if (!(*old_colorsets)[deletions][v].root)

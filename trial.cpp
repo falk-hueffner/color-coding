@@ -107,9 +107,6 @@ bool dynprog_trial(const ColoredGraph& g,
     Mempool* old_pool = new Mempool();
     PTree* old_colorsets = new PTree[g.num_vertices()];
     std::size_t old_path_size = 0;
-    for (std::size_t i = 0; i < g.num_vertices(); ++i)
-	//new (old_colorsets + i) PTree(sizeof (weight_t) + old_path_size);
-	new (old_colorsets + i) PTree();
     PTree::Node** pt_nodes = new PTree::Node*[g.num_vertices()];
 
     for (vertex_t s = 0; s < is_start_vertex.size(); ++s) {
@@ -129,9 +126,6 @@ bool dynprog_trial(const ColoredGraph& g,
 #else
 	std::size_t new_path_size = (l + 1) * sizeof (small_vertex_t);
 #endif
-	for (std::size_t i = 0; i < g.num_vertices(); ++i)
-	    //new (new_colorsets + i) PTree(sizeof (weight_t) + new_path_size);
-	    new (new_colorsets + i) PTree();
 #if 0
 	std::size_t life = 0, dead = 0;
 	for (vertex_t v = 0; v < g.num_vertices(); ++v) {

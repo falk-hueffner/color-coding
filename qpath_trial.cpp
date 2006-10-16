@@ -15,7 +15,8 @@ struct PartialPath {
 
 inline PartialPath* find_pp(PTree& t, colorset_t c, Mempool& mempool,
 			    std::size_t num_vertices) {
-    std::size_t size = num_vertices * sizeof (small_vertex_t);
+    // FIXME subtract trailing  small_vertex_t[1]
+    std::size_t size = sizeof (PartialPath) + num_vertices * sizeof (small_vertex_t);
     return static_cast<PartialPath*>(t.find_or_insert(c, mempool, size));
 }
 
@@ -36,18 +37,19 @@ bool qpath_trial(const ColoredGraph& g,
 
     // Initialize first layer
     for (vertex_t s = 0; s < g.num_vertices(); ++s) {
-	PartialPath *pp = find_pp((*old_colorsets)[0][s], g.color_singleton(s), *old_pool, 1);
+	PartialPath *pp = find_pp((*old_colorsets)[0][s], g.color_singleton(s), *old_pool, 0);
 	pp->weight = match_weights[0][s];
 	pp->insertions = 0;
-	pp->vertices[0] = s;
+	//pp->vertices[0] = s;
 	for (std::size_t deletions = 1; deletions <= max_deletions; ++deletions) {
 	    PartialPath *pp = find_pp((*old_colorsets)[deletions][s], g.color_singleton(s),
-				      *old_pool, 1);
+				      *old_pool, 0);
 	    pp->weight = deletions * deletion_cost;
 	    pp->insertions = 0;
-	    pp->vertices[0] = s;
+	    //pp->vertices[0] = s;
 	}
     }
+    //std::cerr << "Initialized first layer\n";
 
     for (vertex_t l = 0; l < path_length - 1; ++l) {
 	const std::size_t edges_left = (path_length - 1) - l - 1;
@@ -73,16 +75,17 @@ bool qpath_trial(const ColoredGraph& g,
 			if (pt_node->is_leaf) {
 			    PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
 			    weight_t new_weight = old_pp->weight + n->weight
-						+ match_weights[l][w];
+						+ match_weights[l + 1][w];
 			    if (new_weight + bounds.h(w, edges_left) < paths.worst_weight()) {
+				std::size_t old_num_vertices = popcount(pt_node->key) - 1; //l + old_pp->insertions + 1 - 1;
 				if (l + 1 == path_length - 1) {
 				    std::vector<vertex_t> p(old_pp->vertices,
-							    old_pp->vertices
-							    + (l + old_pp->insertions));
+							    old_pp->vertices + old_num_vertices);
+				    p.push_back(v);
 				    p.push_back(w);
 				    paths.add(p, new_weight);
 				} else {
-				    std::size_t old_num_vertices = l + old_pp->insertions + 1;
+				    //std::cerr << "find match\n";
 				    PartialPath* new_pp = find_pp((*new_colorsets)[deletions][w],
 								  pt_node->key | w_color,
 								  *new_pool,
@@ -92,7 +95,8 @@ bool qpath_trial(const ColoredGraph& g,
 					new_pp->insertions = old_pp->insertions;
 					memcpy(new_pp->vertices, old_pp->vertices,
 					       old_num_vertices * sizeof old_pp->vertices[0]);
-					new_pp->vertices[l] = v;
+					new_pp->vertices[old_num_vertices] = v;
+					//std::cerr << "gounf " << v << " " << w << '\n';
 				    }
 				}
 			    }
@@ -112,22 +116,23 @@ bool qpath_trial(const ColoredGraph& g,
 			if (pt_node->is_leaf) {
 			    PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
 			    weight_t new_weight = old_pp->weight + deletion_cost;
-			    std::size_t old_num_vertices = l + 1 + old_pp->insertions;
+			    std::size_t old_num_vertices = popcount(pt_node->key) - 1;// l + old_pp->insertions + 1 - 1;
 			    if (new_weight + bounds.h(v, edges_left) < paths.worst_weight()) {
 				if (l + 1 == path_length - 1) {
 				    std::vector<vertex_t> p(old_pp->vertices,
 							    old_pp->vertices + old_num_vertices);
+				    p.push_back(v);
 				    paths.add(p, new_weight);
 				} else {
+				    //std::cerr << "find deletion\n";
 				    PartialPath* new_pp
 					= find_pp((*new_colorsets)[deletions + 1][v],
-						  pt_node->key, *new_pool, old_num_vertices + 1);
+						  pt_node->key, *new_pool, old_num_vertices);
 				    if (new_weight < new_pp->weight) {
 					new_pp->weight = new_weight;
 					new_pp->insertions = old_pp->insertions;
 					memcpy(new_pp->vertices, old_pp->vertices,
 					       old_num_vertices * sizeof old_pp->vertices[0]);
-					new_pp->vertices[l] = v;
 				    }
 				}
 			    }
@@ -144,6 +149,7 @@ bool qpath_trial(const ColoredGraph& g,
 	    continue;
 
 	// add insertions
+	if(0)
 	for (std::size_t deletions = 0; deletions <= max_deletions; ++ deletions) {
 	    for (vertex_t v = 0; v < g.num_vertices(); ++v) {
 		if (!(*old_colorsets)[deletions][v].root)
@@ -168,7 +174,8 @@ bool qpath_trial(const ColoredGraph& g,
 			    weight_t new_weight = old_pp->weight + n->weight + insertion_cost;
 			    if (old_pp->insertions + 1 <= max_insertions
 				&& new_weight + bounds.h(w, edges_left) < paths.worst_weight()) {
-				std::size_t old_num_vertices = l + old_pp->insertions + 1;
+				std::size_t old_num_vertices = popcount(pt_node->key) - 1; //  l + old_pp->insertions + 1 - 1;
+				//std::cerr << "find insertions\n";
 				PartialPath* new_pp = find_pp((*new_colorsets)[deletions][w],
 							      pt_node->key | w_color, *new_pool,
 							      old_num_vertices + 1);
@@ -177,7 +184,8 @@ bool qpath_trial(const ColoredGraph& g,
 				    new_pp->insertions = old_pp->insertions + 1;
 				    memcpy(new_pp->vertices, old_pp->vertices,
 					   old_num_vertices * sizeof old_pp->vertices[0]);
-				    new_pp->vertices[l] = v;
+				    new_pp->vertices[old_num_vertices] = v;
+				    //std::cerr << "gounf " << v << " " << w << '\n';
 				}
 			    }
 			} else {

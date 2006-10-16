@@ -27,6 +27,9 @@ static void usage(std::ostream& out) {
 	   "  stdin      Input graph\n"
 	   "  -i FILE    Read start vertices from FILE\n"
 	   "  -e FILE    Read end vertices from FILE\n"
+	   "  -q FILE    Read query path from FILE\n"
+	   "  -m FILE    Read matching costs from FILE (only meaningful with -q)\n"
+	   "             (default: 0 if vertex names match, 1 otherwise)\n"
 	   "  -v         Print progress to stderr\n"
 	   "  -l K       Find paths of length K (default: 8)\n"
 	   "  -c C       Use C colors (default: auto)\n"
@@ -77,8 +80,40 @@ std::set<vertex_t> read_vertex_file(const std::string& file, const Graph& g) {
     return vertices;
 }
 
+std::vector<std::string> read_vertex_name_file(const std::string& file) {
+    std::ifstream in(file.c_str());
+    if (!in) {
+	std::cerr << "error: cannot open \"" << file << "\"\n";
+	exit(1);
+    }
+    std::string line;
+    std::size_t lineno = 0;
+    std::vector<std::string> vertices;
+    while (std::getline(in, line)) {
+	++lineno;
+	std::string::size_type p = line.find('#');
+	if (p != std::string::npos)
+	    line = line.substr(0, p);
+	line = trim(line);
+	if (line.empty())
+	    continue;
+	if (line.find_first_of(WHITESPACE) != std::string::npos) {
+	    std::cerr << file << ':' << lineno << ": error: syntax error\n";
+	    exit(1);
+	}
+	if (std::find(vertices.begin(), vertices.end(), line) != vertices.end()) {
+	    std::cerr << file << ':' << lineno << ": error: duplicate vertex '"
+		      << line << "'\n";
+	    exit(1);
+	} else {
+	    vertices.push_back(line);
+	}
+    }
+    return vertices;
+}
+
 int main(int argc, char *argv[]) {
-    std::string start_vertices_file, end_vertices_file;
+    std::string start_vertices_file, end_vertices_file, query_path_file, matching_costs_file;
     std::size_t path_length = 8;
     std::size_t num_colors = 0;
     std::size_t num_paths = 100;
@@ -92,10 +127,12 @@ int main(int argc, char *argv[]) {
     std::size_t max_lb_edges = 2;
 
     int c;
-    while ((c = getopt(argc, argv, "yi:e:l:c:n:f:t:p:x:b:r::vsh")) != -1) {
+    while ((c = getopt(argc, argv, "yi:e:q:m:l:c:n:f:t:p:x:b:r::vsh")) != -1) {
 	switch (c) {
 	case 'i': start_vertices_file = optarg; break;
 	case 'e': end_vertices_file = optarg; break;
+	case 'q': query_path_file = optarg; break;
+	case 'm': matching_costs_file = optarg; break;
 	case 'l': path_length = atoi(optarg); break;
 	case 'c': num_colors = atoi(optarg); problem.auto_colors = false; break;
 	case 'n': num_paths = atoi(optarg); break;
@@ -184,6 +221,21 @@ int main(int argc, char *argv[]) {
     } else {
 	for (std::size_t i = 0; i < g.num_vertices(); ++i)
 	    is_end_vertex[i] = true;
+    }
+
+    std::vector<std::vector<weight_t> > match_weights;
+    if (query_path_file != "") {
+	std::vector<std::string> query_vertices = read_vertex_name_file(matching_costs_file);
+	match_weights.resize(query_vertices.size());
+	for (std::size_t i = 0; i < query_vertices.size(); ++i) {
+	    match_weights[i].resize(g.num_vertices());
+	    for (std::size_t v = 0; v < g.num_vertices(); ++v) {
+		if (g.vertex_name(v) == query_vertices[i])
+		    match_weights[i][v] = 0;
+		else
+		    match_weights[i][v] = 1;
+	    }
+	}
     }
 
     std::size_t max_common = int(path_length * (filter / 100));

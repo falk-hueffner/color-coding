@@ -117,6 +117,8 @@ int main(int argc, char *argv[]) {
     std::size_t path_length = 8;
     std::size_t max_deletions = 3;
     std::size_t max_insertions = 3;
+    weight_t insertion_cost = 1;
+    weight_t deletion_cost = 1;
     std::size_t num_colors = 0;
     std::size_t num_paths = 100;
     double filter = 70;
@@ -250,6 +252,8 @@ int main(int argc, char *argv[]) {
     problem.is_end_vertex = is_end_vertex;
     problem.match_weights = match_weights;
     problem.max_deletions = max_deletions;
+    problem.insertion_cost = insertion_cost;
+    problem.deletion_cost = deletion_cost;
     problem.max_insertions = max_insertions;
     problem.path_length = path_length;
     problem.num_preheat_trials = preheat_trials;

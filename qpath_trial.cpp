@@ -19,14 +19,14 @@ inline PartialPath* find_pp(PTree& t, colorset_t c, Mempool& mempool,
     return static_cast<PartialPath*>(t.find_or_insert(c, mempool, size));
 }
 
-bool dynprog_trial(const ColoredGraph& g,
-		   std::vector<std::vector<weight_t> > match_weights, // match_weights[l][v]
-		   std::size_t max_insertions,
-		   std::size_t max_deletions,
-		   weight_t insertion_cost,
-		   weight_t deletion_cost,
-		   PathSet& paths,
-		   const Bounds& bounds) {
+bool qpath_trial(const ColoredGraph& g,
+		 std::vector<std::vector<weight_t> > match_weights, // match_weights[l][v]
+		 std::size_t max_insertions,
+		 std::size_t max_deletions,
+		 weight_t insertion_cost,
+		 weight_t deletion_cost,
+		 PathSet& paths,
+		 const Bounds& bounds) {
     const std::size_t path_length = match_weights.size();
 
     Mempool* old_pool = new Mempool();

@@ -13,6 +13,8 @@ struct Problem {
     std::vector<std::vector<weight_t> > match_weights;
     std::size_t max_insertions;
     std::size_t max_deletions;
+    weight_t insertion_cost;
+    weight_t deletion_cost;
     std::size_t path_length;
     bool auto_preheat_trials;
     bool auto_trials;

@@ -115,6 +115,8 @@ std::vector<std::string> read_vertex_name_file(const std::string& file) {
 int main(int argc, char *argv[]) {
     std::string start_vertices_file, end_vertices_file, query_path_file, matching_costs_file;
     std::size_t path_length = 8;
+    std::size_t max_deletions = 3;
+    std::size_t max_insertions = 3;
     std::size_t num_colors = 0;
     std::size_t num_paths = 100;
     double filter = 70;
@@ -225,7 +227,7 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::vector<weight_t> > match_weights;
     if (query_path_file != "") {
-	std::vector<std::string> query_vertices = read_vertex_name_file(matching_costs_file);
+	std::vector<std::string> query_vertices = read_vertex_name_file(query_path_file);
 	match_weights.resize(query_vertices.size());
 	for (std::size_t i = 0; i < query_vertices.size(); ++i) {
 	    match_weights[i].resize(g.num_vertices());
@@ -234,8 +236,11 @@ int main(int argc, char *argv[]) {
 		    match_weights[i][v] = 0;
 		else
 		    match_weights[i][v] = 1;
+		std::cerr << query_vertices[i] << ' ' << g.vertex_name(v)
+			  << ' ' << match_weights[i][v] << std::endl;
 	    }
 	}
+	path_length = query_vertices.size() + max_insertions;
     }
 
     std::size_t max_common = int(path_length * (filter / 100));
@@ -243,6 +248,9 @@ int main(int argc, char *argv[]) {
     problem.g = g;
     problem.is_start_vertex = is_start_vertex;
     problem.is_end_vertex = is_end_vertex;
+    problem.match_weights = match_weights;
+    problem.max_deletions = max_deletions;
+    problem.max_insertions = max_insertions;
     problem.path_length = path_length;
     problem.num_preheat_trials = preheat_trials;
     problem.num_trials = num_trials;

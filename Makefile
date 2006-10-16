@@ -18,6 +18,7 @@ OBJS	= \
 	mst.o		\
 	pathset.o	\
 	ptree.o		\
+	qpath_trial.o	\
 	trial.o		\
 	util.o
 

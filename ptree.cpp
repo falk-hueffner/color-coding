@@ -4,7 +4,7 @@
 
 void* PTree::find_or_insert(key_t c, Mempool& mempool, std::size_t leaf_size) {
     if (!root) {
-	root = alloc_leaf(c, mempool);
+	root = alloc_leaf(c, mempool, leaf_size);
 	return root->data();
     }
     Node* node = root;

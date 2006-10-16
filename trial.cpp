@@ -37,8 +37,8 @@ struct PartialPath {
 #endif
 };
 
-inline PartialPath* find_pp(PTree& t, colorset_t c, Mempool& mempool) {
-    return static_cast<PartialPath*>(t.find_or_insert(c, mempool));
+inline PartialPath* find_pp(PTree& t, colorset_t c, Mempool& mempool, std::size_t leaf_size) {
+    return static_cast<PartialPath*>(t.find_or_insert(c, mempool, leaf_size));
 }
 
 inline std::vector<vertex_t>
@@ -108,13 +108,14 @@ bool dynprog_trial(const ColoredGraph& g,
     PTree* old_colorsets = new PTree[g.num_vertices()];
     std::size_t old_path_size = 0;
     for (std::size_t i = 0; i < g.num_vertices(); ++i)
-	new (old_colorsets + i) PTree(sizeof (weight_t) + old_path_size);
-    //PTree::Node* pt_nodes[g.num_vertices()];
+	//new (old_colorsets + i) PTree(sizeof (weight_t) + old_path_size);
+	new (old_colorsets + i) PTree();
     PTree::Node** pt_nodes = new PTree::Node*[g.num_vertices()];
 
     for (vertex_t s = 0; s < is_start_vertex.size(); ++s) {
 	if (is_start_vertex[s]) {
-	    PartialPath *pp = find_pp(old_colorsets[s], g.color_singleton(s), *old_pool);
+	    PartialPath *pp = find_pp(old_colorsets[s], g.color_singleton(s), *old_pool,
+				      sizeof (weight_t));
 	    pp->weight = 0;
 	}
     }
@@ -129,7 +130,8 @@ bool dynprog_trial(const ColoredGraph& g,
 	std::size_t new_path_size = (l + 1) * sizeof (small_vertex_t);
 #endif
 	for (std::size_t i = 0; i < g.num_vertices(); ++i)
-	    new (new_colorsets + i) PTree(sizeof (weight_t) + new_path_size);
+	    //new (new_colorsets + i) PTree(sizeof (weight_t) + new_path_size);
+	    new (new_colorsets + i) PTree();
 #if 0
 	std::size_t life = 0, dead = 0;
 	for (vertex_t v = 0; v < g.num_vertices(); ++v) {
@@ -175,7 +177,8 @@ bool dynprog_trial(const ColoredGraph& g,
 			    } else {
 				PartialPath* new_pp = find_pp(new_colorsets[w],
 							      pt_node->key | w_color,
-							      *new_pool);
+							      *new_pool,
+							      sizeof (weight_t) + new_path_size);
 				if (new_weight < new_pp->weight) {
 				    new_pp->weight = new_weight;
 				    memcpy(new_pp->vertices, old_pp->vertices, old_path_size);

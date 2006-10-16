@@ -11,13 +11,10 @@ class PTree {
 public:
     typedef colorset_t key_t;
 
-    PTree(std::size_t n_leaf_size = 0)
-	: root(NULL), leaf_size(n_leaf_size) { }
+    PTree() : root(NULL) { }
 
     bool contains(key_t k) const;
     void* find_or_insert(key_t k, Mempool& mempool, std::size_t leaf_size);
-    void* find_or_insert(key_t k, Mempool& mempool) { return find_or_insert(k, mempool, leaf_size); }
-    void set_leaf_size(std::size_t n_leaf_size) { leaf_size = n_leaf_size; }
     void dump() const;
 
     // little-endian patricia trees
@@ -58,10 +55,6 @@ public:
 	return leaf;
     }
     
-    inline Node* alloc_leaf(key_t c, Mempool& mempool) {
-	return alloc_leaf(c, mempool, leaf_size);
-    }
-
     inline Node* alloc_branch(key_t k, Node* node, Node* leaf, Mempool& mempool) {
 	key_t branch_bit = isolate_lowest_bit(k ^ node->key);
 	Node* branch = static_cast<PTree::Node*>(mempool.alloc(sizeof (Node)));
@@ -79,7 +72,6 @@ public:
     }
 
     Node* root;
-    std::size_t leaf_size;
 };
 
 #endif	// PTREE_HH

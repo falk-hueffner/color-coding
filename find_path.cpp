@@ -7,6 +7,7 @@
 #include "debug.h"
 #include "find_path.h"
 #include "trial.h"
+#include "qpath_trial.h"
 #include "util.h"
 
 extern std::size_t peak_mem_usage;

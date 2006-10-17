@@ -57,7 +57,7 @@ bool qpath_trial(const ColoredGraph& g,
 	std::vector<std::vector<PTree> >* new_colorsets
 	    = new std::vector<std::vector<PTree> >(max_deletions + 1, g.num_vertices());
 
-	for (std::size_t deletions = 0; deletions <= max_deletions; ++ deletions) {
+	for (std::size_t deletions = 0; deletions <= max_deletions; ++deletions) {
 	    for (vertex_t v = 0; v < g.num_vertices(); ++v) {
 		if (!(*old_colorsets)[deletions][v].root)
 		    continue;
@@ -76,7 +76,7 @@ bool qpath_trial(const ColoredGraph& g,
 			    PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
 			    weight_t new_weight = old_pp->weight + n->weight
 						+ match_weights[l + 1][w];
-			    if (new_weight + bounds.h(w, edges_left) < paths.worst_weight()) {
+			    if (1||new_weight + bounds.h(w, edges_left) < paths.worst_weight()) {
 				std::size_t old_num_vertices = popcount(pt_node->key) - 1; //l + old_pp->insertions + 1 - 1;
 				if (l + 1 == path_length - 1) {
 				    std::vector<vertex_t> p(old_pp->vertices,
@@ -149,18 +149,18 @@ bool qpath_trial(const ColoredGraph& g,
 	    continue;
 
 	// add insertions
-	if(0)
+	if(1)
 	for (std::size_t deletions = 0; deletions <= max_deletions; ++ deletions) {
 	    for (vertex_t v = 0; v < g.num_vertices(); ++v) {
-		if (!(*old_colorsets)[deletions][v].root)
+		if (!(*new_colorsets)[deletions][v].root)
 		    continue;
 
 		for (Graph::neighbor_it n = g.neighbors_begin(v); n != g.neighbors_end(v); ++n) {
 		    vertex_t w = n->neighbor;
 		    colorset_t w_color = g.color_singleton(w);
 		    std::size_t pt_node_stack_size = 0;
-		    pt_node_stack[pt_node_stack_size++] = (*old_colorsets)[deletions][v].root;
-		    /* We modify old_colorsets[deletions][v] while we iterate over it. We still
+		    pt_node_stack[pt_node_stack_size++] = (*new_colorsets)[deletions][v].root;
+		    /* We modify new_colorsets[deletions][v] while we iterate over it. We still
 		       don't miss any newly inserted color set, since any newly inserted color
 		       set has 1 bit more set than an existing entry, and therefore will be
 		       encountered later in iteration, since the zero branch of a branching bit
@@ -173,9 +173,8 @@ bool qpath_trial(const ColoredGraph& g,
 			    PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
 			    weight_t new_weight = old_pp->weight + n->weight + insertion_cost;
 			    if (old_pp->insertions + 1 <= max_insertions
-				&& new_weight + bounds.h(w, edges_left) < paths.worst_weight()) {
+				&& 1||new_weight + bounds.h(w, edges_left) < paths.worst_weight()) {
 				std::size_t old_num_vertices = popcount(pt_node->key) - 1;
-				std::cerr << "find insertions\n";
 				PartialPath* new_pp = find_pp((*new_colorsets)[deletions][w],
 							      pt_node->key | w_color, *new_pool,
 							      old_num_vertices + 1);
@@ -185,7 +184,6 @@ bool qpath_trial(const ColoredGraph& g,
 				    memcpy(new_pp->vertices, old_pp->vertices,
 					   old_num_vertices * sizeof old_pp->vertices[0]);
 				    new_pp->vertices[old_num_vertices] = v;
-				    std::cerr << "gounf " << v << " " << w << '\n';
 				}
 			    }
 			} else {

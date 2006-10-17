@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
     std::size_t path_length = 8;
     std::size_t max_deletions = 3;
     std::size_t max_insertions = 3;
-    weight_t insertion_cost = 0.3;
+    weight_t insertion_cost = 0.01;
     weight_t deletion_cost = 1;
     std::size_t num_colors = 0;
     std::size_t num_paths = 100;
@@ -275,9 +275,13 @@ int main(int argc, char *argv[]) {
 	    weight_t weight = 0;
 	    for (std::size_t j = 0; j < i->path().size() - 1; ++j)
 		weight += g.edge_weight(i->path()[j], i->path()[j + 1]);
-	    if (fabs(weight - i->path_weight()) > 1e-6) {
-		std::cerr << "internal error: path weight is " << weight << std::endl;
-		exit(1);
+	    if (match_weights.size()) {
+		;
+	    } else {
+		if (fabs(weight - i->path_weight()) > 1e-6) {
+		    std::cerr << "internal error: path weight is " << weight << std::endl;
+		    exit(1);
+		}
 	    }
 	}
     }

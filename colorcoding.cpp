@@ -117,7 +117,7 @@ int main(int argc, char *argv[]) {
     std::size_t path_length = 8;
     std::size_t max_deletions = 3;
     std::size_t max_insertions = 3;
-    weight_t insertion_cost = 1;
+    weight_t insertion_cost = 0.3;
     weight_t deletion_cost = 1;
     std::size_t num_colors = 0;
     std::size_t num_paths = 100;
@@ -238,8 +238,6 @@ int main(int argc, char *argv[]) {
 		    match_weights[i][v] = 0;
 		else
 		    match_weights[i][v] = 1;
-		std::cerr << query_vertices[i] << ' ' << g.vertex_name(v)
-			  << ' ' << match_weights[i][v] << std::endl;
 	    }
 	}
 	path_length = query_vertices.size() + max_insertions;

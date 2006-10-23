@@ -69,7 +69,11 @@ weight_t PathSet::best_weight() const {
 }
 
 PathSet::Entry::Entry(const std::vector<vertex_t>& n_p, weight_t n_weight)
-    : p(n_p), weight(n_weight), path_set(p.begin(), p.end()) { }
+    : p(n_p), weight(n_weight) {
+    for (std::size_t i = 0; i < p.size(); ++i)
+	if (p[i] != DELETED_VERTEX)
+	    path_set.insert(abs(p[i]));
+}
 
 bool PathSet::Entry::operator<(const Entry& other) const {
     if (weight != other.weight)

@@ -138,7 +138,7 @@ read_match_weights(const std::string& file) {
 	double weight = atof(fields[2].c_str());
 
 	if (match_weights.find(match) != match_weights.end()) {
-	    std::cerr << "line " << lineno << ": warning: duplicate entry for"
+	    std::cerr << "line " << lineno << ": warning: duplicate entry for "
 		      << fields[0] << " - " << fields[1] << std::endl;
 	} else {
 	    match_weights[match] = weight;
@@ -152,8 +152,8 @@ int main(int argc, char *argv[]) {
     std::size_t path_length = 8;
     std::size_t max_deletions = 3;
     std::size_t max_insertions = 3;
-    weight_t insertion_cost = 0.01;
-    weight_t deletion_cost = 1;
+    weight_t insertion_cost = 0.0;
+    weight_t deletion_cost = 0.0;
     std::size_t num_colors = 0;
     std::size_t num_paths = 100;
     double filter = 70;
@@ -271,6 +271,7 @@ int main(int argc, char *argv[]) {
 	path_match_weights.resize(query_vertices.size());
 	for (std::size_t i = 0; i < query_vertices.size(); ++i) {
 	    path_match_weights[i].resize(g.num_vertices());
+	    weight_t best_match = WEIGHT_MAX;
 	    for (std::size_t v = 0; v < g.num_vertices(); ++v) {
 		std::map<std::pair<std::string, std::string>, weight_t>::const_iterator
 		    it = match_weights.find(std::make_pair(query_vertices[i], g.vertex_name(v)));
@@ -285,7 +286,10 @@ int main(int argc, char *argv[]) {
 			      << query_vertices[i] << " - " << g.vertex_name(v)
 			      << ", defaulting to " << path_match_weights[i][v] << std::endl;
 		}
+		if (path_match_weights[i][v] < best_match)
+		    best_match = path_match_weights[i][v];
 	    }
+	    std::cerr << "Best match for " << query_vertices[i] << ": " << best_match << std::endl;
 	}
 	path_length = query_vertices.size() + max_insertions;
     }

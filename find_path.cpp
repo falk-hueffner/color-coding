@@ -79,9 +79,9 @@ PathSet lightest_path(const Problem& problem, std::size_t num_paths,
 			     paths,
 			     bounds);
 	} else {
-	    dynprog_trial(g, problem.is_start_vertex, problem.is_end_vertex,
-				problem.path_length, colors,
-				paths, bounds);
+	    ok = dynprog_trial(g, problem.is_start_vertex, problem.is_end_vertex,
+			       problem.path_length, colors,
+			       paths, bounds);
 	}
 	bool bound_improved = old_paths_size != paths.size()
 	    || old_worst_weight != paths.worst_weight();

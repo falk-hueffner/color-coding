@@ -55,6 +55,7 @@ bool qpath_trial(const ColoredGraph& g,
 	Mempool* new_pool = new Mempool();
 	std::vector<std::vector<PTree> >* new_colorsets
 	    = new std::vector<std::vector<PTree> >(max_deletions + 1, g.num_vertices());
+	std::size_t alloc_vertices = l + max_insertions + 1;
 
 	for (std::size_t deletions = 0; deletions <= max_deletions; ++deletions) {
 	    for (vertex_t v = 0; v < g.num_vertices(); ++v) {
@@ -86,8 +87,7 @@ bool qpath_trial(const ColoredGraph& g,
 				} else {
 				    PartialPath* new_pp = find_pp((*new_colorsets)[deletions][w],
 								  pt_node->key | w_color,
-								  *new_pool,
-								  old_num_vertices + 1);
+								  *new_pool, alloc_vertices);
 				    if (new_weight < new_pp->weight) {
 					new_pp->weight = new_weight;
 					new_pp->insertions = old_pp->insertions;
@@ -124,7 +124,7 @@ bool qpath_trial(const ColoredGraph& g,
 				} else {
 				    PartialPath* new_pp
 					= find_pp((*new_colorsets)[deletions + 1][v],
-						  pt_node->key, *new_pool, old_num_vertices);
+						  pt_node->key, *new_pool, alloc_vertices);
 				    if (new_weight < new_pp->weight) {
 					new_pp->weight = new_weight;
 					new_pp->insertions = old_pp->insertions;
@@ -148,7 +148,7 @@ bool qpath_trial(const ColoredGraph& g,
 
 	// add insertions
 	if(1)
-	for (std::size_t deletions = 0; deletions <= max_deletions; ++ deletions) {
+	for (std::size_t deletions = 0; deletions <= max_deletions; ++deletions) {
 	    for (vertex_t v = 0; v < g.num_vertices(); ++v) {
 		if (!(*new_colorsets)[deletions][v].root)
 		    continue;
@@ -175,7 +175,7 @@ bool qpath_trial(const ColoredGraph& g,
 				std::size_t old_num_vertices = old_pp->num_vertices;
 				PartialPath* new_pp = find_pp((*new_colorsets)[deletions][w],
 							      pt_node->key | w_color, *new_pool,
-							      old_num_vertices + 1);
+							      alloc_vertices);
 				if (new_weight < new_pp->weight) {
 				    new_pp->weight = new_weight;
 				    new_pp->insertions = old_pp->insertions + 1;

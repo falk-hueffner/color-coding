@@ -182,7 +182,7 @@ bool qpath_trial(const ColoredGraph& g,
 				    new_pp->num_vertices = old_num_vertices + 1;
 				    memcpy(new_pp->vertices, old_pp->vertices,
 					   old_num_vertices * sizeof old_pp->vertices[0]);
-				    new_pp->vertices[old_num_vertices] = v;
+				    new_pp->vertices[old_num_vertices] = -v;
 				}
 			    }
 			} else {

@@ -316,15 +316,21 @@ int main(int argc, char *argv[]) {
     } else {
 	for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {
 	    std::cout << i->path_weight();
-	    for (std::size_t j = 0; j < i->path().size(); ++j)
-		std::cout << ' ' << g.vertex_name(i->path()[j]);
+	    for (std::size_t j = 0; j < i->path().size(); ++j) {
+		small_vertex_t v = i->path()[j];
+		if (v == DELETED_VERTEX)
+		    std::cout << " -";
+		else if (v < 0)
+		    std::cout << " +" << g.vertex_name(-v);
+		else
+		    std::cout << ' ' << g.vertex_name(v);
+	    }
 	    std::cout << std::endl;
-	    weight_t weight = 0;
-	    for (std::size_t j = 0; j < i->path().size() - 1; ++j)
-		weight += g.edge_weight(i->path()[j], i->path()[j + 1]);
 	    if (match_weights.size()) {
-		;
 	    } else {
+		weight_t weight = 0;
+		for (std::size_t j = 0; j < i->path().size() - 1; ++j)
+		    weight += g.edge_weight(i->path()[j], i->path()[j + 1]);
 		if (fabs(weight - i->path_weight()) > 1e-6) {
 		    std::cerr << "internal error: path weight is " << weight << std::endl;
 		    exit(1);

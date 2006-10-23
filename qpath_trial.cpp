@@ -115,9 +115,14 @@ bool qpath_trial(const ColoredGraph& g,
 			PTree::Node* pt_node = pt_node_stack[--pt_node_stack_size];
 			if (pt_node->is_leaf) {
 			    PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
+			    // No deletion after an insertion.
+			    if (old_pp->num_vertices
+				&& old_pp->vertices[old_pp->num_vertices - 1] < 0)
+				continue;
+			    
 			    weight_t new_weight = old_pp->weight + deletion_cost;
 			    std::size_t old_num_vertices = old_pp->num_vertices;
-			    if (new_weight + bounds.h(v, edges_left) < paths.worst_weight()) {
+			    if (new_weight /* + bounds.h(v, edges_left)*/ < paths.worst_weight()) {
 				if (l + 1 == path_length - 1) {
 				    std::vector<vertex_t> p(old_pp->vertices,
 							    old_pp->vertices + old_num_vertices);
@@ -176,7 +181,7 @@ bool qpath_trial(const ColoredGraph& g,
 			    PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
 			    weight_t new_weight = old_pp->weight + n->weight + insertion_cost;
 			    if (old_pp->insertions + 1 <= max_insertions
-				&& new_weight + bounds.h(w, edges_left) < paths.worst_weight()) {
+				&& new_weight /*+ bounds.h(w, edges_left) */ < paths.worst_weight()) {
 				std::size_t old_num_vertices = old_pp->num_vertices;
 				PartialPath* new_pp = find_pp((*new_colorsets)[deletions][w],
 							      pt_node->key | w_color, *new_pool,

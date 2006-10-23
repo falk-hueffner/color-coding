@@ -138,6 +138,7 @@ read_match_weights(const std::string& file) {
 	double weight = atof(fields[2].c_str());
 
 	if (match_weights.find(match) != match_weights.end()) {
+	    if (0)
 	    std::cerr << "line " << lineno << ": warning: duplicate entry for "
 		      << fields[0] << " - " << fields[1] << std::endl;
 	} else {
@@ -282,6 +283,7 @@ int main(int argc, char *argv[]) {
 			path_match_weights[i][v] = 0;
 		    else
 			path_match_weights[i][v] = 1;
+		    if (0)
 		    std::cerr << "warning: no match weight for "
 			      << query_vertices[i] << " - " << g.vertex_name(v)
 			      << ", defaulting to " << path_match_weights[i][v] << std::endl;

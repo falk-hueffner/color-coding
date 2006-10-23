@@ -40,16 +40,13 @@ bool qpath_trial(const ColoredGraph& g,
 	PartialPath *pp = find_pp((*old_colorsets)[0][s], g.color_singleton(s), *old_pool, 0);
 	pp->weight = match_weights[0][s];
 	pp->insertions = 0;
-	//pp->vertices[0] = s;
 	for (std::size_t deletions = 1; deletions <= max_deletions; ++deletions) {
 	    PartialPath *pp = find_pp((*old_colorsets)[deletions][s], g.color_singleton(s),
 				      *old_pool, 0);
 	    pp->weight = deletions * deletion_cost;
 	    pp->insertions = 0;
-	    //pp->vertices[0] = s;
 	}
     }
-    //std::cerr << "Initialized first layer\n";
 
     for (vertex_t l = 0; l < path_length - 1; ++l) {
 	const std::size_t edges_left = (path_length - 1) - l - 1;
@@ -77,7 +74,7 @@ bool qpath_trial(const ColoredGraph& g,
 			    weight_t new_weight = old_pp->weight + n->weight
 						+ match_weights[l + 1][w];
 			    if (1||new_weight + bounds.h(w, edges_left) < paths.worst_weight()) {
-				std::size_t old_num_vertices = popcount(pt_node->key) - 1; //l + old_pp->insertions + 1 - 1;
+				std::size_t old_num_vertices = popcount(pt_node->key) - 1;
 				if (l + 1 == path_length - 1) {
 				    std::vector<vertex_t> p(old_pp->vertices,
 							    old_pp->vertices + old_num_vertices);
@@ -85,7 +82,6 @@ bool qpath_trial(const ColoredGraph& g,
 				    p.push_back(w);
 				    paths.add(p, new_weight);
 				} else {
-				    //std::cerr << "find match\n";
 				    PartialPath* new_pp = find_pp((*new_colorsets)[deletions][w],
 								  pt_node->key | w_color,
 								  *new_pool,
@@ -96,7 +92,6 @@ bool qpath_trial(const ColoredGraph& g,
 					memcpy(new_pp->vertices, old_pp->vertices,
 					       old_num_vertices * sizeof old_pp->vertices[0]);
 					new_pp->vertices[old_num_vertices] = v;
-					//std::cerr << "gounf " << v << " " << w << '\n';
 				    }
 				}
 			    }
@@ -124,7 +119,6 @@ bool qpath_trial(const ColoredGraph& g,
 				    p.push_back(v);
 				    paths.add(p, new_weight);
 				} else {
-				    //std::cerr << "find deletion\n";
 				    PartialPath* new_pp
 					= find_pp((*new_colorsets)[deletions + 1][v],
 						  pt_node->key, *new_pool, old_num_vertices);

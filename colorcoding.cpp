@@ -28,7 +28,7 @@ static void usage(std::ostream& out) {
 	   "  -i FILE    Read start vertices from FILE\n"
 	   "  -e FILE    Read end vertices from FILE\n"
 	   "  -q FILE    Read query path from FILE\n"
-	   "  -m FILE    Read matching costs from FILE (only meaningful with -q)\n"
+	   "  -m FILE    Read matching weights from FILE (only meaningful with -q)\n"
 	   "             (default: 0 if vertex names match, 1 otherwise)\n"
 	   "  -v         Print progress to stderr\n"
 	   "  -l K       Find paths of length K (default: 8)\n"
@@ -112,8 +112,43 @@ std::vector<std::string> read_vertex_name_file(const std::string& file) {
     return vertices;
 }
 
+std::map<std::pair<std::string, std::string>, weight_t>
+read_match_weights(const std::string& file) {
+    std::ifstream in(file.c_str());
+    if (!in) {
+	std::cerr << "error: cannot open \"" << file << "\"\n";
+	exit(1);
+    }
+    std::string line;
+    std::size_t lineno = 0;
+    std::map<std::pair<std::string, std::string>, weight_t> match_weights;
+    while (std::getline(in, line)) {
+	++lineno;
+	std::string::size_type p = line.find('#');
+	if (p != std::string::npos)
+	    line = line.substr(0, p);
+	std::vector<std::string> fields = split(line);
+	if (fields.empty())
+	    continue;
+	if (fields.size() != 3) {
+	    std::cerr << "line " << lineno << ": error: syntax error\n";
+	    exit(1);
+	}
+	std::pair<std::string, std::string> match = std::make_pair(fields[0], fields[1]);
+	double weight = atof(fields[2].c_str());
+
+	if (match_weights.find(match) != match_weights.end()) {
+	    std::cerr << "line " << lineno << ": warning: duplicate entry for"
+		      << fields[0] << " - " << fields[1] << std::endl;
+	} else {
+	    match_weights[match] = weight;
+	}
+    }
+    return match_weights;
+}
+
 int main(int argc, char *argv[]) {
-    std::string start_vertices_file, end_vertices_file, query_path_file, matching_costs_file;
+    std::string start_vertices_file, end_vertices_file, query_path_file, match_weights_file;
     std::size_t path_length = 8;
     std::size_t max_deletions = 3;
     std::size_t max_insertions = 3;
@@ -136,7 +171,7 @@ int main(int argc, char *argv[]) {
 	case 'i': start_vertices_file = optarg; break;
 	case 'e': end_vertices_file = optarg; break;
 	case 'q': query_path_file = optarg; break;
-	case 'm': matching_costs_file = optarg; break;
+	case 'm': match_weights_file = optarg; break;
 	case 'l': path_length = atoi(optarg); break;
 	case 'c': num_colors = atoi(optarg); problem.auto_colors = false; break;
 	case 'n': num_paths = atoi(optarg); break;
@@ -226,18 +261,30 @@ int main(int argc, char *argv[]) {
 	for (std::size_t i = 0; i < g.num_vertices(); ++i)
 	    is_end_vertex[i] = true;
     }
-
-    std::vector<std::vector<weight_t> > match_weights;
+ 
+    std::map<std::pair<std::string, std::string>, weight_t> match_weights;
+    std::vector<std::vector<weight_t> > path_match_weights;
+    if (match_weights_file != "")
+	match_weights = read_match_weights(match_weights_file);
     if (query_path_file != "") {
 	std::vector<std::string> query_vertices = read_vertex_name_file(query_path_file);
-	match_weights.resize(query_vertices.size());
+	path_match_weights.resize(query_vertices.size());
 	for (std::size_t i = 0; i < query_vertices.size(); ++i) {
-	    match_weights[i].resize(g.num_vertices());
+	    path_match_weights[i].resize(g.num_vertices());
 	    for (std::size_t v = 0; v < g.num_vertices(); ++v) {
-		if (g.vertex_name(v) == query_vertices[i])
-		    match_weights[i][v] = 0;
-		else
-		    match_weights[i][v] = 1;
+		std::map<std::pair<std::string, std::string>, weight_t>::const_iterator
+		    it = match_weights.find(std::make_pair(query_vertices[i], g.vertex_name(v)));
+		if (it != match_weights.end()) {
+		    path_match_weights[i][v] = it->second;
+		} else {
+		    if (g.vertex_name(v) == query_vertices[i])
+			path_match_weights[i][v] = 0;
+		    else
+			path_match_weights[i][v] = 1;
+		    std::cerr << "warning: no match weight for "
+			      << query_vertices[i] << " - " << g.vertex_name(v)
+			      << ", defaulting to " << path_match_weights[i][v] << std::endl;
+		}
 	    }
 	}
 	path_length = query_vertices.size() + max_insertions;
@@ -248,7 +295,7 @@ int main(int argc, char *argv[]) {
     problem.g = g;
     problem.is_start_vertex = is_start_vertex;
     problem.is_end_vertex = is_end_vertex;
-    problem.match_weights = match_weights;
+    problem.match_weights = path_match_weights;
     problem.max_deletions = max_deletions;
     problem.insertion_cost = insertion_cost;
     problem.deletion_cost = deletion_cost;

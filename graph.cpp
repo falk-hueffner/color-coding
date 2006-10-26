@@ -48,6 +48,24 @@ void Graph::connect(vertex_t u, vertex_t v, weight_t weight) {
     m_neighbors[v].push_back(Edge(u, weight));
 }
 
+void Graph::set_weight(vertex_t u, vertex_t v, weight_t weight) {
+    assert(u < num_vertices());
+    assert(v < num_vertices());
+    for (std::vector<Edge>::iterator n = m_neighbors[u].begin(); n != m_neighbors[u].end(); ++n) {
+	if (n->neighbor == v) {
+	    n->weight = weight;
+	    break;
+	}
+    }
+    for (std::vector<Edge>::iterator n = m_neighbors[v].begin(); n != m_neighbors[v].end(); ++n) {
+	if (n->neighbor == u) {
+	    n->weight = weight;
+	    return;
+	}
+    }
+    abort();
+}
+
 void Graph::clear_edges() {
     m_neighbors = std::vector<std::vector<Edge> >(num_vertices());
 }

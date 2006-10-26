@@ -72,6 +72,34 @@ Bounds::Bounds(const Problem& problem, Bounds::Mode mode, std::size_t n_max_lb_e
 	    }
 	}
     }
+
+    std::size_t q_len = problem.match_weights.size();
+    if (q_len) {
+	std::vector<weight_t> best_matches(q_len);
+	for (std::size_t m = 0; m < q_len; ++m)
+	    best_matches[m] = *std::min_element(problem.match_weights[m].begin(),
+						problem.match_weights[m].end());
+
+	min_match_weights.resize(q_len + 1);
+	for (std::size_t matched = 0; matched <= q_len; ++matched) {
+	    std::vector<weight_t> matches_left(best_matches.begin() + matched,
+	    				       best_matches.end());
+	    std::sort(matches_left.begin(), matches_left.end());
+	    std::size_t left = q_len - matched;
+
+	    min_match_weights[left].resize(left + 1);
+	    min_match_weights[left][left] = 0;
+	    //std::cerr << "min_match_weights[" << left << "][" << left << "] = "
+	    //      << min_match_weights[left][left] << std::endl;
+	    int i = 0;
+	    for (int deletions = left - 1; deletions >= 0; --deletions) {
+		min_match_weights[left][deletions]
+		    = min_match_weights[left][deletions + 1] + matches_left[i++];
+		//std::cerr << "min_match_weights[" << left << "][" << deletions << "] = "
+		// << min_match_weights[left][deletions] << std::endl;
+	    }
+	}
+    }
 }
 
 void Bounds::dynprog(const Problem& problem, std::size_t s) {

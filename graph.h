@@ -40,6 +40,7 @@ public:
     void clear_edges();
     Graph induced_subgraph(const std::vector<vertex_t>& vertices);
     void connect(vertex_t u, vertex_t v, weight_t weight);
+    void set_weight(vertex_t u, vertex_t v, weight_t weight);
 
 private:
     std::vector<std::vector<Edge> > m_neighbors;

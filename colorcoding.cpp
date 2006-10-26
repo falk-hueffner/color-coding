@@ -19,6 +19,7 @@
 #include "problem.h"
 #include "util.h"
 #include "trial.h"
+#include "random_path.h"
 
 std::size_t peak_mem_usage;
 
@@ -42,6 +43,7 @@ static void usage(std::ostream& out) {
  	   "             x: dynamic programming, max. path length x (default: 2)\n"
 	   "  -r [R]     Random seed R (or random if not given) (default: 1)\n"
 	   "  -s         Print only statistics\n"
+	   "  -R         Find random paths (ignoring weights)\n"
 	   "  -h         Display this list of options\n";
 }
 
@@ -165,9 +167,10 @@ int main(int argc, char *argv[]) {
     Problem problem;
     Bounds::Mode mode = Bounds::DYNPROG;
     std::size_t max_lb_edges = 2;
+    bool random_paths = false;
 
     int c;
-    while ((c = getopt(argc, argv, "yi:e:q:m:l:c:n:f:t:p:x:b:r::vsh")) != -1) {
+    while ((c = getopt(argc, argv, "yi:e:q:m:l:c:n:f:t:p:x:b:r::vsRh")) != -1) {
 	switch (c) {
 	case 'i': start_vertices_file = optarg; break;
 	case 'e': end_vertices_file = optarg; break;
@@ -205,6 +208,7 @@ int main(int argc, char *argv[]) {
 	    break;
 	case 'v': info.turn_on(); break;
 	case 's': stats_only = true; break;
+	case 'R': random_paths = true; break;
 	case 'h': usage(std::cout); exit(0); break;
 	default:  usage(std::cerr); exit(1); break;
 	}
@@ -236,6 +240,19 @@ int main(int argc, char *argv[]) {
 	std::cerr << "error: graph has" << g.num_vertices() << " vertices, but only"
 		  << MAX_VERTEX << " supported\n";
 	exit(1);
+    }
+
+    if (random_paths) {
+	for (std::size_t np = 0; np < num_paths; ++np) {
+	    std::vector<vertex_t> p = random_path(g, path_length);
+	    for (std::size_t i = 0; i < p.size(); ++i) {
+		if (i)
+		    std::cout << ' ';
+		std::cout << g.vertex_name(p[i]);
+	    }
+	    std::cout << std::endl;
+	}
+	return 0;
     }
 
     if (num_trials == 0)
@@ -291,7 +308,7 @@ int main(int argc, char *argv[]) {
 		if (path_match_weights[i][v] < best_match)
 		    best_match = path_match_weights[i][v];
 	    }
-	    std::cerr << "Best match for " << query_vertices[i] << ": " << best_match << std::endl;
+	    //std::cerr << "Best match for " << query_vertices[i] << ": " << best_match << std::endl;
 	}
 	path_length = query_vertices.size() + max_insertions;
     }

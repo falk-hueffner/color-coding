@@ -19,6 +19,7 @@ OBJS	= \
 	pathset.o	\
 	ptree.o		\
 	qpath_trial.o	\
+	random_path.o	\
 	trial.o		\
 	util.o
 

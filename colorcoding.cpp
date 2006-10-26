@@ -32,6 +32,10 @@ static void usage(std::ostream& out) {
 	   "  -m FILE    Read matching weights from FILE (only meaningful with -q)\n"
 	   "             (default: 0 if vertex names match, 1 otherwise)\n"
 	   "  -v         Print progress to stderr\n"
+	   "  -M M       Maximal M insertions (default: 3)\n"
+	   "  -N N       Maximal N deletions (default: 3)\n"
+	   "  -C C       One insertion costs C (default: 0.0)\n"
+	   "  -D D       One deletion costs D (default: 0.0)\n"
 	   "  -l K       Find paths of length K (default: 8)\n"
 	   "  -c C       Use C colors (default: auto)\n"
 	   "  -n P       Find the best P paths (default: 100)\n"
@@ -170,12 +174,16 @@ int main(int argc, char *argv[]) {
     bool random_paths = false;
 
     int c;
-    while ((c = getopt(argc, argv, "yi:e:q:m:l:c:n:f:t:p:x:b:r::vsRh")) != -1) {
+    while ((c = getopt(argc, argv, "yi:e:q:m:M:N:C:D:l:c:n:f:t:p:x:b:r::vsRh")) != -1) {
 	switch (c) {
 	case 'i': start_vertices_file = optarg; break;
 	case 'e': end_vertices_file = optarg; break;
 	case 'q': query_path_file = optarg; break;
 	case 'm': match_weights_file = optarg; break;
+	case 'M': max_insertions = atoi(optarg); break;
+	case 'N': max_deletions = atoi(optarg); break;
+	case 'C': insertion_cost = atof(optarg); break;
+	case 'D': deletion_cost = atof(optarg); break;
 	case 'l': path_length = atoi(optarg); break;
 	case 'c': num_colors = atoi(optarg); problem.auto_colors = false; break;
 	case 'n': num_paths = atoi(optarg); break;

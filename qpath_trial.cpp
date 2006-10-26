@@ -60,6 +60,7 @@ bool qpath_trial(const ColoredGraph& g,
 	std::size_t alloc_vertices = l + max_insertions + max_deletions + 1;
 
 	for (std::size_t deletions = 0; deletions <= max_deletions; ++deletions) {
+	    std::size_t deletions_left = max_deletions - deletions;
 	    for (vertex_t v = 0; v < g.num_vertices(); ++v) {
 		if (!(*old_colorsets)[deletions][v].root)
 		    continue;
@@ -78,7 +79,8 @@ bool qpath_trial(const ColoredGraph& g,
 			    PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
 			    weight_t new_weight = old_pp->weight + n->weight
 						+ match_weights[l + 1][w];
-			    if (new_weight + bounds.h(w, edges_left) < paths.worst_weight()) {
+			    if (new_weight + bounds.h(w, edges_left, deletions_left)
+				 < paths.worst_weight()) {
 				std::size_t old_num_vertices = old_pp->num_vertices;
 				if (l + 1 == path_length - 1) {
 				    std::vector<vertex_t> p(old_pp->vertices,
@@ -122,7 +124,8 @@ bool qpath_trial(const ColoredGraph& g,
 			    
 			    weight_t new_weight = old_pp->weight + deletion_cost;
 			    std::size_t old_num_vertices = old_pp->num_vertices;
-			    if (new_weight /* + bounds.h(v, edges_left)*/ < paths.worst_weight()) {
+			    if (new_weight + bounds.h(v, edges_left, deletions_left)
+				< paths.worst_weight()) {
 				if (l + 1 == path_length - 1) {
 				    std::vector<vertex_t> p(old_pp->vertices,
 							    old_pp->vertices + old_num_vertices);
@@ -159,6 +162,7 @@ bool qpath_trial(const ColoredGraph& g,
 	// add insertions
 	if(1)
 	for (std::size_t deletions = 0; deletions <= max_deletions; ++deletions) {
+	    std::size_t deletions_left = max_deletions - deletions;
 	    for (vertex_t v = 0; v < g.num_vertices(); ++v) {
 		if (!(*new_colorsets)[deletions][v].root)
 		    continue;
@@ -181,7 +185,8 @@ bool qpath_trial(const ColoredGraph& g,
 			    PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
 			    weight_t new_weight = old_pp->weight + n->weight + insertion_cost;
 			    if (old_pp->insertions + 1 <= max_insertions
-				&& new_weight /*+ bounds.h(w, edges_left) */ < paths.worst_weight()) {
+				&& (new_weight + bounds.h(w, edges_left, deletions_left)
+				    < paths.worst_weight())) {
 				std::size_t old_num_vertices = old_pp->num_vertices;
 				PartialPath* new_pp = find_pp((*new_colorsets)[deletions][w],
 							      pt_node->key | w_color, *new_pool,

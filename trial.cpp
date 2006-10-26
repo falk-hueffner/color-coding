@@ -134,7 +134,7 @@ bool dynprog_trial(const ColoredGraph& g,
 	    else
 		++dead;
 	}
-	std::cerr << "l = " << l << " life = " << life << " dead = " << dead << endl;
+	std::cerr << "l = " << l << " life = " << life << " dead = " << dead << std::endl;
 #endif
 	for (vertex_t v = 0; v < g.num_vertices(); ++v) {
 	    if (!old_colorsets[v].root)

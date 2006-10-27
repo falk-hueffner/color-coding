@@ -101,18 +101,15 @@ std::vector<std::string> read_vertex_name_file(const std::string& file) {
 	if (p != std::string::npos)
 	    line = line.substr(0, p);
 	line = trim(line);
-	if (line.empty())
-	    continue;
-	if (line.find_first_of(WHITESPACE) != std::string::npos) {
-	    std::cerr << file << ':' << lineno << ": error: syntax error\n";
-	    exit(1);
-	}
-	if (std::find(vertices.begin(), vertices.end(), line) != vertices.end()) {
-	    std::cerr << file << ':' << lineno << ": error: duplicate vertex '"
-		      << line << "'\n";
-	    exit(1);
-	} else {
-	    vertices.push_back(line);
+	std::vector<std::string> fields = split(line);
+	for (std::size_t i = 0; i < fields.size(); ++i) {
+	    if (std::find(vertices.begin(), vertices.end(), fields[i]) != vertices.end()) {
+		std::cerr << file << ':' << lineno << ": error: duplicate vertex '"
+			  << fields[i] << "'\n";
+		exit(1);
+	    } else {
+		vertices.push_back(fields[i]);
+	    }
 	}
     }
     return vertices;
@@ -357,7 +354,8 @@ int main(int argc, char *argv[]) {
 		    std::cout << ' ' << g.vertex_name(v);
 	    }
 	    std::cout << std::endl;
-	    if (match_weights.size()) {
+	    if (path_match_weights.size()) {
+		// FIXME verifier for path queries
 	    } else {
 		weight_t weight = 0;
 		for (std::size_t j = 0; j < i->path().size() - 1; ++j)

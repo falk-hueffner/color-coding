@@ -342,16 +342,18 @@ int main(int argc, char *argv[]) {
 	       (unsigned long) (peak_mem_usage / 1024 / 1024),
 	       paths.best_weight(), paths.worst_weight());
     } else {
+	bool next_is_insertion = false;
 	for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {
 	    std::cout << i->path_weight();
 	    for (std::size_t j = 0; j < i->path().size(); ++j) {
 		small_vertex_t v = i->path()[j];
 		if (v == DELETED_VERTEX)
 		    std::cout << " -";
-		else if (v < 0)
-		    std::cout << " +" << g.vertex_name(-v);
+		else if (next_is_insertion)
+		    std::cout << " +" << g.vertex_name(abs(v));
 		else
-		    std::cout << ' ' << g.vertex_name(v);
+		    std::cout << ' ' << g.vertex_name(abs(v));
+		next_is_insertion = v < 0;
 	    }
 	    std::cout << std::endl;
 	    if (path_match_weights.size()) {

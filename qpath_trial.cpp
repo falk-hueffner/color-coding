@@ -37,13 +37,9 @@ bool qpath_trial(const ColoredGraph& g,
 
     // Initialize first layer
     for (vertex_t s = 0; s < g.num_vertices(); ++s) {
-	PartialPath *pp = find_pp((*old_colorsets)[0][s], g.color_singleton(s), *old_pool, 0);
-	pp->weight = match_weights[0][s];
-	pp->insertions = 0;
-	pp->num_vertices = 0;
-	for (std::size_t deletions = 1; deletions <= max_deletions; ++deletions) {
+	for (std::size_t deletions = 0; deletions <= max_deletions; ++deletions) {
 	    PartialPath *pp = find_pp((*old_colorsets)[deletions][s], g.color_singleton(s),
-				      *old_pool, 0);
+				      *old_pool, deletions);
 	    pp->weight = deletions * deletion_cost + match_weights[deletions][s];
 	    pp->insertions = 0;
 	    pp->num_vertices = deletions;

@@ -304,7 +304,7 @@ int main(int argc, char *argv[]) {
 		    if (g.vertex_name(v) == query_vertices[i])
 			path_match_weights[i][v] = 0;
 		    else
-			path_match_weights[i][v] = 1;
+			path_match_weights[i][v] = 100;
 		    if (0)
 		    std::cerr << "warning: no match weight for "
 			      << query_vertices[i] << " - " << g.vertex_name(v)

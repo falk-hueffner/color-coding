@@ -43,7 +43,7 @@ bool qpath_trial(const ColoredGraph& g,
 	Mempool* new_pool = new Mempool();
 	std::vector<std::vector<PTree> >* new_colorsets
 	    = new std::vector<std::vector<PTree> >(max_deletions + 1, g.num_vertices());
-	std::size_t alloc_vertices = new_matched + max_insertions + 100;	// FIXME test increasing
+	std::size_t alloc_vertices = new_matched + max_insertions;
 
 	// Initialize entries with first "real" (non-deleted) match
 	if (matched <= max_deletions) {
@@ -128,7 +128,7 @@ bool qpath_trial(const ColoredGraph& g,
 			    
 			    weight_t new_weight = old_pp->weight + deletion_cost;
 			    std::size_t old_num_vertices = old_pp->num_vertices;
-			    if (new_weight + bounds.h(v, edges_left, deletions_left) // FIXME
+			    if (new_weight + bounds.h(v, edges_left, deletions_left)
 				< paths.worst_weight()) {
 				if (new_matched == path_length) {
 				    std::vector<vertex_t> p(old_pp->vertices,
@@ -163,7 +163,6 @@ bool qpath_trial(const ColoredGraph& g,
 	    continue;		// no more insertions make sense
 
 	// add insertions
-	if(1)
 	for (std::size_t deletions = 0; deletions <= max_deletions; ++deletions) {
 	    std::size_t deletions_left = max_deletions - deletions;
 	    for (vertex_t v = 0; v < g.num_vertices(); ++v) {

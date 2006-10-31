@@ -35,25 +35,33 @@ bool qpath_trial(const ColoredGraph& g,
 	= new std::vector<std::vector<PTree> >(max_deletions + 1, g.num_vertices());
     PTree::Node** pt_node_stack = new PTree::Node*[g.num_vertices()];
 
-    for (vertex_t l = 0; l < path_length - 1; ++l) {
-	const std::size_t edges_left = (path_length - 1) - l - 1;
+    // old: MATCHED matched
+    // new: MATCHED + 1 matched    
+    for (vertex_t matched = 0; matched < path_length; ++matched) {
+	const std::size_t new_matched = matched + 1;
+	const std::size_t edges_left = path_length - new_matched;
 	Mempool* new_pool = new Mempool();
 	std::vector<std::vector<PTree> >* new_colorsets
 	    = new std::vector<std::vector<PTree> >(max_deletions + 1, g.num_vertices());
-	std::size_t alloc_vertices = (l + 1) + max_insertions + max_deletions + 1;
+	std::size_t alloc_vertices = new_matched + max_insertions + 100;	// FIXME test increasing
 
 	// Initialize entries with first "real" (non-deleted) match
-	if (l <= max_deletions) {
-	    std::size_t deletions = l;
+	if (matched <= max_deletions) {
+	    std::size_t deletions = matched;
 	    for (vertex_t s = 0; s < g.num_vertices(); ++s) {
-		PartialPath *pp = find_pp((*old_colorsets)[deletions][s], g.color_singleton(s),
-					  *old_pool, deletions + 1);
-		pp->weight = deletions * deletion_cost + match_weights[deletions][s];
-		pp->insertions = 0;
-		pp->num_vertices = 1 + deletions;
-		for (std::size_t i = 0; i < deletions; ++i)
-		    pp->vertices[i] = DELETED_VERTEX;
-		pp->vertices[deletions] = s;
+		weight_t new_weight = deletions * deletion_cost + match_weights[matched][s];
+		if (new_weight + bounds.h(s, edges_left, max_deletions - deletions) < paths.worst_weight()) {
+		    PartialPath *pp = find_pp((*new_colorsets)[deletions][s], g.color_singleton(s),
+					      *new_pool, deletions + 1);
+		    if (new_weight < pp->weight) {
+			pp->weight = new_weight;
+			pp->insertions = 0;
+			pp->num_vertices = 1 + deletions;
+			for (std::size_t i = 0; i < deletions; ++i)
+			    pp->vertices[i] = DELETED_VERTEX;
+			pp->vertices[deletions] = s;
+		    }
+		}
 	    }
 	}
 
@@ -76,11 +84,10 @@ bool qpath_trial(const ColoredGraph& g,
 			if (pt_node->is_leaf) {
 			    PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
 			    weight_t new_weight = old_pp->weight + n->weight
-						+ match_weights[l + 1][w];
-			    if (new_weight + bounds.h(w, edges_left, deletions_left)
-				 < paths.worst_weight()) {
+						+ match_weights[matched][w];
+			    if (new_weight + bounds.h(w, edges_left, deletions_left) < paths.worst_weight()) {
 				std::size_t old_num_vertices = old_pp->num_vertices;
-				if (l + 1 == path_length - 1) {
+				if (new_matched == path_length) {
 				    std::vector<vertex_t> p(old_pp->vertices,
 							    old_pp->vertices + old_num_vertices);
 				    p.push_back(w);
@@ -114,16 +121,16 @@ bool qpath_trial(const ColoredGraph& g,
 			PTree::Node* pt_node = pt_node_stack[--pt_node_stack_size];
 			if (pt_node->is_leaf) {
 			    PartialPath* old_pp = static_cast<PartialPath*>(pt_node->data());
+			    assert (old_pp->num_vertices);
 			    // No deletion after an insertion.
-			    if (0&&old_pp->num_vertices
-				&& old_pp->vertices[old_pp->num_vertices - 1] < 0)
+			    if (old_pp->vertices[old_pp->num_vertices - 1] < 0)
 				continue;
 			    
 			    weight_t new_weight = old_pp->weight + deletion_cost;
 			    std::size_t old_num_vertices = old_pp->num_vertices;
-			    if (new_weight /* + bounds.h(v, edges_left, deletions_left) */
+			    if (new_weight + bounds.h(v, edges_left, deletions_left) // FIXME
 				< paths.worst_weight()) {
-				if (l + 1 == path_length - 1) {
+				if (new_matched == path_length) {
 				    std::vector<vertex_t> p(old_pp->vertices,
 							    old_pp->vertices + old_num_vertices);
 				    p.push_back(DELETED_VERTEX);
@@ -152,8 +159,8 @@ bool qpath_trial(const ColoredGraph& g,
 	    }
 	}
 
-	if (l + 1 == path_length - 1)
-	    continue;
+	if (new_matched == path_length)
+	    continue;		// no more insertions make sense
 
 	// add insertions
 	if(1)

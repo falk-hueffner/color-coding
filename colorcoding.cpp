@@ -292,6 +292,7 @@ int main(int argc, char *argv[]) {
     if (query_path_file != "") {
 	std::vector<std::string> query_vertices = read_vertex_name_file(query_path_file);
 	path_match_weights.resize(query_vertices.size());
+	std::size_t unmatchable = 0;
 	for (std::size_t i = 0; i < query_vertices.size(); ++i) {
 	    path_match_weights[i].resize(g.num_vertices());
 	    weight_t best_match = WEIGHT_MAX;
@@ -313,9 +314,15 @@ int main(int argc, char *argv[]) {
 		if (path_match_weights[i][v] < best_match)
 		    best_match = path_match_weights[i][v];
 	    }
+	    if (best_match >= 100)
+		++unmatchable;
 	    //std::cerr << "Best match for " << query_vertices[i] << ": " << best_match << std::endl;
 	}
 	path_length = query_vertices.size() + max_insertions;
+	if (unmatchable > max_deletions) {
+	    std::cerr << "No matching possible\n";
+	    exit(1);
+	}
     }
 
     std::size_t max_common = int(path_length * (filter / 100));

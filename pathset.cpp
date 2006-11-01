@@ -53,7 +53,7 @@ void PathSet::add(const std::vector<vertex_t>& p, weight_t weight) {
 
 void PathSet::update_worst_weight() {
     if (!is_full())
-	m_worst_weight = 100;
+	m_worst_weight = 1e10;
     else {
 	PathSet::it i = entries.begin();
 	for (std::size_t j = 1; j < max_size; j++, i++) { }

@@ -89,14 +89,10 @@ Bounds::Bounds(const Problem& problem, Bounds::Mode mode, std::size_t n_max_lb_e
 
 	    min_match_weights[left].resize(left + 1);
 	    min_match_weights[left][left] = 0;
-	    //std::cerr << "min_match_weights[" << left << "][" << left << "] = "
-	    //      << min_match_weights[left][left] << std::endl;
 	    int i = 0;
 	    for (int deletions = left - 1; deletions >= 0; --deletions) {
 		min_match_weights[left][deletions]
 		    = min_match_weights[left][deletions + 1] + matches_left[i++];
-		//std::cerr << "min_match_weights[" << left << "][" << deletions << "] = "
-		// << min_match_weights[left][deletions] << std::endl;
 	    }
 	}
     }

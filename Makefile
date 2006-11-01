@@ -1,4 +1,4 @@
-VERSION = 1.0
+VERSION = 1.1
 CXX	= /home/mit/theinf1/hueffner/bin/g++-4.2
 # gcc-arch can be obtained from http://people.debian.org/~falk/gcc-arch
 CXXFLAGS= -O3 $(shell CC=$(CC) /home/mit/theinf1/hueffner/bin/gcc-arch) -g -W -Wall -Wno-sign-compare -pipe
@@ -68,6 +68,8 @@ DIST_FILES = \
 	problem.h	\
 	ptree.cpp	\
 	ptree.h		\
+	qpath_trial.h	\
+	random_path.h	\
 	trial.cpp	\
 	trial.h		\
 	types.h		\

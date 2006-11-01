@@ -1,11 +1,16 @@
 This package contains the source code accompanying the paper
 
-Falk Hüffner, Sebastian Wernicke and Thomas Zichner:
-Algorithm Engineering for Color-Coding to Detect Signaling Pathways
-in Protein Interaction Networks.
+Falk Hüffner, Sebastian Wernicke, and Thomas Zichner:
+Algorithm engineering for color-coding to facilitate signaling pathway
+detection. In Proceedings of the 5th Asia-Pacific Bioinformatics
+Conference (APBC'07), Hong Kong. January 2007. Advances in
+Bioinformatics and Computational Biology, World Scientific.
 
-Its purpose is to find minimum-weight paths of a prespecified length
-in a weighted undirected graph.
+It can solve two problems (see paper):
+
+* Find minimum-weight paths of a prespecified length in a weighted
+  undirected graph.
+* Path queries.
 
 The program is written in ISO C++. It has only been tested on Unix
 systems, but should be portable to other systems. Sources can be
@@ -47,6 +52,12 @@ list of vertices. Example:
 
 There are many options that affect program behavior; see ./colorcoding -h
 for a listing.
+
+Version history
+===============
+
+1.0 2006-05-10	initial release
+1.1 2006-11-01	path query functionality added
 
 -- Falk Hueffner (http://theinf1.informatik.uni-jena.de/~hueffner/)
    April 25, 2006

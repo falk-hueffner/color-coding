@@ -10,10 +10,19 @@
 #include "qpath_trial.h"
 #include "util.h"
 
+#ifdef _GUI_
+	#include "gui/guiApp.h"
+#endif
+
 extern std::size_t peak_mem_usage;
 
+#ifndef _GUI_
 PathSet lightest_path(const Problem& problem, std::size_t num_paths,
 		      std::size_t max_common, Bounds::Mode mode, std::size_t max_lb_edges) {
+#else
+PathSet lightest_path(const Problem& problem, std::size_t num_paths,
+		      std::size_t max_common, Bounds::Mode mode, std::size_t max_lb_edges, SearchThread *search) {
+#endif
     std::vector<weight_t> edge_weights;
     
     for (vertex_t v = 0; v < problem.g.num_vertices(); ++v)
@@ -22,6 +31,11 @@ PathSet lightest_path(const Problem& problem, std::size_t num_paths,
 	    edge_weights.push_back(n->weight);
     std::sort(edge_weights.begin(), edge_weights.end());
 
+#ifdef _GUI_
+	wxMutexGuiEnter();
+	wxGetApp().frame->StatusBar->SetStatusText(wxT("Bounds computation"),1);
+	wxMutexGuiLeave();
+#endif
     PathSet paths(num_paths, max_common);
     Bounds bounds(problem, mode, max_lb_edges);
     std::size_t colors;
@@ -55,6 +69,19 @@ PathSet lightest_path(const Problem& problem, std::size_t num_paths,
 	    ? trials_for_prob(problem.path_length, colors, problem.success_prob)
 	    : problem.num_trials;
 	g.color_randomly(colors);
+
+#ifdef _GUI_
+	wxString statustext;
+	statustext << (preheating ? "preheat" : "trial")  << "  " 
+		<< (unsigned long) (preheating ? preheat_trials : trials) +1 << " / " 
+		<< (unsigned long) (preheating ? max_preheat_trials : max_trials);
+	wxMutexGuiEnter();
+	wxGetApp().frame->StatusBar->SetStatusText(statustext,1);
+	wxMutexGuiLeave();
+
+	if (search->TestDestroy()) return paths;
+#endif
+
 	if (info.is_on())
 	    fprintf(stderr, "%7s %6lu/%6lu edges=%lu colors=%lu %luM %lu:[%10.8f,%10.8f]\n",
 		    preheating ? "preheat" : "trial",

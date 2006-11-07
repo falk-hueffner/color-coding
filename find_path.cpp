@@ -72,8 +72,8 @@ PathSet lightest_path(const Problem& problem, std::size_t num_paths,
 
 #ifdef _GUI_
 	wxString statustext;
-	statustext << (preheating ? "preheat" : "trial")  << "  " 
-		<< (unsigned long) (preheating ? preheat_trials : trials) +1 << " / " 
+	statustext << (preheating ? wxT("preheat") : wxT("trial"))  << wxT("  ")
+		<< (unsigned long) (preheating ? preheat_trials : trials) +1 << wxT(" / ")
 		<< (unsigned long) (preheating ? max_preheat_trials : max_trials);
 	wxMutexGuiEnter();
 	wxGetApp().frame->StatusBar->SetStatusText(statustext,1);

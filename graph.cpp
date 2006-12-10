@@ -3,6 +3,10 @@
 #include "graph.h"
 #include "util.h"
 
+#ifdef _GUI_
+	#include "gui/guiApp.h"
+#endif
+
 std::size_t Graph::num_edges() const {
     std::size_t num = 0;
     for (std::size_t u = 0; u < num_vertices(); ++u)
@@ -82,8 +86,16 @@ Graph::Graph(std::istream& in) {
 	if (fields.empty())
 	    continue;
 	if (fields.size() != 3) {
+#ifndef _GUI_
 	    std::cerr << "line " << lineno << ": error: syntax error\n";
 	    exit(1);
+#else
+		wxString errormsg;
+		errormsg << wxT("Error while loading graph file!\nLine ") << lineno << wxT(": syntax error\nLoading aborted.");
+		wxMessageDialog(wxGetApp().frame, errormsg).ShowModal();
+		wxGetApp().graphload_ok = false;
+		return;
+#endif
 	}
 	vertex_t v[2];
 	for (std::size_t i = 0; i < 2; i++) {

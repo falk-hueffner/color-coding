@@ -92,7 +92,7 @@ Graph::Graph(std::istream& in) {
 #else
 		wxString errormsg;
 		errormsg << wxT("Error while loading graph file!\nLine ") << lineno << wxT(": syntax error\nLoading aborted.");
-		wxMessageDialog(wxGetApp().frame, errormsg).ShowModal();
+		(wxMessageDialog(wxGetApp().frame, errormsg)).ShowModal();
 		wxGetApp().graphload_ok = false;
 		return;
 #endif

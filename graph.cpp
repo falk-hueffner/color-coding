@@ -3,6 +3,7 @@
 #include "graph.h"
 #include "util.h"
 
+#include <math.h>
 #ifdef _GUI_
 	#include "gui/guiApp.h"
 #endif
@@ -74,7 +75,7 @@ void Graph::clear_edges() {
     m_neighbors = std::vector<std::vector<Edge> >(num_vertices());
 }
 
-Graph::Graph(std::istream& in) {
+Graph::Graph(std::istream& in, bool type) {
     std::string line;
     std::size_t lineno = 0;
     while (std::getline(in, line)) {
@@ -108,7 +109,8 @@ Graph::Graph(std::istream& in) {
 		m_vertex_numbers[fields[i]] = v[i];
 	    }
 	}
-	connect(v[0], v[1], atof(fields[2].c_str()));
+	if (type) connect(v[0], v[1], atof(fields[2].c_str()));
+	else connect(v[0], v[1], -log(atof(fields[2].c_str())));
     }
 }
 

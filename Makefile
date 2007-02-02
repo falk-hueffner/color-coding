@@ -1,5 +1,5 @@
 VERSION = 1.1
-CXX	= /home/mit/theinf1/hueffner/bin/g++-4.2
+CXX	= g++ #/home/mit/theinf1/hueffner/bin/g++-4.2
 # gcc-arch can be obtained from http://people.debian.org/~falk/gcc-arch
 CXXFLAGS= -O3 $(shell CC=$(CC) /home/mit/theinf1/hueffner/bin/gcc-arch) -g -W -Wall -Wno-sign-compare -pipe
 # disable internal consistency checking for some speedup

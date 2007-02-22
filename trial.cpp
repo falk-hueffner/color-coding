@@ -102,7 +102,7 @@ bool dynprog_trial(const ColoredGraph& g,
 		   std::size_t num_colors,
 		   PathSet& paths,
 		   const Bounds& bounds) {
-    std::size_t max_mem_usage = 768 * 1024 * 1024;
+    std::size_t max_mem_usage = 64 * 1024 * 1024;
     std::size_t color_size = bits_needed(num_colors);
     Mempool* old_pool = new Mempool();
     PTree* old_colorsets = new PTree[g.num_vertices()];

@@ -93,7 +93,7 @@ Graph::Graph(std::istream& in, bool type) {
 #else
 		wxString errormsg;
 		errormsg << wxT("Error while loading graph file!\nLine ") << lineno << wxT(": syntax error\nLoading aborted.");
-		(wxMessageDialog(wxGetApp().frame, errormsg)).ShowModal();
+		(wxMessageDialog(wxGetApp().frame, errormsg, wxT("Error"))).ShowModal();
 		wxGetApp().graphload_ok = false;
 		return;
 #endif
@@ -109,8 +109,22 @@ Graph::Graph(std::istream& in, bool type) {
 		m_vertex_numbers[fields[i]] = v[i];
 	    }
 	}
-	if (type) connect(v[0], v[1], atof(fields[2].c_str()));
-	else connect(v[0], v[1], -log(atof(fields[2].c_str())));
+	weight_t weight = atof(fields[2].c_str());
+	if (type) connect(v[0], v[1], weight);
+	else if((weight >= 0) && (weight <= 1)) connect(v[0], v[1], -log(weight));
+	else {
+#ifndef _GUI_
+	    std::cerr << "line " << lineno << ": error: interaction probability not between 0 and 1.\n";
+	    exit(1);
+#else
+		wxString errormsg;
+		errormsg << wxT("Error while loading graph file!\nLine ") << lineno 
+			<< wxT(": interaction probability not between 0 and 1.\nLoading aborted.");
+		(wxMessageDialog(wxGetApp().frame, errormsg, wxT("Error"))).ShowModal();
+		wxGetApp().graphload_ok = false;
+		return;
+#endif
+	}
     }
 }
 

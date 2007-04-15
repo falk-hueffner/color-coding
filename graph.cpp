@@ -78,6 +78,14 @@ void Graph::clear_edges() {
 Graph::Graph(std::istream& in, bool type) {
     std::string line;
     std::size_t lineno = 0;
+#ifdef _GUI_
+	std::size_t colV1 = wxGetApp().colVertex1 - 1;
+	std::size_t colV2 = wxGetApp().colVertex2 - 1;
+	std::size_t colProb = wxGetApp().colProb - 1;
+	std::size_t maxColumn = std::max(colV1, std::max(colV2, colProb));
+	for (; lineno < wxGetApp().skipLines; lineno++) 
+		(std::getline(in, line));
+#endif
     while (std::getline(in, line)) {
 	++lineno;
 	std::string::size_type p = line.find('#');
@@ -86,18 +94,27 @@ Graph::Graph(std::istream& in, bool type) {
 	std::vector<std::string> fields = split(line);
 	if (fields.empty())
 	    continue;
-	if (fields.size() != 3) {
 #ifndef _GUI_
+	if (fields.size() != 3) {
 	    std::cerr << "line " << lineno << ": error: syntax error\n";
 	    exit(1);
+	}
 #else
+	if (fields.size() <= maxColumn) {
 		wxString errormsg;
 		errormsg << wxT("Error while loading graph file!\nLine ") << lineno << wxT(": syntax error\nLoading aborted.");
 		(wxMessageDialog(wxGetApp().frame, errormsg, wxT("Error"))).ShowModal();
 		wxGetApp().graphload_ok = false;
 		return;
-#endif
 	}
+	std::string strVertex1 = fields[colV1];
+	std::string strVertex2 = fields[colV2];
+	std::string strProb = fields[colProb];
+	fields.clear();
+	fields.push_back(strVertex1);
+	fields.push_back(strVertex2);
+	fields.push_back(strProb);
+#endif
 	vertex_t v[2];
 	for (std::size_t i = 0; i < 2; i++) {
 	    if (const vertex_t* pv = lookup_vertex(fields[i])) {

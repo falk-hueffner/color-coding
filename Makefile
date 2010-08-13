@@ -1,63 +1,41 @@
-VERSION = 1.1
-CXX	= g++ #/home/mit/theinf1/hueffner/bin/g++-4.2
-# gcc-arch can be obtained from http://people.debian.org/~falk/gcc-arch
-CXXFLAGS= -O3 $(shell CC=$(CC) /home/mit/theinf1/hueffner/bin/gcc-arch) -g -W -Wall -Wno-sign-compare -pipe
-# disable internal consistency checking for some speedup
-#CXXFLAGS  += -DNDEBUG
+CXX	= c++
+CXXFLAGS= -O3 -g
 
-INCLUDES=
-LDPATH	=
-LIBS	=
+VERSION = 1.1.2
 
-OBJS	= \
-	bounds.o	\
-	colorcoding.o	\
-	debug.o		\
-	find_path.o	\
-	graph.o		\
-	mst.o		\
-	pathset.o	\
-	ptree.o		\
-	qpath_trial.o	\
-	random_path.o	\
-	trial.o		\
-	util.o
+LIBS	= -lm
 
-CXXOMPILE = $(CXX) $(CXXFLAGS) $(INCLUDES)
-CXXLINK	= $(CXX) $(CXXFLAGS) $(LDPATH) $(LIBS)
+OBJS	= bounds.o colorcoding.o debug.o find_path.o graph.o pathset.o \
+	  ptree.o qpath_trial.o random_path.o trial.o util.o
 
-all: depend colorcoding generate_graph analyse_graph optimal-x
+all: colorcoding
+
+.SUFFIXES: .cpp .o
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) -c $<
 
 colorcoding: $(OBJS)
-	$(CXXLINK) $^ -o $@
-
-generate_graph: generate_graph.o
-	$(CXXLINK) $^ -o $@
-
-analyse_graph: analyse_graph.o graph2.o debug.o
-	$(CXXLINK) $^ -o $@
-
-optimal-x: optimal-x.c
-	$(CXXLINK) $^ -o $@
-
-%.o: %.cpp
-	$(CXXOMPILE) -c $<
+	$(CXX) $(OBJS) $(LIBS) -o $@
 
 clean:
 	rm -f *.o core gmon.out
-	rm -f colorcoding generate_graph
+	rm -f colorcoding
 
 realclean: clean
 	rm -f *~ *.bak
 
 DIST_FILES = \
+	LICENSE		\
+	Makefile	\
 	README		\
 	bounds.cpp	\
 	bounds.h	\
-	colorcoding.cpp	\
-	colored_graph.h	\
+	colorcoding.cpp \
+	colored_graph.h \
 	debug.cpp	\
 	debug.h		\
+	example.graph	\
 	find_path.cpp	\
 	find_path.h	\
 	graph.cpp	\
@@ -68,27 +46,24 @@ DIST_FILES = \
 	problem.h	\
 	ptree.cpp	\
 	ptree.h		\
+	qpath_trial.cpp \
 	qpath_trial.h	\
+	random_path.cpp \
 	random_path.h	\
 	trial.cpp	\
 	trial.h		\
 	types.h		\
 	util.cpp	\
-	util.h
+	util.h		\
 
 dist:
 	rm -rf colorcoding-$(VERSION)
 	mkdir colorcoding-$(VERSION)
 	cp $(DIST_FILES) colorcoding-$(VERSION)
-	cp Makefile.dist colorcoding-$(VERSION)/Makefile
-	cp netz.txt colorcoding-$(VERSION)/example.graph
-	cp /usr/share/common-licenses/GPL colorcoding-$(VERSION)/LICENSE
 	(cd colorcoding-$(VERSION) && touch .depend && make depend)
 	GZIP=--best tar -cvvzf colorcoding-$(VERSION).tar.gz colorcoding-$(VERSION)
 
-.depend: depend
-
 depend:
-	$(CXX) $(CXXFLAGS) -MM *.cpp > .depend
+	$(CXX) $(CXXFLAGS) -MM $(OBJS:.o=.cpp) > .depend
 
 include .depend

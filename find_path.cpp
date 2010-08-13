@@ -1,6 +1,9 @@
-#include <math.h>
-#include <vector>
+#include <algorithm>
 #include <set>
+#include <vector>
+
+#include <math.h>
+#include <stdio.h>
 
 #include "bounds.h"
 #include "colored_graph.h"
@@ -37,6 +40,8 @@ PathSet lightest_path(const Problem& problem, std::size_t num_paths,
 	wxMutexGuiLeave();
 #endif
     PathSet paths(num_paths, max_common);
+    if (problem.g.num_vertices() == 0)
+	return paths;
     Bounds bounds(problem, mode, max_lb_edges);
     std::size_t colors;
     std::size_t max_preheat_trials =

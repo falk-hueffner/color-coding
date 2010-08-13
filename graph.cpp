@@ -75,7 +75,7 @@ void Graph::clear_edges() {
     m_neighbors = std::vector<std::vector<Edge> >(num_vertices());
 }
 
-Graph::Graph(std::istream& in, bool type) {
+Graph::Graph(std::istream& in, bool weights) {
     std::string line;
     std::size_t lineno = 0;
 #ifdef _GUI_
@@ -127,9 +127,11 @@ Graph::Graph(std::istream& in, bool type) {
 	    }
 	}
 	weight_t weight = atof(fields[2].c_str());
-	if (type) connect(v[0], v[1], weight);
-	else if((weight >= 0) && (weight <= 1)) connect(v[0], v[1], -log(weight));
-	else {
+	if (weights) {
+	    connect(v[0], v[1], weight);
+	} else if (weight >= 0 && weight <= 1) {
+	    connect(v[0], v[1], -log(weight));
+	} else {
 #ifndef _GUI_
 	    std::cerr << "line " << lineno << ": error: interaction probability not between 0 and 1.\n";
 	    exit(1);

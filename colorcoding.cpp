@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <set>
@@ -22,10 +23,12 @@
 #include "random_path.h"
 
 std::size_t peak_mem_usage;
+std::size_t max_mem_usage = 896 * 1024 * 1024;
 
 static void usage(std::ostream& out) {
     out << "colorcode: Find most probable path in a graph\n"
 	   "  stdin      Input graph\n"
+	   "  -w         Weights in input are probabilities\n"
 	   "  -i FILE    Read start vertices from FILE\n"
 	   "  -e FILE    Read end vertices from FILE\n"
 	   "  -q FILE    Read query path from FILE\n"
@@ -45,6 +48,7 @@ static void usage(std::ostream& out) {
 	   "  -x X       X pre-heating trials (default: auto)\n"
 	   "  -b X       Heuristic. 'n': none; 'e': min. edge weight;\n"
  	   "             x: dynamic programming, max. path length x (default: 2)\n"
+	   "  -L X       Memory limit X MB (default: 896)"
 	   "  -r [R]     Random seed R (or random if not given) (default: 1)\n"
 	   "  -s         Print only statistics\n"
 	   "  -R         Find random paths (ignoring weights)\n"
@@ -169,9 +173,10 @@ int main(int argc, char *argv[]) {
     Bounds::Mode mode = Bounds::DYNPROG;
     std::size_t max_lb_edges = 2;
     bool random_paths = false;
+    bool probabilities = false;
 
     int c;
-    while ((c = getopt(argc, argv, "yi:e:q:m:M:N:C:D:l:c:n:f:t:p:x:b:r::vsRh")) != -1) {
+    while ((c = getopt(argc, argv, "yi:e:q:m:M:N:C:D:l:c:n:f:t:p:x:b:L:r::vsRhw")) != -1) {
 	switch (c) {
 	case 'i': start_vertices_file = optarg; break;
 	case 'e': end_vertices_file = optarg; break;
@@ -188,16 +193,18 @@ int main(int argc, char *argv[]) {
 	case 't': num_trials = atoi(optarg); problem.auto_trials = false; break;
 	case 'p': success_prob = atof(optarg); break;
 	case 'x': preheat_trials = atoi(optarg); problem.auto_preheat_trials = false; break;
+	case 'w': probabilities = true; break;
 	case 'b':
-	    if (optarg == std::string("n")) {
+	    if (optarg == std::string("n") || atoi(optarg) <= 0) {
 		mode = Bounds::NONE;
-	    } else if (optarg == std::string("e")) {
+	    } else if (optarg == std::string("e") || atoi(optarg) == 1) {
 		mode = Bounds::EDGE_WEIGHT;
 	    } else {
 		mode = Bounds::DYNPROG;
 		max_lb_edges = atoi(optarg);
 	    }
 	    break;
+	case 'L': max_mem_usage = std::size_t(atoi(optarg)) * 1024 * 1024; break;
 	case 'r':
 	    if (optarg) {
 		srand(atoi(optarg));
@@ -239,7 +246,7 @@ int main(int argc, char *argv[]) {
 	exit(1);
     }
 
-    Graph g(std::cin);
+    Graph g(std::cin, !probabilities);
 
     if (g.num_vertices() > MAX_VERTEX) {
 	std::cerr << "error: graph has" << g.num_vertices() << " vertices, but only"
@@ -347,10 +354,15 @@ int main(int argc, char *argv[]) {
     if (stats_only) {
 	printf("%15.2f %6lu %12.8f %12.8f\n", stop - start,
 	       (unsigned long) (peak_mem_usage / 1024 / 1024),
-	       paths.best_weight(), paths.worst_weight());
-    } else {
-	for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {
-	    std::cout << i->path_weight();
+	       probabilities ? exp(-paths.best_weight()) : paths.best_weight(),
+	       probabilities ? exp(-paths.worst_weight()) : paths.worst_weight());
+    }
+    for (PathSet::it i = paths.begin(); i != paths.end(); ++i) {
+	if (!stats_only) {
+	    if (probabilities)
+		std::cout << exp(-i->path_weight());
+	    else
+		std::cout << i->path_weight();
 	    for (std::size_t j = 0; j < i->path().size(); ++j) {
 		small_vertex_t v = i->path()[j];
 		if (v == DELETED_VERTEX)
@@ -361,15 +373,15 @@ int main(int argc, char *argv[]) {
 		    std::cout << ' ' << g.vertex_name(v);
 	    }
 	    std::cout << std::endl;
-	    if (match_weights.size()) {
-	    } else {
-		weight_t weight = 0;
-		for (std::size_t j = 0; j < i->path().size() - 1; ++j)
-		    weight += g.edge_weight(i->path()[j], i->path()[j + 1]);
-		if (fabs(weight - i->path_weight()) > 1e-6) {
-		    std::cerr << "internal error: path weight is " << weight << std::endl;
-		    exit(1);
-		}
+	}
+	if (!match_weights.size()) {
+	    weight_t weight = 0;
+	    for (std::size_t j = 0; j < i->path().size() - 1; ++j)
+		weight += g.edge_weight(i->path()[j], i->path()[j + 1]);
+	    if (fabs(weight - i->path_weight()) > 1e-6) {
+		std::cerr << "internal error: path weight is stored " << weight
+			  << ", calculated " << i->path_weight() << std::endl;
+		exit(1);
 	    }
 	}
     }

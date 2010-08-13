@@ -1,4 +1,7 @@
+#include <algorithm>
 #include <set>
+
+#include <stdio.h>
 
 #include "bounds.h"
 #include "debug.h"

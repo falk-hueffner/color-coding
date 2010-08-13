@@ -12,7 +12,7 @@
 
 /* random number from 0..n-1  */
 std::size_t random(std::size_t n) {
-    return double(n) * rand() / (RAND_MAX + 1.0);
+    return std::size_t(double(n) * rand() / (RAND_MAX + 1.0));
 }
 
 std::vector<vertex_t> random_path(const Graph& g0, std::size_t path_length) {

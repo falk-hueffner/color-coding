@@ -12,7 +12,7 @@
 class Graph {
 public:
     Graph() { }
-    Graph(std::istream& in, const bool type = true);
+    Graph(std::istream& in, bool weights = true);
 
     std::size_t num_vertices() const { return m_neighbors.size(); }
     std::size_t num_edges() const;

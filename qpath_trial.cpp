@@ -1,5 +1,7 @@
 #include <vector>
+
 #include <stdint.h>
+#include <string.h>
 
 #include "bounds.h"
 #include "colored_graph.h"
@@ -32,7 +34,7 @@ bool qpath_trial(const ColoredGraph& g,
 
     Mempool* old_pool = new Mempool();
     std::vector<std::vector<PTree> >* old_colorsets
-	= new std::vector<std::vector<PTree> >(max_deletions + 1, g.num_vertices());
+	= new std::vector<std::vector<PTree> >(max_deletions + 1, std::vector<PTree>(g.num_vertices()));
     PTree::Node** pt_node_stack = new PTree::Node*[g.num_vertices()];
 
     // old: MATCHED matched
@@ -42,7 +44,7 @@ bool qpath_trial(const ColoredGraph& g,
 	const std::size_t edges_left = path_length - new_matched;
 	Mempool* new_pool = new Mempool();
 	std::vector<std::vector<PTree> >* new_colorsets
-	    = new std::vector<std::vector<PTree> >(max_deletions + 1, g.num_vertices());
+	    = new std::vector<std::vector<PTree> >(max_deletions + 1, std::vector<PTree>(g.num_vertices()));
 	std::size_t alloc_vertices = new_matched + max_insertions;
 
 	// Initialize entries with first "real" (non-deleted) match

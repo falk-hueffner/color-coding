@@ -1,9 +1,10 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <bitset>
+#include <limits>
 #include <string>
 #include <vector>
-#include <bitset>
 
 #define COMPILE_TIME_ASSERT(expr)	extern char UNIQUE_NAME[(expr) ? 1 : -1]
 #define UNIQUE_NAME			MAKE_NAME(__LINE__)

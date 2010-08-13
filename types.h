@@ -9,11 +9,11 @@
 
 COMPILE_TIME_ASSERT(CHAR_BIT == 8);
 
-typedef unsigned     vertex_t;
-typedef int16_t      small_vertex_t;
-typedef float        weight_t;
-typedef unsigned     color_t;
-typedef uint32_t     colorset_t;
+typedef unsigned      vertex_t;
+typedef int16_t       small_vertex_t;
+typedef float         weight_t;
+typedef unsigned      color_t;
+typedef unsigned long colorset_t;
 
 #define MAX_COLORS (sizeof (colorset_t) * CHAR_BIT - 1) // one bit is used up in PTree::Node
 #define DELETED_VERTEX 32767

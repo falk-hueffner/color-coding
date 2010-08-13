@@ -11,7 +11,7 @@
 extern "C" double lgamma(double x);
 extern "C" double log1p(double x);
 
-extern std::size_t peak_mem_usage;
+extern std::size_t peak_mem_usage, max_mem_usage;
 
 #define STORE_ONLY_COLORS 1
 
@@ -45,6 +45,11 @@ inline std::vector<vertex_t>
 recover_path(const ColoredGraph& g, const std::vector<bool>& is_start_vertex,
 	     vertex_t v, const unsigned char *vertices,
 	     std::size_t color_size, std::size_t path_length) {
+    if (path_length <= 1) {
+	std::vector<vertex_t> p;
+	p.push_back(v);
+	return p;
+    }
     std::queue<vertex_t> q;
     std::vector<weight_t> wt(g.num_vertices(), WEIGHT_MAX);
     std::vector<vertex_t> pred(g.num_vertices(), (vertex_t) -1);
@@ -102,7 +107,6 @@ bool dynprog_trial(const ColoredGraph& g,
 		   std::size_t num_colors,
 		   PathSet& paths,
 		   const Bounds& bounds) {
-    std::size_t max_mem_usage = 64 * 1024 * 1024;
     std::size_t color_size = bits_needed(num_colors);
     Mempool* old_pool = new Mempool();
     PTree* old_colorsets = new PTree[g.num_vertices()];

@@ -63,6 +63,8 @@ dist:
 	(cd colorcoding-$(VERSION) && touch .depend && make depend)
 	GZIP=--best tar -cvvzf colorcoding-$(VERSION).tar.gz colorcoding-$(VERSION)
 
+.depend: depend
+
 depend:
 	$(CXX) $(CXXFLAGS) -MM $(OBJS:.o=.cpp) > .depend
 

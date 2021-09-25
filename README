@@ -5,7 +5,14 @@ Algorithm engineering for color-coding with applications to signaling
 pathway detection.
 Algorithmica, 52(2):114–132, 2008.
 http://dx.doi.org/10.1007/s00453-007-9008-7
-http://theinf1.informatik.uni-jena.de/publications/color-coding-algorithmica07.pdf
+http://falk.hueffner.de/color-coding-algorithmica07.pdf
+
+A slightly updated description is in the thesis
+
+Falk Hüffner:
+Algorithms and Experiments for Parameterized Approaches to Hard Graph Problems.
+PhD thesis, Institut für Informatik, Friedrich-Schiller-Universität Jena, 2007.
+http://hueffner.de/falk/diss-hueffner07.pdf
 
 
 Command line program
@@ -72,4 +79,4 @@ Version history
 			add -L option
 			fix some minor bugs
 
--- Falk Hueffner (http://theinf1.informatik.uni-jena.de/~hueffner/)
+-- Falk Hüffner (http://hueffner.de/falk/)
